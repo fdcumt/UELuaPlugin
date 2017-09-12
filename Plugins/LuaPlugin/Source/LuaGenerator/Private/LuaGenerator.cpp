@@ -8,13 +8,13 @@ DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
 void FLuaGenerator::StartupModule()
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("StartupModule") );
+	UE_LOG(LogLuaGenerator, Warning, TEXT("StartupModule") ); 
 	IModularFeatures::Get().RegisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
 void FLuaGenerator::ShutdownModule()
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("ShutdownModule"));
+	UE_LOG(LogLuaGenerator, Warning, TEXT("ShutdownModule")); 
 	IModularFeatures::Get().UnregisterModularFeature(TEXT("ScriptGenerator"), this);
 
 }
