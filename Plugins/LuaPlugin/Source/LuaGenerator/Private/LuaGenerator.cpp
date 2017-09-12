@@ -8,15 +8,12 @@ DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
 void FLuaGenerator::StartupModule()
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("StartupModule") ); 
 	IModularFeatures::Get().RegisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
 void FLuaGenerator::ShutdownModule()
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("ShutdownModule")); 
 	IModularFeatures::Get().UnregisterModularFeature(TEXT("ScriptGenerator"), this);
-
 }
 
 FString FLuaGenerator::GetGeneratedCodeModuleName() const
@@ -25,22 +22,32 @@ FString FLuaGenerator::GetGeneratedCodeModuleName() const
 	return FString("MyProject");
 }
 
-
 bool FLuaGenerator::ShouldExportClassesForModule(const FString& ModuleName, EBuildModuleType::Type ModuleType, const FString& ModuleGeneratedIncludeDirectory) const
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("ShouldExportClassesForModule, Module name:%s"), *ModuleName);
 	return true;
 }
 
 
 bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 {
-	FProjectDescriptor ProjectDescriptor;
-	FText OutError;
-	ProjectDescriptor.Load(FPaths::GetProjectFilePath(), OutError);
-	FString GameModuleName = ProjectDescriptor.Modules[0].Name.ToString();
-	UE_LOG(LogLuaGenerator, Warning, TEXT("SupportsTarget, target name:%s, GameModuleName:%s, ProjectFilePath:%s"), *TargetName, *GameModuleName, *FPaths::GetProjectFilePath());
-	return true;
+	// if support the target, the project must have the config file(LuaConfig.ini), in config folder.
+	if (FPaths::IsProjectFilePathSet())
+	{
+		FString ProjectFilePath = FPaths::GetProjectFilePath();
+		FString ProjectPath = FPaths::GetPath(ProjectFilePath);
+		FConfigFile* File = GConfig->Find(ProjectPath /"Config/LuaConfig.ini", false);
+		if (File != nullptr)
+		{
+			FProjectDescriptor ProjectDescriptor;
+			FText OutError;
+
+			// FPaths::GetProjectFilePath() return the  path of project's .uproject file
+			ProjectDescriptor.Load(ProjectFilePath, OutError);
+			m_GameModuleName = ProjectDescriptor.Modules[0].Name.ToString(); // get the first module name in file ProjectName.uproject 
+			return true;
+		}
+	}
+	return false;
 }
 
 void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
