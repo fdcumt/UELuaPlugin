@@ -1,0 +1,26 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "LuaPlugin",
+	"Description": "Generate lua script",
+	"Category": "Lua",
+	"CreatedBy": "",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+  "SupportURL": "",
+  "EnabledByDefault" : true,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+  "Installed": true,
+	"CanBeUsedWithUnrealHeaderTool" : true,
+
+  "Modules": [
+    {
+      "Name": "LuaGenerator",
+      "Type": "Program",
+      "LoadingPhase": "PostConfigInit"
+    }
+  ]
+}
