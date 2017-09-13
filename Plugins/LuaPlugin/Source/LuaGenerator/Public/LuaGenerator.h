@@ -3,7 +3,7 @@
 #include "ModuleManager.h"
 #include "ILuaGenerator.h"
 #include "GeneratorDefine.h"
-#include "LuaScriptGenerator.h"
+#include "ScriptGeneratorManager.h"
 
 class FLuaGenerator : public ILuaGenerator
 {
@@ -24,5 +24,5 @@ public:
 
 protected:
 	TArray<FString> m_SupportedModules;
-	FLuaScriptGenerator *m_LuaScriptGenerator;
+	FScriptGeneratorManager *m_LuaScriptGenerator;
 };

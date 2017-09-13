@@ -7,7 +7,7 @@
 
 void FLuaGenerator::StartupModule()
 {
-	m_LuaScriptGenerator = new FLuaScriptGenerator();
+	m_LuaScriptGenerator = new FScriptGeneratorManager();
 	IModularFeatures::Get().RegisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
