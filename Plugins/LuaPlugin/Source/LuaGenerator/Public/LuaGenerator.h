@@ -2,9 +2,8 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 #include "ILuaGenerator.h"
-
-DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
-
+#include "GeneratorDefine.h"
+#include "LuaScriptGenerator.h"
 
 class FLuaGenerator : public ILuaGenerator
 {
@@ -23,10 +22,7 @@ public:
 	virtual void FinishExport() override;
 	virtual FString GetGeneratorName() const override;
 
-public:
-	const FString& GetGameModuleName() const { return m_GameModuleName; }
-
 protected:
 	TArray<FString> m_SupportedModules;
-	FString m_GameModuleName;
+	FLuaScriptGenerator *m_LuaScriptGenerator;
 };

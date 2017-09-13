@@ -1,32 +1,31 @@
 #include "LuaGenerator.h"
+#include "GeneratorDefine.h"
 #include "ProjectDescriptor.h"
 #include "Features/IModularFeatures.h"
-
-DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
 #define LOCTEXT_NAMESPACE "FLuaPluginModule"
 
 void FLuaGenerator::StartupModule()
 {
+	m_LuaScriptGenerator = new FLuaScriptGenerator();
 	IModularFeatures::Get().RegisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
 void FLuaGenerator::ShutdownModule()
 {
+	delete m_LuaScriptGenerator;
 	IModularFeatures::Get().UnregisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
 FString FLuaGenerator::GetGeneratedCodeModuleName() const
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("GetGeneratedCodeModuleName"));
-	return FString("MyProject");
+	return NS_LuaGenerator::GameModuleName;
 }
 
 bool FLuaGenerator::ShouldExportClassesForModule(const FString& ModuleName, EBuildModuleType::Type ModuleType, const FString& ModuleGeneratedIncludeDirectory) const
 {
-	return true;
+	return m_SupportedModules.Contains(ModuleName);
 }
-
 
 bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 {
@@ -34,8 +33,8 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 	if (FPaths::IsProjectFilePathSet())
 	{
 		FString ProjectFilePath = FPaths::GetProjectFilePath();
-		FString ProjectPath = FPaths::GetPath(ProjectFilePath);
-		FConfigFile* File = GConfig->Find(ProjectPath /"Config/LuaConfig.ini", false);
+		NS_LuaGenerator::ProjectPath = FPaths::GetPath(ProjectFilePath);
+		FConfigFile* File = GConfig->Find(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::LuaConfigFileRelativePath, false);
 		if (File != nullptr)
 		{
 			FProjectDescriptor ProjectDescriptor;
@@ -43,7 +42,9 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 
 			// FPaths::GetProjectFilePath() return the  path of project's .uproject file
 			ProjectDescriptor.Load(ProjectFilePath, OutError);
-			m_GameModuleName = ProjectDescriptor.Modules[0].Name.ToString(); // get the first module name in file ProjectName.uproject 
+
+			// init the GameModuleName by the first module name in the file of ProjectName.uproject 
+			ProjectDescriptor.Modules[0].Name.ToString(NS_LuaGenerator::GameModuleName); 
 			return true;
 		}
 	}
@@ -53,24 +54,27 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
 	UE_LOG(LogLuaGenerator, Warning, TEXT("Initialize"));
-}
 
+	// init support module
+	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	GConfig->GetArray(NS_LuaGenerator::LuaConfigSectionName, NS_LuaGenerator::LuaConfigKeyName, m_SupportedModules, ConfigFilePath);
+
+	m_LuaScriptGenerator->Initialize(RootLocalPath, RootBuildPath, OutputDirectory, IncludeBase);
+}
 
 void FLuaGenerator::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
 {
-	//UE_LOG(LogLuaGenerator, Warning, TEXT("ExportClass"));
+	m_LuaScriptGenerator->ExportClass(Class, SourceHeaderFilename, GeneratedHeaderFilename, bHasChanged);
 }
-
 
 void FLuaGenerator::FinishExport()
 {
 	UE_LOG(LogLuaGenerator, Warning, TEXT("FinishExport"));
+	m_LuaScriptGenerator->FinishExport();
 }
 
-
 FString FLuaGenerator::GetGeneratorName() const
-{
-	UE_LOG(LogLuaGenerator, Warning, TEXT("GetGeneratorName"));
+{ // this function is for debug info
 	return FString("LuaGenerator");
 }
 
