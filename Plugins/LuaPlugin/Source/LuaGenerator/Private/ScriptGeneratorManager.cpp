@@ -21,9 +21,9 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 	m_OutputDirectory = OutputDirectory;
 	m_IncludeBase = IncludeBase;
 
-	UE_LOG(LogLuaGenerator, Warning, TEXT("m_RootLocalPath: %s"), *m_RootLocalPath);
-	UE_LOG(LogLuaGenerator, Warning, TEXT("m_RootBuildPath: %s"), *m_RootBuildPath);
-	UE_LOG(LogLuaGenerator, Warning, TEXT("m_OutputDirectory: %s"), *m_OutputDirectory);
+	DebugLog(TEXT("m_RootLocalPath: %s"), *m_RootLocalPath);
+	DebugLog(TEXT("m_RootBuildPath: %s"), *m_RootBuildPath);
+	DebugLog(TEXT("m_OutputDirectory: %s"), *m_OutputDirectory);
 }
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
@@ -40,10 +40,7 @@ void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHe
 
 void FScriptGeneratorManager::FinishExport()
 {
-	for (TObjectIterator<UScriptStruct> It; It; ++It)
-	{
-		//UE_LOG(LogLuaGenerator, Warning, TEXT("UScriptStruct name: %s"),*It->GetFName().ToString());
-	}
+
 }
 
 IScriptGenerator* FScriptGeneratorManager::CreateGeneratorByType(NS_LuaGenerator::E_GeneratorType InType, UObject *InObj)

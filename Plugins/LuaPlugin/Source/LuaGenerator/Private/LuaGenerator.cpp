@@ -53,9 +53,6 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 
 void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("Initialize"));
-
-	// init support module
 	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
 	GConfig->GetArray(NS_LuaGenerator::SupportModuleSection, NS_LuaGenerator::SupportModuleKey, m_SupportedModules, ConfigFilePath);
 
@@ -69,7 +66,7 @@ void FLuaGenerator::ExportClass(UClass* Class, const FString& SourceHeaderFilena
 
 void FLuaGenerator::FinishExport()
 {
-	UE_LOG(LogLuaGenerator, Warning, TEXT("FinishExport"));
+	DebugLog(TEXT("FinishExport"));
 	m_LuaScriptGenerator->FinishExport();
 }
 

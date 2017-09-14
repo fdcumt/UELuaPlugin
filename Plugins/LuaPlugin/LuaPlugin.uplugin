@@ -21,6 +21,11 @@
       "Name": "LuaGenerator",
       "Type": "Program",
       "LoadingPhase": "PostConfigInit"
+    },
+    {
+      "Name": "LuaWrapper",
+      "Type": "Runtime",
+      "LoadingPhase": "PreDefault"
     }
   ]
 }

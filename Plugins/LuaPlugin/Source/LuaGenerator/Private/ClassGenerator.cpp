@@ -106,44 +106,43 @@ void FClassGenerator::AddFunctionToRegister(UFunction *InFunction)
 void FClassGenerator::GenerateFunctionParam(UProperty *InParam, int32 InIndex, FString &OutStr)
 {
 	FString propertyType = GetPropertyType(InParam, CPPF_ArgumentOrReturnValue);
-	UE_LOG(LogLuaGenerator, Error, TEXT("GetPropertyType type:%s"), *propertyType);
+	DebugLog(TEXT("GetPropertyType type:%s"), *propertyType);
 
 	if (InParam->IsA(UIntProperty::StaticClass()) ||
 		InParam->IsA(UUInt32Property::StaticClass()) ||
 		InParam->IsA(UInt64Property::StaticClass()) ||
 		InParam->IsA(UUInt16Property::StaticClass()))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), TEXT("int32"));
+		DebugLog(TEXT("Function param type:%s"), TEXT("int32"));
 	}
 	else if (InParam->IsA(UFloatProperty::StaticClass()))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), TEXT("float"));
+		DebugLog(TEXT("Function param type:%s"), TEXT("float"));
 	}
 	else if (InParam->IsA(UStrProperty::StaticClass()))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), TEXT("FString"));
+		DebugLog(TEXT("Function param type:%s"), TEXT("FString"));
 	}
 	else if (InParam->IsA(UNameProperty::StaticClass()))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), TEXT("FName"));
+		DebugLog(TEXT("Function param type:%s"), TEXT("FName"));
 	}
 	else if (InParam->IsA(UBoolProperty::StaticClass()))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), TEXT("bool"));
+		DebugLog(TEXT("Function param type:%s"), TEXT("bool"));
 	}
 	else if (InParam->IsA(UStructProperty::StaticClass()))
 	{
 		UStructProperty* StructProp = CastChecked<UStructProperty>(InParam);
-		UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), *StructProp->Struct->GetName());
+		DebugLog(TEXT("Function param type:%s"), *StructProp->Struct->GetName());
 	}
 	else if (InParam->IsA(UClassProperty::StaticClass()))
 	{
-		//UClassProperty* StructProp = CastChecked<UClassProperty>(InParam);
-		//UE_LOG(LogLuaGenerator, Error, TEXT("Function param type:%s"), StructProp->Struct->GetName());
+
 	}
 	else if (InParam->IsA(UObjectPropertyBase::StaticClass()))
 	{
-		//FString::Printf(TEXT("(%s)(lua_touserdata"), *GetPropertyTypeCPP(InParam, CPPF_ArgumentOrReturnValue), ParamIndex);
+		
 	}
 }
 

@@ -2,7 +2,17 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 
+
+
 #define EndLinPrintf(FormatString, ...) FString::Printf(TEXT("%s\r\n"), *FString::Printf(FormatString, ##__VA_ARGS__ ))
+
+
+#ifdef 1
+#define DebugLog(FormatString, ...) UE_LOG(LogLuaGenerator, Error, FormatString, ##__VA_ARGS__ )
+#else
+#define DebugLog(FormatString, ...)
+#endif
+
 
 namespace NS_LuaGenerator
 {
