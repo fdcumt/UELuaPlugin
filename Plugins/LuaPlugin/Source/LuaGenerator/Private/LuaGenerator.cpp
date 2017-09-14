@@ -57,7 +57,7 @@ void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& Root
 
 	// init support module
 	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
-	GConfig->GetArray(NS_LuaGenerator::LuaConfigSectionName, NS_LuaGenerator::LuaConfigKeyName, m_SupportedModules, ConfigFilePath);
+	GConfig->GetArray(NS_LuaGenerator::SupportModuleSection, NS_LuaGenerator::SupportModuleKey, m_SupportedModules, ConfigFilePath);
 
 	m_LuaScriptGenerator->Initialize(RootLocalPath, RootBuildPath, OutputDirectory, IncludeBase);
 }

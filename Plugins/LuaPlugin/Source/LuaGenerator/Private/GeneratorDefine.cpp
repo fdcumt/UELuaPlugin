@@ -6,8 +6,14 @@ namespace NS_LuaGenerator
 {
 	FString ProjectPath;
 	FString GameModuleName;
-	const TCHAR* LuaConfigSectionName = TEXT("Lua");
-	const TCHAR* LuaConfigKeyName = TEXT("SupportModule");
+	FString ClassScriptHeaderSuffix(".script.h"); 
+
+	const TCHAR* SupportModuleSection = TEXT("SupportModule");
+	const TCHAR* SupportModuleKey = TEXT("SupportModuleKey");
+
+	const TCHAR* NotSupportClassSection = TEXT("NotSupportClass");
+	const TCHAR* NotSupportClassKey = TEXT("NotSupportClassKey");
+
 	const FString LuaConfigFileRelativePath("Config/LuaConfig.ini");
 
 }
