@@ -2,7 +2,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 
-#define StringPrintfWithEndLine(FormatString, ...) FString::Printf(TEXT("%s\r\n"), *FString::Printf(FormatString, ##__VA_ARGS__ ))
+#define EndLinPrintf(FormatString, ...) FString::Printf(TEXT("%s\r\n"), *FString::Printf(FormatString, ##__VA_ARGS__ ))
 
 namespace NS_LuaGenerator
 {

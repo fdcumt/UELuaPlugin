@@ -36,20 +36,6 @@ void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHe
 	}
 	
 	pGenerator->Export();
-
-
-// 	UE_LOG(LogLuaGenerator, Warning, TEXT("ExportClass class name: %s"), *Class->GetFName().ToString());
-// 	for (TFieldIterator<UFunction> FuncIt(Class); FuncIt; ++FuncIt)
-// 	{
-// 		UFunction *Function = *FuncIt;
-// 		UE_LOG(LogLuaGenerator, Warning, TEXT("ExportClass function name: %s"), *Function->GetFName().ToString());
-// 
-// 		for (TFieldIterator<UProperty> ParamIt(Function); ParamIt; ++ParamIt)
-// 		{
-// 			UProperty *pParam = *ParamIt;
-// 			UE_LOG(LogLuaGenerator, Warning, TEXT("ExportClass function param name: %s"), *pParam->GetFName().ToString());
-// 		}
-// 	}
 }
 
 void FScriptGeneratorManager::FinishExport()

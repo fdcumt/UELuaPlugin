@@ -9,7 +9,6 @@ public:
 
 private:
 	TArray<FString> m_NotSuportClasses;
-
 };
 
 class FClassGenerator : public IScriptGenerator
@@ -31,14 +30,19 @@ public:
 private:
 	void GenerateScriptHeader(FString &OutStr);
 	void GenerateFunctions(FString &OutStr);
-	void GenerateSingleFunction(UFunction *InFunction, FString &OutStr);
-	void AddFunctionToRegister(UFunction *InFunction);
 	void GenerateRegister(FString &OutStr);
-	void GenerateRegisterItem(const FString &InFunctionName, FString &OutStr);
-	FString GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName);
-
 	void GenerateScriptTail(FString &OutStr);
 
+private:
+	void GenerateRegisterItem(const FString &InFunctionName, FString &OutStr);
+	FString GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName);
+	bool CanExportFunction(UFunction *InFunction);
+	void GenerateSingleFunction(UFunction *InFunction, FString &OutStr);
+	void AddFunctionToRegister(UFunction *InFunction);
+	void GenerateFunctionParam(UProperty *InParam, int32 InIndex, FString &OutStr);
+	void GenerateFunctionParams(UFunction *InFunction, FString &OutStr);
+	void GeneratorCheckParamsNumCode(UFunction *InFunction, FString &OutStr);
+	FString GetPropertyType(UProperty *InParam, uint32 PortFlags=0);
 
 private:
 	UClass *m_pClass;
