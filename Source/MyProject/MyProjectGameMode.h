@@ -13,6 +13,9 @@ class AMyProjectGameMode : public AGameModeBase
 
 public:
 	AMyProjectGameMode();
+
+public:
+	virtual void StartPlay() override;
 };
 
 

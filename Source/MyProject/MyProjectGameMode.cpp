@@ -3,6 +3,7 @@
 #include "MyProjectGameMode.h"
 #include "MyProjectCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "LuaWrapperModule.h"
 
 AMyProjectGameMode::AMyProjectGameMode()
 {
@@ -12,4 +13,10 @@ AMyProjectGameMode::AMyProjectGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
+}
+
+void AMyProjectGameMode::StartPlay()
+{
+	FLuaWrapperModule& ModuleUI = FModuleManager::Get().LoadModuleChecked<FLuaWrapperModule>(FName("LuaWrapper"));
+	ModuleUI.Restart();
 }
