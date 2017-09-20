@@ -15,6 +15,7 @@ public:
 
 private:
 	void InitLuaEnv();
+	void InitGlobalTable();
 	void CloseLuaEnv();
 
 private:
