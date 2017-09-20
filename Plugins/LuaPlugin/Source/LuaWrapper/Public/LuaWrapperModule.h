@@ -11,6 +11,7 @@ public:
 
 public:
 	void Restart();
+	void Init();
 
 private:
 	FLuaWrapper *m_LuaWrapper;

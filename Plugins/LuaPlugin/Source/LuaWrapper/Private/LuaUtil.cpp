@@ -1,6 +1,6 @@
 #include "LuaUtil.h"
 
-void FLuaUtil::RegisterClass(const luaL_Reg *ClassFunctions, const char *ClassName)
+void FLuaUtil::RegisterClass(const luaL_Reg ClassFunctions[], const char *ClassName)
 {
 	AddClass(ClassName);
 	OpenClass(ClassName);
@@ -41,7 +41,7 @@ void FLuaUtil::CloseClass()
 	lua_pop(g_LuaState, 2);
 }
 
-void FLuaUtil::RegisterClassFunctions( luaL_Reg *ClassFunctions)
+void FLuaUtil::RegisterClassFunctions( const luaL_Reg ClassFunctions[])
 { // ×¢²áº¯Êý
 	for (int32 i=0; ClassFunctions[i].name!=nullptr; ++i)
 	{
@@ -94,15 +94,29 @@ bool FLuaUtil::ExistData(void *p)
 bool FLuaUtil::ExistClass(const char *ClassName)
 {
 	lua_getglobal(g_LuaState, ClassName);
-	bool bExistClass = true;
-	if (lua_istable(g_LuaState), -1)
-	{
-		bExistClass = false;
-		LuaWrapperLog(Warning, TEXT("class:%s not export!!!"), ClassName);
-	}
-	
+	bool bExistClass = lua_istable(g_LuaState, -1)==1;
 	lua_pop(g_LuaState, 1);
 	return bExistClass;
+}
+
+void FLuaUtil::TemplateLogPrint(const FString &Content)
+{
+	LuaWrapperLog(Log, TEXT("%s"), *Content);
+}
+
+void FLuaUtil::TemplateLogWarning(const FString &Content)
+{
+	LuaWrapperLog(Warning, TEXT("%s"), *Content);
+}
+
+void FLuaUtil::TemplateLogError(const FString &Content)
+{
+	LuaWrapperLog(Error, TEXT("%s"), *Content);
+}
+
+void FLuaUtil::TemplateLogFatal(const FString &Content)
+{
+	LuaWrapperLog(Fatal, TEXT("%s"), *Content);
 }
 
 int32 FLuaUtil::Push(uint8 value)
@@ -159,97 +173,63 @@ int32 FLuaUtil::Push(const char* value)
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FClassType &&value)
-{ // push class args
-	if (!ExistClass(value.m_ClassName))
-	{
-		LuaWrapperLog(Fatal, TEXT("can not use a not export class(%s) as the lua arg"), value.m_ClassName);
-		return 1;
-	}
 
-	if (value.m_ClassObj==nullptr)
-	{
-		lua_pushnil(g_LuaState);
-		return 1;
-	}
-
-	if (!ExistData((void*)value.m_ClassObj))
-	{ // add to table
-		*(void**)lua_newuserdata(g_LuaState, sizeof(void *)) = value.m_ClassObj;
-		lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-		lua_pushlightuserdata(g_LuaState, value.m_ClassObj);
-		lua_pushvalue(g_LuaState, -3);
-		lua_rawset(g_LuaState, -3);
-		lua_pop(g_LuaState, 2); // pop the LUA_REGISTRYINDEX table and userdata
-	}
-
-	// set metatable
-	lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(g_LuaState, (void*)value.m_ClassObj);
-	lua_rawget(g_LuaState, -2); // get userdata
-	luaL_getmetatable(g_LuaState, value.m_ClassName);
-	lua_setmetatable(g_LuaState, -2);
-	lua_replace(L, -2);
-	return 1;
+int32 FLuaUtil::Push()
+{
+	return 0;
 }
 
-void FLuaUtil::pop()
+void FLuaUtil::Pop()
 {
 	lua_pop(g_LuaState, 1);
 }
 
-void FLuaUtil::pop(uint8 &ReturnValue)
+void FLuaUtil::Pop(uint8 &ReturnValue)
 {
 	ReturnValue = lua_tointeger(g_LuaState, -1);
-	pop();
+	Pop();
 }
 
-void FLuaUtil::pop(int32 &ReturnValue)
+void FLuaUtil::Pop(int32 &ReturnValue)
 {
 	ReturnValue = lua_tointeger(g_LuaState, -1);
-	pop();
+	Pop();
 }
 
-void FLuaUtil::pop(int &ReturnValue)
-{
-	ReturnValue = lua_tointeger(g_LuaState, -1);
-	pop();
-}
-
-void FLuaUtil::pop(float &ReturnValue)
+void FLuaUtil::Pop(float &ReturnValue)
 {
 	ReturnValue = lua_tonumber(g_LuaState, -1);
-	pop();
+	Pop();
 }
 
-void FLuaUtil::pop(double &ReturnValue)
+void FLuaUtil::Pop(double &ReturnValue)
 {
 	ReturnValue = lua_tonumber(g_LuaState, -1);
-	pop();
+	Pop();
 }
 
-void FLuaUtil::pop(bool &ReturnValue)
+void FLuaUtil::Pop(bool &ReturnValue)
 {
-	ReturnValue = lua_toboolean(g_LuaState, -1);
-	pop();
+	ReturnValue = !!(lua_toboolean(g_LuaState, -1));
+	Pop();
 }
 
-void FLuaUtil::pop(FText &ReturnValue)
+void FLuaUtil::Pop(FText &ReturnValue)
 {
 	ReturnValue = FText::FromString(luaL_checkstring(g_LuaState, -1));
-	pop();
+	Pop();
 }
 
-void FLuaUtil::pop(FName &ReturnValue)
+void FLuaUtil::Pop(FName &ReturnValue)
 {
 	ReturnValue = FName(luaL_checkstring(g_LuaState, -1));
-	pop();
+	Pop();
 }
 
-void FLuaUtil::pop(FString &ReturnValue)
+void FLuaUtil::Pop(FString &ReturnValue)
 {
 	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(g_LuaState, -1)));
-	pop();
+	Pop();
 }
 
 int LuaErrHandleFunc(lua_State*LuaState)

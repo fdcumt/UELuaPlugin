@@ -6,7 +6,7 @@
 
 void FLuaWrapperModule::StartupModule()
 {
-	g_LuaWrapper = m_LuaWrapper = new FLuaWrapper();
+	
 }
 
 void FLuaWrapperModule::ShutdownModule()
@@ -17,6 +17,13 @@ void FLuaWrapperModule::ShutdownModule()
 void FLuaWrapperModule::Restart()
 {
 	m_LuaWrapper->Restart();
+}
+
+
+void FLuaWrapperModule::Init()
+{
+	g_LuaWrapper = m_LuaWrapper = new FLuaWrapper();
+	m_LuaWrapper->Init();
 }
 
 #undef LOCTEXT_NAMESPACE

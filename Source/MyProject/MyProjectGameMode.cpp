@@ -4,6 +4,7 @@
 #include "MyProjectCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 #include "LuaWrapperModule.h"
+#include "LuaUtil.h"
 
 AMyProjectGameMode::AMyProjectGameMode()
 {
@@ -18,5 +19,7 @@ AMyProjectGameMode::AMyProjectGameMode()
 void AMyProjectGameMode::StartPlay()
 {
 	FLuaWrapperModule& ModuleUI = FModuleManager::Get().LoadModuleChecked<FLuaWrapperModule>(FName("LuaWrapper"));
-	ModuleUI.Restart();
+	ModuleUI.Init();
+
+	FLuaUtil::Call("Init");
 }
