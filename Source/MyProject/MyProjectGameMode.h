@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "MyProjectGameMode.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogProject, Log, All);
+
 UCLASS(minimalapi)
 class AMyProjectGameMode : public AGameModeBase
 {

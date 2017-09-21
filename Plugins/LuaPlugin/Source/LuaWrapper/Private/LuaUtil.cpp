@@ -190,12 +190,6 @@ void FLuaUtil::Pop(uint8 &ReturnValue)
 	Pop();
 }
 
-void FLuaUtil::Pop(int32 &ReturnValue)
-{
-	ReturnValue = lua_tointeger(g_LuaState, -1);
-	Pop();
-}
-
 void FLuaUtil::Pop(float &ReturnValue)
 {
 	ReturnValue = lua_tonumber(g_LuaState, -1);
@@ -229,6 +223,12 @@ void FLuaUtil::Pop(FName &ReturnValue)
 void FLuaUtil::Pop(FString &ReturnValue)
 {
 	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(g_LuaState, -1)));
+	Pop();
+}
+
+void FLuaUtil::Pop(int32 &ReturnValue)
+{
+	ReturnValue = lua_tointeger(g_LuaState, -1);
 	Pop();
 }
 

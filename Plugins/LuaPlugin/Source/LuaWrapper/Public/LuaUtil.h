@@ -7,7 +7,7 @@ LUAWRAPPER_API int LuaErrHandleFunc(lua_State*g_LuaState);
 class LUAWRAPPER_API FLuaFuncName
 {
 public:
-	FLuaFuncName(const char *FuncName)
+	explicit FLuaFuncName(const char *FuncName)
 		:m_FuncName(FuncName)
 	{
 	}
@@ -19,7 +19,7 @@ public:
 class FLuaReturnTypeNum
 {
 public:
-	FLuaReturnTypeNum(int32 num)
+	explicit FLuaReturnTypeNum(int32 num)
 		:m_num(num)
 	{
 	}
@@ -35,12 +35,12 @@ public:
 };
 
 template <class T>
-class LUAWRAPPER_API FClassType
+class LUAWRAPPER_API FLuaClassType
 {
 public:
-	FClassType(T &ClassObj, const char *ClassName)
-		: m_ClassObj(ClassObj)
-		, m_ClassName(ClassName)
+	explicit FLuaClassType(T &ClassObj, const char *ClassName)
+		:m_ClassObj(ClassObj)
+		,m_ClassName(ClassName)
 	{
 	}
 
@@ -65,16 +65,51 @@ public: // call functions
 	template <class... T>
 	static void Call(const char *FuncName, T&&... args)
 	{
-		//CallRImpl(FLuaReturnTypeNum(0), FLuaFuncName(FuncName), Forward<T>(args)...);
+		CallRImpl(FLuaReturnTypeNum(0), FLuaFuncName(FuncName), Forward<T>(args)...);
+// 		lua_pushcfunction(g_LuaState, LuaErrHandleFunc);
+// 		lua_getfield(g_LuaState, LUA_GLOBALSINDEX, FuncName);
+// 		int32 paramCount = Push(Forward<T>(args)...);
+// 		if (lua_pcall(g_LuaState, paramCount, 0, -(paramCount+2)))
+// 		{
+// 			FString log = FString::Printf(TEXT("call r impl found an error: %s"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
+// 			TemplateLogFatal(log);
+// 		}
+	}
+
+
+public: // call function with return
+	template <class... T>
+	static void CallR(T&&... args)
+	{
+		CallRImpl(FLuaReturnTypeNum(0), Forward<T>(args)...);
+	}
+
+private:
+	template <class... T>
+	static void CallRImpl(FLuaReturnTypeNum &&RetTypeNum, FLuaFuncName &&Value, T&&... args)
+	{
 		lua_pushcfunction(g_LuaState, LuaErrHandleFunc);
-		lua_getfield(g_LuaState, LUA_GLOBALSINDEX, FuncName);
+		lua_getfield(g_LuaState, LUA_GLOBALSINDEX, Value.m_FuncName);
 		int32 paramCount = Push(Forward<T>(args)...);
-		if (lua_pcall(g_LuaState, paramCount, 0, -(paramCount+2)))
+		if (lua_pcall(g_LuaState, paramCount, RetTypeNum.m_num, -(paramCount + 2)))
 		{
-			FString log = FString::Printf(TEXT("call r impl found an error: %s"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
+			FString log = FString::Printf(TEXT("call r impl found an error: %s!!!"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
 			TemplateLogFatal(log);
 		}
 	}
+
+	template <class T1, class... T>
+	static void CallRImpl(FLuaReturnTypeNum &&RetTypeNum, T1 &&ReturnValue, T&&... args)
+	{
+		CallRImpl(Forward<FLuaReturnTypeNum>(RetTypeNum+1), Forward<T>(args)...);
+		Pop(ReturnValue);
+	}
+
+
+public:
+	template <class T>
+	static void TouserCppClassType(FLuaClassType<T> &&OutValue); // 解析成 cpp class 类型
+
 
 public: // push args
 	template <class T1, class... T>
@@ -95,7 +130,7 @@ public: // push args
 	static int32 Push(const FString& value);
 
 	template <class T>
-	static int32 Push(const FClassType<T> &&value);
+	static int32 Push(const FLuaClassType<T> &&value);
 
 
 public:
@@ -110,24 +145,7 @@ public:
 	static void Pop(int32   &ReturnValue);
 
 	template <class T>
-	static void Pop(FClassType<T> &&ReturnValue);
-
-
-public: // call function with return
-	template <class... T>
-	static void CallR(T&&... args);
-
-private:
-	template <class T1, class... T>
-	static void CallRImpl(FLuaReturnTypeNum &&RetTypeNum,  T1 &&ReturnValue, T&&... args);
-
-	template <class... T>
-	static void CallRImpl(FLuaReturnTypeNum &&RetTypeNum, const FLuaFuncName &Value, T&&... args);
-
-
-public:
-	template <class T>
-	static void TouserCppClassType(FClassType<T> &&OutValue); // 解析成 cpp class 类型
+	static void Pop(FLuaClassType<T> &&ReturnValue);
 
 
 private: // not export Function
@@ -164,7 +182,7 @@ int FLuaUtil::Push(const T& value)
 }
 
 template <class T>
-void FLuaUtil::Pop(FClassType<T> &&ReturnValue)
+void FLuaUtil::Pop(FLuaClassType<T> &&ReturnValue)
 {
 	const char *ClassName = ReturnValue.m_ClassName;
 	if (!ExistClass(ReturnValue.m_ClassName))
@@ -176,34 +194,8 @@ void FLuaUtil::Pop(FClassType<T> &&ReturnValue)
 	TouserCppClassType(ReturnValue);
 }
 
-template <class... T>
-void FLuaUtil::CallR(T&&... args)
-{
-	CallRImpl(FLuaReturnTypeNum(0), Forward<T>(args)...);
-}
-
-template <class T1, class... T>
-void FLuaUtil::CallRImpl(FLuaReturnTypeNum &&RetTypeNum, T1 &&ReturnValue, T&&... args)
-{
-	CallRImpl(RetTypeNum+1, Forward<T>(args)...);
-	Pop(ReturnValue);
-}
-
-template <class... T>
-void FLuaUtil::CallRImpl(FLuaReturnTypeNum &&RetTypeNum, const FLuaFuncName &Value, T&&... args)
-{
-	lua_pushcfunction(g_LuaState, LuaErrHandleFunc);
-	lua_getfield(g_LuaState, LUA_GLOBALSINDEX, Value.m_FuncName);
-	int32 paramCount = Push(Forward<T>(args)...);
-	if (lua_pcall(g_LuaState, paramCount, RetTypeNum.m_num, -(paramCount + 2)))
-	{
-		FString log = FString::Printf(Fatal, TEXT("call r impl found an error: %s!!!"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
-		TemplateLogFatal(log);
-	}
-}
-
 template <class T>
-void FLuaUtil::TouserCppClassType(FClassType<T> &&OutValue)
+void FLuaUtil::TouserCppClassType(FLuaClassType<T> &&OutValue)
 {
 	if (lua_isnil(g_LuaState, -1))
 	{
@@ -227,7 +219,7 @@ void FLuaUtil::TouserCppClassType(FClassType<T> &&OutValue)
 }
 
 template <class T>
-int32 FLuaUtil::Push(const FClassType<T> &&value)
+int32 FLuaUtil::Push(const FLuaClassType<T> &&value)
 { // push class args
 	if (!ExistClass(value.m_ClassName))
 	{
