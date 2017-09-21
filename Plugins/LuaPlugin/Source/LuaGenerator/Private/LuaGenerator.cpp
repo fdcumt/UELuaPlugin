@@ -66,7 +66,6 @@ void FLuaGenerator::ExportClass(UClass* Class, const FString& SourceHeaderFilena
 
 void FLuaGenerator::FinishExport()
 {
-	DebugLog(TEXT("FinishExport"));
 	m_LuaScriptGenerator->FinishExport();
 }
 

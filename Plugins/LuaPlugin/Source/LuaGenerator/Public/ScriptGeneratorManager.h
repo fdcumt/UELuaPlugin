@@ -2,7 +2,6 @@
 #include "GeneratorDefine.h"
 #include "IScriptGenerator.h"
 
-
 class FScriptGeneratorManager
 {
 public:
@@ -17,6 +16,12 @@ public:
 private:
 	IScriptGenerator* CreateGeneratorByType(NS_LuaGenerator::E_GeneratorType InType, UObject *InObj);
 	bool CanExportClass(IScriptGenerator *InGenerator) const ;
+
+private: // config class
+	void ExportConfigClass();
+	void ParseConfigClass(const FString &FileName, TArray<FConfigClass> &OutConfigClasses);
+
+
 
 private:
 	FString m_RootLocalPath;

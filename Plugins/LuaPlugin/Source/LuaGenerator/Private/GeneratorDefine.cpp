@@ -15,5 +15,6 @@ namespace NS_LuaGenerator
 	const TCHAR* NotSupportClassKey = TEXT("NotSupportClassKey");
 
 	const FString LuaConfigFileRelativePath("Config/LuaConfig.ini");
+	const FString ClassConfigFileRelativePath("Config/ExportClasses.json");
 
 }

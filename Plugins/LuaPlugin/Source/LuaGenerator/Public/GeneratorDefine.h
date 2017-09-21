@@ -32,5 +32,21 @@ namespace NS_LuaGenerator
 	extern const TCHAR* NotSupportClassKey;
 
 	extern const FString LuaConfigFileRelativePath;
+	extern const FString ClassConfigFileRelativePath;
 }
+
+struct FConfigFunction
+{
+	FString Name;
+	bool bStatic;
+	FString RetType;
+	TArray<FString> ParamTypes;
+};
+
+struct FConfigClass
+{
+	FString Name;
+	FString ParentName;
+	TArray<FConfigFunction> Functions;
+};
 

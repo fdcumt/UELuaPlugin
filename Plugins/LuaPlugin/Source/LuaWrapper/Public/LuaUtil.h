@@ -66,14 +66,6 @@ public: // call functions
 	static void Call(const char *FuncName, T&&... args)
 	{
 		CallRImpl(FLuaReturnTypeNum(0), FLuaFuncName(FuncName), Forward<T>(args)...);
-// 		lua_pushcfunction(g_LuaState, LuaErrHandleFunc);
-// 		lua_getfield(g_LuaState, LUA_GLOBALSINDEX, FuncName);
-// 		int32 paramCount = Push(Forward<T>(args)...);
-// 		if (lua_pcall(g_LuaState, paramCount, 0, -(paramCount+2)))
-// 		{
-// 			FString log = FString::Printf(TEXT("call r impl found an error: %s"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
-// 			TemplateLogFatal(log);
-// 		}
 	}
 
 
@@ -110,13 +102,28 @@ public:
 	template <class T>
 	static void TouserCppClassType(FLuaClassType<T> &&OutValue); // 解析成 cpp class 类型
 
+	template <class T>
+	static T TouserCppClassType(const char *ClassName)
+	{
+		T pCppObj;
+		TouserCppClassType(FLuaClassType<T>(pCppObj, ClassName));
+		return pCppObj;
+	}
+
 
 public: // push args
 	template <class T1, class... T>
-	static int32 Push(const T1 &Value, T&&... args);
+	static int32 Push(const T1 &Value, T&&... args)
+	{
+		int32 num = Push(Value);
+		return num + Push(Forward<T>(args)...);
+	}
 
 	template<typename T>
-	static int Push(const T& value);
+	static int Push(const T& value)
+	{
+		TemplateLogFatal(TEXT("not find this arg type"));
+	}
 
 	static int32 Push();
 	static int32 Push(uint8  value);
@@ -133,6 +140,7 @@ public: // push args
 	static int32 Push(const FLuaClassType<T> &&value);
 
 
+
 public:
 	static void Pop();
 	static void Pop(uint8  &ReturnValue);
@@ -145,7 +153,8 @@ public:
 	static void Pop(int32   &ReturnValue);
 
 	template <class T>
-	static void Pop(FLuaClassType<T> &&ReturnValue);
+	static void Pop(FLuaClassType<T> &&value);
+	
 
 
 private: // not export Function
@@ -167,18 +176,40 @@ private: // log
 
 };
 
+template <class T>
+int32 FLuaUtil::Push(const FLuaClassType<T> &&value)
+{ // push class args
+	if (!ExistClass(value.m_ClassName))
+	{
+		FString log = FString::Printf(TEXT("push error, not export this class:%s"), value.m_ClassName);
+		TemplateLogFatal(log);
+		return 1;
+	}
 
-template <class T1, class... T>
-int32 FLuaUtil::Push(const T1 &Value ,T&&... args)
-{
-	int32 num = Push(Value);
-	return num + Push(Forward<T>(args)...);
-}
+	if (value.m_ClassObj == nullptr)
+	{
+		lua_pushnil(g_LuaState);
+		return 1;
+	}
 
-template<typename T>
-int FLuaUtil::Push(const T& value)
-{
-	TemplateLogFatal(TEXT("not find this arg type"));
+	if (!ExistData((void*)value.m_ClassObj))
+	{ // add to table
+		*(void**)lua_newuserdata(g_LuaState, sizeof(void *)) = value.m_ClassObj;
+		lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
+		lua_pushlightuserdata(g_LuaState, value.m_ClassObj);
+		lua_pushvalue(g_LuaState, -3);
+		lua_rawset(g_LuaState, -3);
+		lua_pop(g_LuaState, 2); // Pop the LUA_REGISTRYINDEX table and userdata
+	}
+
+	// set metatable
+	lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
+	lua_pushlightuserdata(g_LuaState, (void*)value.m_ClassObj);
+	lua_rawget(g_LuaState, -2); // get userdata
+	luaL_getmetatable(g_LuaState, value.m_ClassName);
+	lua_setmetatable(g_LuaState, -2);
+	lua_replace(L, -2);
+	return 1;
 }
 
 template <class T>
@@ -217,40 +248,3 @@ void FLuaUtil::TouserCppClassType(FLuaClassType<T> &&OutValue)
 		TemplateLogFatal(TEXT("TouserCppClassType error"));
 	}
 }
-
-template <class T>
-int32 FLuaUtil::Push(const FLuaClassType<T> &&value)
-{ // push class args
-	if (!ExistClass(value.m_ClassName))
-	{
-		FString log = FString::Printf(TEXT("push error, not export this class:%s"), value.m_ClassName);
-		TemplateLogFatal(log);
-		return 1;
-	}
-
-	if (value.m_ClassObj == nullptr)
-	{
-		lua_pushnil(g_LuaState);
-		return 1;
-	}
-
-	if (!ExistData((void*)value.m_ClassObj))
-	{ // add to table
-		*(void**)lua_newuserdata(g_LuaState, sizeof(void *)) = value.m_ClassObj;
-		lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-		lua_pushlightuserdata(g_LuaState, value.m_ClassObj);
-		lua_pushvalue(g_LuaState, -3);
-		lua_rawset(g_LuaState, -3);
-		lua_pop(g_LuaState, 2); // Pop the LUA_REGISTRYINDEX table and userdata
-	}
-
-	// set metatable
-	lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(g_LuaState, (void*)value.m_ClassObj);
-	lua_rawget(g_LuaState, -2); // get userdata
-	luaL_getmetatable(g_LuaState, value.m_ClassName);
-	lua_setmetatable(g_LuaState, -2);
-	lua_replace(L, -2);
-	return 1;
-}
-

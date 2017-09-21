@@ -24,7 +24,8 @@ public class LuaGenerator : ModuleRules
 			{
 				"Core",
                 "CoreUObject",
-			});
+                "Json",
+            });
 			
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
