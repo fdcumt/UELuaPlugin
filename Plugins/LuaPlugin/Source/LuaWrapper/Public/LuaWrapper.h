@@ -19,6 +19,7 @@ private:
 	void InitGlobalTable();
 	void CloseLuaEnv();
 	void RegisterLuaLog();
+	void RegisterAllClasses();
 	void DoMainFile();
 
 private:

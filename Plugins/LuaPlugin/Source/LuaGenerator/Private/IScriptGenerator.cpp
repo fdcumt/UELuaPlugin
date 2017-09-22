@@ -1,8 +1,10 @@
 #include "IScriptGenerator.h"
 
-IScriptGenerator::IScriptGenerator(const FString &OutDir)
-	:m_OutDir(OutDir)
+IScriptGenerator::IScriptGenerator(NS_LuaGenerator::E_GeneratorType InType, const FString &OutDir)
+	: m_Type(InType)
+	, m_OutDir(OutDir)
 {
+
 }
 
 IScriptGenerator::~IScriptGenerator()

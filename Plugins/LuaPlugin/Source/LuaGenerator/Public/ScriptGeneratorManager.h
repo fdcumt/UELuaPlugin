@@ -15,13 +15,26 @@ public:
 
 private:
 	bool CanExportClass(IScriptGenerator *InGenerator) const ;
+	void ExportExtrasToMemory();
+	void AdjustBeforeSaveToFile();
+
+private: // save to file
+	void SaveToFiles();
+	void SaveConfigClassesToFiles();
+
+private: // finish export post
+	void FinishExportPost();
+	void GenerateAndSaveAllHeaderFile();
+	void GererateLoadAllDefineFile();
 
 private: // config class
 	void ExportConfigClasses();
 	void ExportConfigClass(const FConfigClass& ClassItem);
 	void ParseConfigClass(const FString &&FileName, TArray<FConfigClass> &OutConfigClasses);
-	void AddGeneratorToMap(IScriptGenerator *InGenerator);
 
+private:
+	void AddGeneratorToMap(IScriptGenerator *InGenerator);
+	
 
 private:
 	FString m_OutDir;

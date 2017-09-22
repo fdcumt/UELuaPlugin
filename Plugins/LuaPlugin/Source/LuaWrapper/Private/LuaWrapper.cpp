@@ -1,6 +1,8 @@
 #include "LuaWrapper.h"
 #include "LuaUtil.h"
 #include "LuaWrapperDefine.h"
+#include "AllHeaders.h"
+#include "LoadAllDefine.h"
 
 FLuaWrapper::FLuaWrapper()
 {
@@ -77,6 +79,11 @@ const luaL_Reg LuaPrint[] =
 void FLuaWrapper::RegisterLuaLog()
 {
 	FLuaUtil::RegisterClass(LuaPrint, "LuaPrint");
+}
+
+void FLuaWrapper::RegisterAllClasses()
+{
+	Def_LoadAll();
 }
 
 void FLuaWrapper::DoMainFile()

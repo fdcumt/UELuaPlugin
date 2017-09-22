@@ -29,7 +29,8 @@ public class LuaWrapper : ModuleRules
 			{
 				"Core",
                 "CoreUObject",
-			});
+                "Slate",
+            });
 
         PublicIncludePaths.Add(Path.Combine(LuaLibPath, "Include"));
    

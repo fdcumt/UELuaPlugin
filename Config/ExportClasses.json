@@ -2,69 +2,26 @@
 	{
 		"ClassName":"STextBlock",
 		"ParentName":"",
+		"HeaderFiles":["Widgets/Text/STextBlock.h"],
 		"Functions":
 		[
 			{
-				"FuncName":"Construct",
-				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":["const FArguments&"]
-			},
-			{
 				"FuncName":"GetText",
 				"IsStatic":"false",
-				"RetType":"const FText&",
+				"RetType":"FText",
 				"ParamTypes":[]
 			},
 			{
 				"FuncName":"SetHighlightText",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["TAttribute<FText> InText"]
+				"ParamTypes":["FText"]
 			},
 			{
 				"FuncName":"SetText",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["const FText&"]
-			}
-		]
-	},
-	{
-		"ClassName":"FCurveSequence",
-		"ParentName":"",
-		"Functions":
-		[
-			{
-				"FuncName":"AddCurve",
-				"IsStatic":"false",
-				"RetType":"FCurveHandle",
-				"ParamTypes":["const float InStartTimeSeconds","const float InDurationSeconds","const ECurveEaseFunction::Type"]
-			},
-			{
-				"FuncName":"Play",
-				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":["const TSharedRef<SWidget>", "bool", "const float"]
-			},
-			{
-				"FuncName":"Reverse",
-				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":[]
-			}
-		]
-	},
-	{
-		"ClassName":"FPaperSpriteVertex",
-		"ParentName":"",
-		"Functions":
-		[
-			{
-				"FuncName":"SetTangentsFromPaperAxes",
-				"IsStatic":"true",
-				"RetType":"void",
-				"ParamTypes":[]
+				"ParamTypes":["FText"]
 			}
 		]
 	}

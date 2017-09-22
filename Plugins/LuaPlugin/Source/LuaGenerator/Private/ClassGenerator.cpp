@@ -1,6 +1,5 @@
 #include "ClassGenerator.h"
 #include "UnrealType.h"
-#include "GeneratorDefine.h"
 #include "Templates/Casts.h"
 #include "Misc/FileHelper.h"
 #include "UObjectIterator.h"
@@ -32,7 +31,7 @@ IScriptGenerator* FClassGenerator::CreateGenerator(UObject *InObj, const FString
 }
 
 FClassGenerator::FClassGenerator(UClass *InClass, const FString &InOutDir)
-	:IScriptGenerator(InOutDir)
+	:IScriptGenerator(NS_LuaGenerator::EUClass, InOutDir)
 {
 	m_FileName.Empty();
 	m_FileContent.Empty();
@@ -52,13 +51,12 @@ bool FClassGenerator::CanExport() const
 	return m_ClassConfig.CanExport(m_pClass->GetName());
 }
 
-void FClassGenerator::Export()
+void FClassGenerator::ExportToMemory()
 {
 	GenerateScriptHeader(m_FileContent);
 	GenerateFunctions(m_FileContent);
 	GenerateRegister(m_FileContent);
 	GenerateScriptTail(m_FileContent);
-	SaveToFile();
 }
 
 void FClassGenerator::SaveToFile()

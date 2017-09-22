@@ -23,8 +23,10 @@ public:
 public:
 	/** FBaseGenerator interface */
 	virtual FString GetKey() const override { return m_pClass->GetName(); }
+	virtual FString GetFileName() const override { return m_FileName; }
+	virtual FString GetRegName() const override { return FString(""); };
 	virtual bool CanExport()const  override;
-	virtual void Export() override;
+	virtual void ExportToMemory() override;
 	virtual void SaveToFile() override;
 
 private:

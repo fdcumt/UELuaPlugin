@@ -48,6 +48,7 @@ struct FConfigClass
 {
 	FString Name;
 	FString ParentName;
+	TArray<FString> IncludeHeaders;
 	TArray<FConfigFunction> Functions;
 };
 

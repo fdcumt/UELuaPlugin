@@ -29,6 +29,7 @@ bool FLuaGenerator::ShouldExportClassesForModule(const FString& ModuleName, EBui
 
 bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 {
+	DebugLog(TEXT("TargetName:%s"), *TargetName);
 	// if support the target, the project must have the config file(LuaConfig.ini), in config folder.
 	if (FPaths::IsProjectFilePathSet())
 	{
