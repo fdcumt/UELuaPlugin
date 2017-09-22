@@ -1,101 +1,70 @@
 [
 	{
-		"ClassName":"ClassName1",
+		"ClassName":"STextBlock",
 		"ParentName":"",
 		"Functions":
 		[
 			{
-				"FuncName":"11funcName1",
+				"FuncName":"Construct",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["int32","void","void"]
+				"ParamTypes":["const FArguments&"]
 			},
 			{
-				"FuncName":"11funcName2",
+				"FuncName":"GetText",
 				"IsStatic":"false",
-				"RetType":"int32",
-				"ParamTypes":["void","int32","int32"]
+				"RetType":"const FText&",
+				"ParamTypes":[]
 			},
 			{
-				"FuncName":"11funcName3",
-				"IsStatic":"true",
+				"FuncName":"SetHighlightText",
+				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["int32","int32","void"]
+				"ParamTypes":["TAttribute<FText> InText"]
+			},
+			{
+				"FuncName":"SetText",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":["const FText&"]
 			}
 		]
 	},
 	{
-		"ClassName":"ClassName2",
+		"ClassName":"FCurveSequence",
 		"ParentName":"",
 		"Functions":
 		[
 			{
-				"FuncName":"22funcName1",
+				"FuncName":"AddCurve",
 				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":["int32","void","void"]
+				"RetType":"FCurveHandle",
+				"ParamTypes":["const float InStartTimeSeconds","const float InDurationSeconds","const ECurveEaseFunction::Type"]
 			},
 			{
-				"FuncName":"22funcName2",
+				"FuncName":"Play",
 				"IsStatic":"false",
-				"RetType":"int32",
-				"ParamTypes":["void","int32","int32"]
+				"RetType":"void",
+				"ParamTypes":["const TSharedRef<SWidget>", "bool", "const float"]
 			},
 			{
-				"FuncName":"22funcName3",
-				"IsStatic":"true",
+				"FuncName":"Reverse",
+				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["int32","int32","void"]
+				"ParamTypes":[]
 			}
 		]
 	},
 	{
-		"ClassName":"ClassName3",
+		"ClassName":"FPaperSpriteVertex",
 		"ParentName":"",
 		"Functions":
 		[
 			{
-				"FuncName":"33funcName1",
-				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":["int32","void","void"]
-			},
-			{
-				"FuncName":"33funcName2",
-				"IsStatic":"false",
-				"RetType":"int32",
-				"ParamTypes":["void","int32","int32"]
-			},
-			{
-				"FuncName":"33funcName3",
+				"FuncName":"SetTangentsFromPaperAxes",
 				"IsStatic":"true",
 				"RetType":"void",
-				"ParamTypes":["int32","int32","void"]
-			}
-		]
-	},
-	{
-		"ClassName":"ClassName4",
-		"ParentName":"",
-		"Functions":
-		[
-			{
-				"FuncName":"44funcName1",
-				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":["int32","void","void"]
-			},
-			{
-				"FuncName":"44funcName2",
-				"IsStatic":"false",
-				"RetType":"int32",
-				"ParamTypes":["void","int32","int32"]
-			},
-			{
-				"FuncName":"44funcName3",
-				"IsStatic":"true",
-				"RetType":"void",
-				"ParamTypes":["int32","int32","void"]
+				"ParamTypes":[]
 			}
 		]
 	}

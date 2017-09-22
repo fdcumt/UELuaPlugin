@@ -143,14 +143,23 @@ public: // push args
 
 public:
 	static void Pop();
-	static void Pop(uint8  &ReturnValue);
-	static void Pop(float  &ReturnValue);
-	static void Pop(double &ReturnValue);
-	static void Pop(bool   &ReturnValue);
+	static void Pop(uint8   &ReturnValue);
+	static void Pop(float   &ReturnValue);
+	static void Pop(double  &ReturnValue);
+	static void Pop(bool    &ReturnValue);
 	static void Pop(FText   &ReturnValue);
 	static void Pop(FName   &ReturnValue);
 	static void Pop(FString &ReturnValue);
 	static void Pop(int32   &ReturnValue);
+
+	static void Pop(FLuaClassType<uint8>   &&ReturnValue);
+	static void Pop(FLuaClassType<int32>   &&ReturnValue);
+	static void Pop(FLuaClassType<float>   &&ReturnValue);
+	static void Pop(FLuaClassType<double>  &&ReturnValue);
+	static void Pop(FLuaClassType<bool>    &&ReturnValue);
+	static void Pop(FLuaClassType<FText>   &&ReturnValue);
+	static void Pop(FLuaClassType<FName>   &&ReturnValue);
+	static void Pop(FLuaClassType<FString> &&ReturnValue);
 
 	template <class T>
 	static void Pop(FLuaClassType<T> &&value);

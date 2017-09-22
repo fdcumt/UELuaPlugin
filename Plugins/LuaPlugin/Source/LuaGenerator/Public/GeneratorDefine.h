@@ -2,9 +2,9 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 
-
-
-#define EndLinPrintf(FormatString, ...) FString::Printf(TEXT("%s\r\n"), *FString::Printf(FormatString, ##__VA_ARGS__ ))
+#define SafeDelete(pItem) if (pItem) { delete pItem; }
+#define EndLinePrintf(FormatString, ...) FString::Printf(TEXT("%s\r\n"), *FString::Printf(FormatString, ##__VA_ARGS__ ))
+#define GeneratorLog(LogVerbosity, FormatString, ...) UE_LOG(LogLuaGenerator, LogVerbosity, FormatString, ##__VA_ARGS__ )
 
 
 #if 1
@@ -18,7 +18,8 @@ namespace NS_LuaGenerator
 {
 	enum E_GeneratorType
 	{
-		EClass = 0,
+		EUClass = 0,
+		EConfigClass = 1,
 	};
 
 	extern FString ProjectPath;

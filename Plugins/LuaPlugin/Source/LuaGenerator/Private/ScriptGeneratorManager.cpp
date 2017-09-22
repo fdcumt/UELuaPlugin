@@ -4,6 +4,7 @@
 #include "GeneratorDefine.h"
 #include "Misc/FileHelper.h"
 #include "UObjectIterator.h"
+#include "ConfigClassGenerator.h"
 #include "Serialization/JsonSerializer.h"
 
 FScriptGeneratorManager::FScriptGeneratorManager()
@@ -18,9 +19,9 @@ FScriptGeneratorManager::~FScriptGeneratorManager()
 
 void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
+	m_OutDir = OutputDirectory;
 	m_RootLocalPath = RootLocalPath;
 	m_RootBuildPath = RootBuildPath;
-	m_OutputDirectory = OutputDirectory;
 	m_IncludeBase = IncludeBase;
 
 	//DebugLog(TEXT("m_RootLocalPath: %s"), *m_RootLocalPath);
@@ -30,52 +31,38 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
 {
-	IScriptGenerator *pGenerator = CreateGeneratorByType(NS_LuaGenerator::EClass, Class);
+	IScriptGenerator *pGenerator = FClassGenerator::CreateGenerator(Class, m_OutDir);
 
-	if (!CanExportClass(pGenerator))
+	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
 	{
-		return;
+		pGenerator->Export();
+		AddGeneratorToMap(pGenerator);
 	}
-	
-	pGenerator->Export();
+	else
+	{
+		SafeDelete(pGenerator);
+	}
 }
 
 void FScriptGeneratorManager::FinishExport()
 {
-	ExportConfigClass();
-}
-
-IScriptGenerator* FScriptGeneratorManager::CreateGeneratorByType(NS_LuaGenerator::E_GeneratorType InType, UObject *InObj)
-{
-	switch (InType)
-	{
-	case NS_LuaGenerator::EClass:
-	{
-		return FClassGenerator::CreateGenerator(InObj, m_OutputDirectory);
-	}
-	default:
-	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("FScriptGeneratorManager::CreateGeneratorByType error, not found generator type:%d"), int32(InType));
-	}
-	}
-
-	return nullptr;
+	ExportConfigClasses();
 }
 
 bool FScriptGeneratorManager::CanExportClass(IScriptGenerator *InGenerator) const
 {
-	return InGenerator && !m_Generators.Find(InGenerator->GetKey());
+	return !m_Generators.Find(InGenerator->GetKey());
 }
 
-void FScriptGeneratorManager::ExportConfigClass()
+void FScriptGeneratorManager::ExportConfigClasses()
 {
-	FString ConfigClassFileName = NS_LuaGenerator::ProjectPath/NS_LuaGenerator::ClassConfigFileRelativePath;
-
 	TArray<FConfigClass> ConfigClasses;
-	ParseConfigClass(ConfigClassFileName, ConfigClasses);
+	ParseConfigClass(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::ClassConfigFileRelativePath, ConfigClasses);
 
 	for (const FConfigClass& ClassItem : ConfigClasses)
 	{
+		ExportConfigClass(ClassItem);
+
 		FString ConfigClass;
 		
 		DebugLog(TEXT("ClassItem.ParentName:%s"), *ClassItem.ParentName);
@@ -110,7 +97,21 @@ void FScriptGeneratorManager::ExportConfigClass()
 	}
 }
 
-void FScriptGeneratorManager::ParseConfigClass(const FString &FileName, TArray<FConfigClass> &OutConfigClasses)
+void FScriptGeneratorManager::ExportConfigClass(const FConfigClass& ClassItem)
+{
+	IScriptGenerator *pGenerator = FConfigClassGenerator::CreateGenerator(ClassItem, m_OutDir);
+	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport() )
+	{
+		pGenerator->Export();
+		AddGeneratorToMap(pGenerator);
+	}
+	else
+	{
+		SafeDelete(pGenerator);
+	}
+}
+
+void FScriptGeneratorManager::ParseConfigClass(const FString &&FileName, TArray<FConfigClass> &OutConfigClasses)
 {
 	FString JsonStr;
 	TArray<TSharedPtr<FJsonValue>> JsonClasses;
@@ -211,4 +212,9 @@ void FScriptGeneratorManager::ParseConfigClass(const FString &FileName, TArray<F
 
 		OutConfigClasses.Add(ConfigClass);
 	}
+}
+
+void FScriptGeneratorManager::AddGeneratorToMap(IScriptGenerator *InGenerator)
+{
+	m_Generators.Add(InGenerator->GetKey(), InGenerator);
 }

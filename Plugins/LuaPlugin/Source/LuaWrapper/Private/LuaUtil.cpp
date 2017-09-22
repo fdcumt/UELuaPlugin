@@ -232,6 +232,54 @@ void FLuaUtil::Pop(int32 &ReturnValue)
 	Pop();
 }
 
+void FLuaUtil::Pop(FLuaClassType<uint8> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = lua_tointeger(g_LuaState, -1);
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<int32> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = lua_tointeger(g_LuaState, -1);
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<float> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = lua_tonumber(g_LuaState, -1);
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<double> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = lua_tonumber(g_LuaState, -1);
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<bool> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = lua_toboolean(g_LuaState, -1)==1;
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<FText> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = FText::FromString(ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<FName> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = FName(ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
+	Pop();
+}
+
+void FLuaUtil::Pop(FLuaClassType<FString> &&ReturnValue)
+{
+	ReturnValue.m_ClassObj = FString(ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
+	Pop();
+}
+
 int LuaErrHandleFunc(lua_State*LuaState)
 {
 	lua_getfield(LuaState, LUA_GLOBALSINDEX, "debug");

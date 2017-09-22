@@ -3,10 +3,15 @@
 class IScriptGenerator
 {
 public:
-	virtual ~IScriptGenerator() {}
+	IScriptGenerator(const FString &OutDir);
+	virtual ~IScriptGenerator();
+
 public:
-	virtual FString GetKey() = 0;
-	virtual bool CanExport() = 0;
+	virtual FString GetKey() const = 0;
+	virtual bool CanExport() const = 0;
 	virtual void Export() = 0;
 	virtual void SaveToFile() = 0;
+
+protected:
+	FString m_OutDir;
 };

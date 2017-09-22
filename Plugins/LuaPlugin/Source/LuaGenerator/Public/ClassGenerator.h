@@ -22,8 +22,8 @@ public:
 
 public:
 	/** FBaseGenerator interface */
-	virtual FString GetKey() override { return m_FileName; }
-	virtual bool CanExport() override;
+	virtual FString GetKey() const override { return m_pClass->GetName(); }
+	virtual bool CanExport()const  override;
 	virtual void Export() override;
 	virtual void SaveToFile() override;
 
@@ -46,7 +46,6 @@ private:
 
 private:
 	UClass *m_pClass;
-	FString m_OutDir;
 	FString m_FileName;
 	FString m_FileContent;
 	TArray<FString> m_FunctionNames;

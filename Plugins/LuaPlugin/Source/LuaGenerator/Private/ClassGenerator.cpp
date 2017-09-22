@@ -32,13 +32,13 @@ IScriptGenerator* FClassGenerator::CreateGenerator(UObject *InObj, const FString
 }
 
 FClassGenerator::FClassGenerator(UClass *InClass, const FString &InOutDir)
+	:IScriptGenerator(InOutDir)
 {
 	m_FileName.Empty();
 	m_FileContent.Empty();
 	m_FunctionNames.Empty();
 
 	m_pClass = InClass;
-	m_OutDir = InOutDir;
 	m_FileName = InClass->GetName() + NS_LuaGenerator::ClassScriptHeaderSuffix; 
 }
 
@@ -47,7 +47,7 @@ FClassGenerator::~FClassGenerator()
 
 }
 
-bool FClassGenerator::CanExport()
+bool FClassGenerator::CanExport() const
 {
 	return m_ClassConfig.CanExport(m_pClass->GetName());
 }
@@ -72,9 +72,9 @@ void FClassGenerator::SaveToFile()
 
 void FClassGenerator::GenerateScriptHeader(FString &OutStr)
 {
-	OutStr += EndLinPrintf(TEXT("#pragma once"));
-	OutStr += EndLinPrintf(TEXT("PRAGMA_DISABLE_DEPRECATION_WARNINGS"));
-	OutStr += EndLinPrintf(TEXT(""));
+	OutStr += EndLinePrintf(TEXT("#pragma once"));
+	OutStr += EndLinePrintf(TEXT("PRAGMA_DISABLE_DEPRECATION_WARNINGS"));
+	OutStr += EndLinePrintf(TEXT(""));
 }
 
 void FClassGenerator::GenerateFunctions(FString &OutStr)
@@ -91,11 +91,11 @@ void FClassGenerator::GenerateFunctions(FString &OutStr)
 
 void FClassGenerator::GenerateSingleFunction(UFunction *InFunction, FString &OutStr)
 {
-	OutStr += EndLinPrintf(TEXT(""));
-	OutStr += EndLinPrintf(TEXT("static int32 %s_%s(lua_State* L)"), *m_pClass->GetName(), *InFunction->GetFName().ToString());
-	OutStr += EndLinPrintf(TEXT("{"));
+	OutStr += EndLinePrintf(TEXT(""));
+	OutStr += EndLinePrintf(TEXT("static int32 %s_%s(lua_State* L)"), *m_pClass->GetName(), *InFunction->GetFName().ToString());
+	OutStr += EndLinePrintf(TEXT("{"));
 	GenerateFunctionParams(InFunction, OutStr);
-	OutStr += EndLinPrintf(TEXT("}"));
+	OutStr += EndLinePrintf(TEXT("}"));
 }
 
 void FClassGenerator::AddFunctionToRegister(UFunction *InFunction)
@@ -198,22 +198,22 @@ FString FClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/*
 
 void FClassGenerator::GenerateRegister(FString &OutStr)
 {
-	OutStr += EndLinPrintf(TEXT(""));
-	OutStr += EndLinPrintf(TEXT("static const luaL_Reg %s_Lib[] ="), *m_pClass->GetName());
-	OutStr += EndLinPrintf(TEXT("{"));
+	OutStr += EndLinePrintf(TEXT(""));
+	OutStr += EndLinePrintf(TEXT("static const luaL_Reg %s_Lib[] ="), *m_pClass->GetName());
+	OutStr += EndLinePrintf(TEXT("{"));
 
 	for (const FString &FunctionName : m_FunctionNames)
 	{
 		GenerateRegisterItem(FunctionName, OutStr);
 	}
 
-	OutStr += EndLinPrintf(TEXT("\t{ NULL, NULL }"));
-	OutStr += EndLinPrintf(TEXT("};"));
+	OutStr += EndLinePrintf(TEXT("\t{ NULL, NULL }"));
+	OutStr += EndLinePrintf(TEXT("};"));
 }
 
 void FClassGenerator::GenerateRegisterItem(const FString &InFunctionName, FString &OutStr)
 {
-	OutStr += EndLinPrintf(TEXT("\t{ \"%s\", %s},"), *InFunctionName, *GenerateRegisterFuncName(*InFunctionName, *m_pClass->GetName()) );
+	OutStr += EndLinePrintf(TEXT("\t{ \"%s\", %s},"), *InFunctionName, *GenerateRegisterFuncName(*InFunctionName, *m_pClass->GetName()) );
 }
 
 FString FClassGenerator::GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName)
@@ -236,8 +236,8 @@ bool FClassGenerator::CanExportFunction(UFunction *InFunction)
 void FClassGenerator::GenerateScriptTail(FString &OutStr)
 {
 
-	OutStr += EndLinPrintf(TEXT(""));
-	OutStr += EndLinPrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
+	OutStr += EndLinePrintf(TEXT(""));
+	OutStr += EndLinePrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
 }
 
 FClassGeneratorConfig FClassGenerator::m_ClassConfig;
