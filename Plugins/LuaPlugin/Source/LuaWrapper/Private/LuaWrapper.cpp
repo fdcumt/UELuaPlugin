@@ -24,6 +24,7 @@ void FLuaWrapper::Init()
 {
 	InitLuaEnv();
 	RegisterLuaLog();
+	RegisterAllClasses();
 	DoMainFile();
 	LuaWrapperLog(Log, TEXT("FLuaWrapper init"));
 }

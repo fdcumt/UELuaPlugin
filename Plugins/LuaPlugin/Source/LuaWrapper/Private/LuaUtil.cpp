@@ -47,7 +47,7 @@ void FLuaUtil::RegisterClassFunctions( const luaL_Reg ClassFunctions[])
 	{
 		if (ClassFunctions[i].func!=nullptr)
 		{
-			lua_CFunction func = ClassFunctions->func;
+			lua_CFunction func = ClassFunctions[i].func;
 			AddClassFunction(ClassFunctions[i].name, func);
 		}
 	}
@@ -125,7 +125,7 @@ int32 FLuaUtil::Push(uint8 value)
 	return 1;
 }
 
-int32 FLuaUtil::Push(int value)
+int32 FLuaUtil::Push(int32 value)
 {
 	lua_pushinteger(g_LuaState, value);
 	return 1;
@@ -155,18 +155,6 @@ int32 FLuaUtil::Push(const FString& value)
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FText& value)
-{
-	lua_pushstring(g_LuaState, TCHAR_TO_ANSI(*value.ToString()));
-	return 1;
-}
-
-int32 FLuaUtil::Push(const FName& value)
-{
-	lua_pushstring(g_LuaState, TCHAR_TO_ANSI(*value.ToString()));
-	return 1;
-}
-
 int32 FLuaUtil::Push(const char* value)
 {
 	lua_pushstring(g_LuaState, value);
@@ -177,6 +165,48 @@ int32 FLuaUtil::Push(const char* value)
 int32 FLuaUtil::Push()
 {
 	return 0;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<uint8> &&value)
+{
+	lua_pushinteger(g_LuaState, value.m_ClassObj);
+	return 1;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<int32> &&value)
+{
+	lua_pushinteger(g_LuaState, value.m_ClassObj);
+	return 1;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<float> &&value)
+{
+	lua_pushnumber(g_LuaState, value.m_ClassObj);
+	return 1;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<double> &&value)
+{
+	lua_pushnumber(g_LuaState, value.m_ClassObj);
+	return 1;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<bool> &&value)
+{
+	lua_pushboolean(g_LuaState, value.m_ClassObj);
+	return 1;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<const char*> &&value)
+{
+	lua_pushstring(g_LuaState, value.m_ClassObj);
+	return 1;
+}
+
+int32 FLuaUtil::Push(const FLuaClassType<const FString&> &&value)
+{
+	lua_pushstring(g_LuaState, TCHAR_TO_ANSI(*value.m_ClassObj));
+	return 1;
 }
 
 void FLuaUtil::Pop()
@@ -280,7 +310,7 @@ void FLuaUtil::Pop(FLuaClassType<FString> &&ReturnValue)
 	Pop();
 }
 
-int LuaErrHandleFunc(lua_State*LuaState)
+int32 LuaErrHandleFunc(lua_State*LuaState)
 {
 	lua_getfield(LuaState, LUA_GLOBALSINDEX, "debug");
 	lua_getfield(LuaState, -1, "traceback");

@@ -1,27 +1,33 @@
 [
 	{
-		"ClassName":"STextBlock",
+		"ClassName":"FMyTest",
 		"ParentName":"",
-		"HeaderFiles":["Widgets/Text/STextBlock.h"],
+		"HeaderFiles":["SimpleTest.h"],
 		"Functions":
 		[
 			{
-				"FuncName":"GetText",
+				"FuncName":"GetMember",
 				"IsStatic":"false",
-				"RetType":"FText",
+				"RetType":"int32",
 				"ParamTypes":[]
 			},
 			{
-				"FuncName":"SetHighlightText",
+				"FuncName":"SetMember",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["FText"]
+				"ParamTypes":["int32"]
 			},
 			{
-				"FuncName":"SetText",
+				"FuncName":"Print",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":["FText"]
+				"ParamTypes":[]
+			},
+			{
+				"FuncName":"StaticPrint",
+				"IsStatic":"true",
+				"RetType":"void",
+				"ParamTypes":[]
 			}
 		]
 	}

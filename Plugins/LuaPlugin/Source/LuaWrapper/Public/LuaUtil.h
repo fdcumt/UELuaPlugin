@@ -115,7 +115,7 @@ public: // push args
 	template <class T1, class... T>
 	static int32 Push(const T1 &Value, T&&... args)
 	{
-		int32 num = Push(Value);
+		int32 num = Push(Value);+
 		return num + Push(Forward<T>(args)...);
 	}
 
@@ -127,14 +127,20 @@ public: // push args
 
 	static int32 Push();
 	static int32 Push(uint8  value);
-	static int32 Push(int    value);
+	static int32 Push(int32  value);
 	static int32 Push(float  value);
 	static int32 Push(double value);
 	static int32 Push(bool   value);
 	static int32 Push(const char*    value);
-	static int32 Push(const FText&   value);
-	static int32 Push(const FName&   value);
 	static int32 Push(const FString& value);
+
+	static int32 Push(const FLuaClassType<bool>  &&value);
+	static int32 Push(const FLuaClassType<uint8> &&value);
+	static int32 Push(const FLuaClassType<int32> &&value);
+	static int32 Push(const FLuaClassType<float> &&value);
+	static int32 Push(const FLuaClassType<double> &&value);
+	static int32 Push(const FLuaClassType<const char*> &&value);
+	static int32 Push(const FLuaClassType<const FString&> &&value);
 
 	template <class T>
 	static int32 Push(const FLuaClassType<T> &&value);
@@ -246,11 +252,11 @@ void FLuaUtil::TouserCppClassType(FLuaClassType<T> &&OutValue)
 		lua_pushstring(g_LuaState, "CppParent");
 		lua_rawget(g_LuaState, -2);
 		lua_replace(g_LuaState, -2);
-		TouserCppClassType(OutValue);
+		TouserCppClassType(Forward<FLuaClassType<T>>(OutValue) );
 	}
 	else if (lua_isuserdata(g_LuaState, -1))
 	{
-		OutValue.m_ClassObj = static_cast<T>(lua_touserdata(L, -1))
+		OutValue.m_ClassObj = static_cast<T>(lua_touserdata(g_LuaState, -1));
 	}
 	else
 	{
