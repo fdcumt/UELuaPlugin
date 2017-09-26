@@ -329,6 +329,8 @@ void FConfigClassGenerator::GeneratorScriptName(FString &OutStr)
 
 void FConfigClassGenerator::GeneratorIncludeHeaders(TArray<FString> &OutStr)
 {
+	OutStr.Add(EndLinePrintf(TEXT("#include \"LuaUtil.h\"")));
+
 	for (const FString &IncludeFile : m_ConfigClass.IncludeHeaders)
 	{
 		FString strIncludeFile;

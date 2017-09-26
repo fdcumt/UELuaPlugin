@@ -225,10 +225,6 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 	lua_setmetatable(InLuaState, -2);
 	lua_replace(InLuaState, -2);
 
-	if (lua_isuserdata(InLuaState, -1)==1)
-	{
-		TemplateLogPrint(FString::Printf(TEXT(" user data11111111111!!!")));
-	}
 	return 1;
 }
 
@@ -254,12 +250,10 @@ void FLuaUtil::TouserCppClassType(lua_State *InLuaState,  FLuaClassType<T> &&Out
 	}
 	else if (lua_isuserdata(InLuaState, -1) == 1)
 	{
-		LuaWrapperLog(Log, TEXT("TouserCppClassType is userdata"));
 		OutValue.m_ClassObj = static_cast<T>(lua_touserdata(InLuaState, -1));
 	}
 	else if (lua_istable(InLuaState, -1))
 	{
-		LuaWrapperLog(Log, TEXT("TouserCppClassType is table"));
 		lua_pushstring(InLuaState, "CppParent");
 		lua_rawget(InLuaState, -2);
 		lua_replace(InLuaState, -2);
