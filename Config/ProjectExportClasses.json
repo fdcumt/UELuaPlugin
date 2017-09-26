@@ -6,9 +6,21 @@
 		"Functions":
 		[
 			{
+				"FuncName":"CreateSelf",
+				"IsStatic":"true",
+				"RetType":"FMyTest*",
+				"ParamTypes":[]
+			},
+			{
 				"FuncName":"GetMember",
 				"IsStatic":"false",
 				"RetType":"int32",
+				"ParamTypes":[]
+			},
+			{
+				"FuncName":"StaticPrint1",
+				"IsStatic":"true",
+				"RetType":"void",
 				"ParamTypes":[]
 			},
 			{

@@ -26,14 +26,17 @@ namespace NS_LuaGenerator
 	extern FString GameModuleName;
 	extern FString ClassScriptHeaderSuffix;
 
+	extern const FString LuaConfigFileRelativePath;
+
 	extern const TCHAR* SupportModuleKey;
 	extern const TCHAR* SupportModuleSection;
 
 	extern const TCHAR* NotSupportClassSection;
 	extern const TCHAR* NotSupportClassKey;
 
-	extern const FString LuaConfigFileRelativePath;
-	extern const FString ClassConfigFileRelativePath;
+	extern const TCHAR* ConfigClassFilesSection;
+	extern const TCHAR* ConfigClassFileKey;
+	extern const FString ClassConfigFileRelativeFolder;
 }
 
 struct FConfigFunction

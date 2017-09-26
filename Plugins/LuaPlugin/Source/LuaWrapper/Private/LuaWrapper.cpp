@@ -79,20 +79,20 @@ const luaL_Reg LuaPrint[] =
 
 void FLuaWrapper::RegisterLuaLog()
 {
-	FLuaUtil::RegisterClass(LuaPrint, "LuaPrint");
+	FLuaUtil::RegisterClass(m_LuaState, LuaPrint, "LuaPrint");
 }
 
 void FLuaWrapper::RegisterAllClasses()
 {
-	Def_LoadAll();
+	Def_LoadAll(m_LuaState);
 }
 
 void FLuaWrapper::DoMainFile()
 {
 	FString luaDir = FPaths::ConvertRelativePathToFull(FPaths::GameDir() / TEXT("LuaSource"));
 	FString LuaMainFile = luaDir / TEXT("main.lua");
-	if (luaL_dofile(g_LuaState, TCHAR_TO_ANSI(*LuaMainFile)))
+	if (luaL_dofile(m_LuaState, TCHAR_TO_ANSI(*LuaMainFile)))
 	{
-		LuaWrapperLog(Fatal, TEXT("DoMainFile error %s!"),*lua_tostring(g_LuaState, -1));
+		LuaWrapperLog(Fatal, TEXT("DoMainFile error %s!"),*lua_tostring(m_LuaState, -1));
 	}
 }

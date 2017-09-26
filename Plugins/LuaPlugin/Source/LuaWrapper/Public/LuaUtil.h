@@ -2,7 +2,7 @@
 #include "lua_tinker.h"
 #include "LuaWrapperDefine.h"
 
-LUAWRAPPER_API int LuaErrHandleFunc(lua_State*g_LuaState);
+LUAWRAPPER_API int LuaErrHandleFunc(lua_State*InLuaState);
 
 class LUAWRAPPER_API FLuaFuncName
 {
@@ -52,7 +52,7 @@ public:
 class LUAWRAPPER_API FLuaUtil
 {
 public:
-	static void RegisterClass(const luaL_Reg ClassFunctions[], const char *ClassName);
+	static void RegisterClass(lua_State *InLuaState, const luaL_Reg ClassFunctions[], const char *ClassName);
 
 
 public: // call functions 
@@ -82,7 +82,7 @@ private:
 	{
 		lua_pushcfunction(g_LuaState, LuaErrHandleFunc);
 		lua_getfield(g_LuaState, LUA_GLOBALSINDEX, Value.m_FuncName);
-		int32 paramCount = Push(Forward<T>(args)...);
+		int32 paramCount = Push(g_LuaState, Forward<T>(args)...);
 		if (lua_pcall(g_LuaState, paramCount, RetTypeNum.m_num, -(paramCount + 2)))
 		{
 			FString log = FString::Printf(TEXT("call r impl found an error: %s!!!"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
@@ -94,94 +94,94 @@ private:
 	static void CallRImpl(FLuaReturnTypeNum &&RetTypeNum, T1 &&ReturnValue, T&&... args)
 	{
 		CallRImpl(Forward<FLuaReturnTypeNum>(RetTypeNum+1), Forward<T>(args)...);
-		Pop(ReturnValue);
+		Pop(g_LuaState, ReturnValue);
 	}
 
 
 public:
 	template <class T>
-	static void TouserCppClassType(FLuaClassType<T> &&OutValue); // 解析成 cpp class 类型
+	static void TouserCppClassType(lua_State *InLuaState, FLuaClassType<T> &&OutValue); // 解析成 cpp class 类型
 
 	template <class T>
-	static T TouserCppClassType(const char *ClassName)
+	static T TouserCppClassType(lua_State *InLuaState, const char *ClassName)
 	{
 		T pCppObj;
-		TouserCppClassType(FLuaClassType<T>(pCppObj, ClassName));
+		TouserCppClassType(InLuaState, FLuaClassType<T>(pCppObj, ClassName));
 		return pCppObj;
 	}
 
 
 public: // push args
 	template <class T1, class... T>
-	static int32 Push(const T1 &Value, T&&... args)
+	static int32 Push(lua_State *InLuaState, const T1 &Value, T&&... args)
 	{
 		int32 num = Push(Value);+
 		return num + Push(Forward<T>(args)...);
 	}
 
 	template<typename T>
-	static int Push(const T& value)
+	static int Push(lua_State *InLuaState, const T& value)
 	{
 		TemplateLogFatal(TEXT("not find this arg type"));
 	}
 
-	static int32 Push();
-	static int32 Push(uint8  value);
-	static int32 Push(int32  value);
-	static int32 Push(float  value);
-	static int32 Push(double value);
-	static int32 Push(bool   value);
-	static int32 Push(const char*    value);
-	static int32 Push(const FString& value);
+	static int32 Push(lua_State *InLuaState);
+	static int32 Push(lua_State *InLuaState, uint8  value);
+	static int32 Push(lua_State *InLuaState, int32  value);
+	static int32 Push(lua_State *InLuaState, float  value);
+	static int32 Push(lua_State *InLuaState, double value);
+	static int32 Push(lua_State *InLuaState, bool   value);
+	static int32 Push(lua_State *InLuaState, const char*    value);
+	static int32 Push(lua_State *InLuaState, const FString& value);
 
-	static int32 Push(const FLuaClassType<bool>  &&value);
-	static int32 Push(const FLuaClassType<uint8> &&value);
-	static int32 Push(const FLuaClassType<int32> &&value);
-	static int32 Push(const FLuaClassType<float> &&value);
-	static int32 Push(const FLuaClassType<double> &&value);
-	static int32 Push(const FLuaClassType<const char*> &&value);
-	static int32 Push(const FLuaClassType<const FString&> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<bool>  &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<uint8> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<int32> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<float> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<double> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<const char*> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<const FString&> &&value);
 
 	template <class T>
-	static int32 Push(const FLuaClassType<T> &&value);
+	static int32 Push(lua_State *InLuaState, const FLuaClassType<T> &&value);
 
 
 
 public:
-	static void Pop();
-	static void Pop(uint8   &ReturnValue);
-	static void Pop(float   &ReturnValue);
-	static void Pop(double  &ReturnValue);
-	static void Pop(bool    &ReturnValue);
-	static void Pop(FText   &ReturnValue);
-	static void Pop(FName   &ReturnValue);
-	static void Pop(FString &ReturnValue);
-	static void Pop(int32   &ReturnValue);
+	static void Pop(lua_State *InLuaState);
+	static void Pop(lua_State *InLuaState, uint8   &ReturnValue);
+	static void Pop(lua_State *InLuaState, float   &ReturnValue);
+	static void Pop(lua_State *InLuaState, double  &ReturnValue);
+	static void Pop(lua_State *InLuaState, bool    &ReturnValue);
+	static void Pop(lua_State *InLuaState, FText   &ReturnValue);
+	static void Pop(lua_State *InLuaState, FName   &ReturnValue);
+	static void Pop(lua_State *InLuaState, FString &ReturnValue);
+	static void Pop(lua_State *InLuaState, int32   &ReturnValue);
 
-	static void Pop(FLuaClassType<uint8>   &&ReturnValue);
-	static void Pop(FLuaClassType<int32>   &&ReturnValue);
-	static void Pop(FLuaClassType<float>   &&ReturnValue);
-	static void Pop(FLuaClassType<double>  &&ReturnValue);
-	static void Pop(FLuaClassType<bool>    &&ReturnValue);
-	static void Pop(FLuaClassType<FText>   &&ReturnValue);
-	static void Pop(FLuaClassType<FName>   &&ReturnValue);
-	static void Pop(FLuaClassType<FString> &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<uint8>   &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<int32>   &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<float>   &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<double>  &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<bool>    &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<FText>   &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<FName>   &&ReturnValue);
+	static void Pop(lua_State *InLuaState, FLuaClassType<FString> &&ReturnValue);
 
 	template <class T>
-	static void Pop(FLuaClassType<T> &&value);
+	static void Pop(lua_State *InLuaState, FLuaClassType<T> &&value);
 	
 
 
 private: // not export Function
-	static void AddClass(const char *ClassName);
-	static void OpenClass(const char *ClassName);
-	static void CloseClass();
-	static void RegisterClassFunctions( const luaL_Reg ClassFunctions[]);
-	static void AddClassFunction(const char *FuncName, lua_CFunction &luaFunction);
-	static void InitMetaFuncs(); // 初始化元表中的元操作
-	static void InitUserDefinedFuncs(const char *ClassName); // 初始化元表中的自定义操作
-	static bool ExistData(void *p);
-	static bool ExistClass(const char *ClassName);
+	static void AddClass(lua_State *InLuaState, const char *ClassName);
+	static void OpenClass(lua_State *InLuaState, const char *ClassName);
+	static void CloseClass(lua_State *InLuaState);
+	static void RegisterClassFunctions( lua_State *InLuaState, const luaL_Reg ClassFunctions[]);
+	static void AddClassFunction(lua_State *InLuaState, const char *FuncName, lua_CFunction &luaFunction);
+	static void InitMetaFuncs(lua_State *InLuaState); // 初始化元表中的元操作
+	static void InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName); // 初始化元表中的自定义操作
+	static bool ExistData(lua_State *InLuaState, void *p);
+	static bool ExistClass(lua_State *InLuaState, const char *ClassName);
 
 private: // log
 	static void TemplateLogPrint(const FString &Content);
@@ -192,71 +192,78 @@ private: // log
 };
 
 template <class T>
-int32 FLuaUtil::Push(const FLuaClassType<T> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 { // push class args
-	if (!ExistClass(value.m_ClassName))
+	if (!ExistClass(InLuaState, value.m_ClassName))
 	{
-		FString log = FString::Printf(TEXT("push error, not export this class:%s"), value.m_ClassName);
+		FString log = FString::Printf(TEXT("push error, not export this class:%s"), ANSI_TO_TCHAR(value.m_ClassName));
 		TemplateLogFatal(log);
 		return 1;
 	}
 
 	if (value.m_ClassObj == nullptr)
 	{
-		lua_pushnil(g_LuaState);
+		lua_pushnil(InLuaState);
 		return 1;
 	}
 
-	if (!ExistData((void*)value.m_ClassObj))
+	if (!ExistData(InLuaState, (void*)value.m_ClassObj))
 	{ // add to table
-		*(void**)lua_newuserdata(g_LuaState, sizeof(void *)) = value.m_ClassObj;
-		lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-		lua_pushlightuserdata(g_LuaState, value.m_ClassObj);
-		lua_pushvalue(g_LuaState, -3);
-		lua_rawset(g_LuaState, -3);
-		lua_pop(g_LuaState, 2); // Pop the LUA_REGISTRYINDEX table and userdata
+		*(void**)lua_newuserdata(InLuaState, sizeof(void *)) = value.m_ClassObj;
+		lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
+		lua_pushlightuserdata(InLuaState, value.m_ClassObj);
+		lua_pushvalue(InLuaState, -3);
+		lua_rawset(InLuaState, -3);
+		lua_pop(InLuaState, 2); // Pop the LUA_REGISTRYINDEX table and userdata
 	}
 
 	// set metatable
-	lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(g_LuaState, (void*)value.m_ClassObj);
-	lua_rawget(g_LuaState, -2); // get userdata
-	luaL_getmetatable(g_LuaState, value.m_ClassName);
-	lua_setmetatable(g_LuaState, -2);
-	lua_replace(L, -2);
+	lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
+	lua_pushlightuserdata(InLuaState, (void*)value.m_ClassObj);
+	lua_rawget(InLuaState, -2); // get userdata
+	luaL_getmetatable(InLuaState, value.m_ClassName);
+	lua_setmetatable(InLuaState, -2);
+	lua_replace(InLuaState, -2);
+
+	if (lua_isuserdata(InLuaState, -1)==1)
+	{
+		TemplateLogPrint(FString::Printf(TEXT(" user data11111111111!!!")));
+	}
 	return 1;
 }
 
 template <class T>
-void FLuaUtil::Pop(FLuaClassType<T> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<T> &&ReturnValue)
 {
 	const char *ClassName = ReturnValue.m_ClassName;
-	if (!ExistClass(ReturnValue.m_ClassName))
+	if (!ExistClass(InLuaState, ,ReturnValue.m_ClassName))
 	{
 		TemplateLogFatal(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), ReturnValue.m_ClassName));
 		return;
 	}
 
-	TouserCppClassType(ReturnValue);
+	TouserCppClassType(InLuaState, ReturnValue);
 }
 
 template <class T>
-void FLuaUtil::TouserCppClassType(FLuaClassType<T> &&OutValue)
+void FLuaUtil::TouserCppClassType(lua_State *InLuaState,  FLuaClassType<T> &&OutValue)
 {
-	if (lua_isnil(g_LuaState, -1))
+	if (lua_isnil(InLuaState, -1))
 	{
 		OutValue.m_ClassObj = nullptr;
 	}
-	else if (lua_istable(g_LuaState, -1))
+	else if (lua_isuserdata(InLuaState, -1) == 1)
 	{
-		lua_pushstring(g_LuaState, "CppParent");
-		lua_rawget(g_LuaState, -2);
-		lua_replace(g_LuaState, -2);
-		TouserCppClassType(Forward<FLuaClassType<T>>(OutValue) );
+		LuaWrapperLog(Log, TEXT("TouserCppClassType is userdata"));
+		OutValue.m_ClassObj = static_cast<T>(lua_touserdata(InLuaState, -1));
 	}
-	else if (lua_isuserdata(g_LuaState, -1))
+	else if (lua_istable(InLuaState, -1))
 	{
-		OutValue.m_ClassObj = static_cast<T>(lua_touserdata(g_LuaState, -1));
+		LuaWrapperLog(Log, TEXT("TouserCppClassType is table"));
+		lua_pushstring(InLuaState, "CppParent");
+		lua_rawget(InLuaState, -2);
+		lua_replace(InLuaState, -2);
+		TouserCppClassType(InLuaState, Forward<FLuaClassType<T>>(OutValue) );
 	}
 	else
 	{

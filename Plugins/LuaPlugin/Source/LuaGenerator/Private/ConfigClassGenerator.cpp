@@ -94,34 +94,38 @@ void FConfigClassGenerator::GenerateFunctionKey(const FConfigFunction &FuncItem,
 
 void FConfigClassGenerator::GenerateFunctionValue(const FConfigFunction &FuncItem, FString &OutStr)
 {
-	int32 index = 0;
+	bool bAddComma = false;
 	FString FunctionName;
-	FString ParamList;
+	FString strParamNames;
 	FString strComma(", ");
 	FString ReturnValueName("RetValue");
 	GeneratorFunctionName(FuncItem, FunctionName);
 	OutStr += EndLinePrintf(TEXT(""));
-	OutStr += EndLinePrintf(TEXT("static int32 %s(lua_State* L)"), *FunctionName);
+	OutStr += EndLinePrintf(TEXT("static int32 %s(lua_State* InLuaState)"), *FunctionName);
 	OutStr += EndLinePrintf(TEXT("{"));
+	
+	for (int32 i = FuncItem.ParamTypes.Num()-1; i>=0; --i)
+	{
+		const FString &ParamItemType = FuncItem.ParamTypes[i];
+		FString ParamName = FString::Printf(TEXT("param_%d"), i);
+		OutStr += EndLinePrintf(TEXT("\t%s %s;"), *ParamItemType, *ParamName);
+		OutStr += EndLinePrintf(TEXT("\tFLuaUtil::Pop(InLuaState, FLuaClassType<%s>(%s, \"%s\"));"), *ParamItemType, *ParamName, *GeneratePureClassName(ParamItemType));
+
+		if (!bAddComma)
+		{
+			bAddComma = true;
+			strParamNames = ParamName;
+		}
+		else
+		{
+			strParamNames = ParamName + strComma + strParamNames;
+		}
+	}
 
 	if (!FuncItem.bStatic)
 	{
-		OutStr += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(\"%s\");"), *m_ConfigClass.Name, *m_ConfigClass.Name, *m_ConfigClass.Name);
+		OutStr += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *m_ConfigClass.Name, *m_ConfigClass.Name, *GeneratePureClassName(m_ConfigClass.Name));
 	}
-
-	for (const FString &ParamItemType : FuncItem.ParamTypes)
-	{
-		FString ParamName = FString::Printf(TEXT("param_%d"), index);
-		OutStr += EndLinePrintf(TEXT("\t%s %s;"), *ParamItemType, *ParamName);
-		OutStr += EndLinePrintf(TEXT("\tFLuaUtil::Pop(FLuaClassType<%s>(%s, \"%s\"));"), *ParamItemType, *ParamName, *ParamItemType);
-
-		if (index>0)
-		{
-			ParamList += strComma;
-		}
-		ParamList += ParamName;
-	}
-
 
 	if (FuncItem.RetType!=FString("void"))
 	{
@@ -134,16 +138,16 @@ void FConfigClassGenerator::GenerateFunctionValue(const FConfigFunction &FuncIte
 
 	if (!FuncItem.bStatic)
 	{
-		OutStr += EndLinePrintf(TEXT("pObj->%s(%s);"), *FuncItem.Name, *ParamList);
+		OutStr += EndLinePrintf(TEXT("pObj->%s(%s);"), *FuncItem.Name, *strParamNames);
 	}
 	else
 	{
-		OutStr += EndLinePrintf(TEXT("%s::%s(%s);"), *m_ConfigClass.Name, *FuncItem.Name, *ParamList);
+		OutStr += EndLinePrintf(TEXT("%s::%s(%s);"), *m_ConfigClass.Name, *FuncItem.Name, *strParamNames);
 	}
 
 	if (FuncItem.RetType != FString("void"))
 	{
-		OutStr += EndLinePrintf(TEXT("\tFLuaUtil::Push(FLuaClassType<%s>(%s, \"%s\"));"), *FuncItem.RetType, *ReturnValueName, *FuncItem.RetType);
+		OutStr += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(%s, \"%s\"));"), *FuncItem.RetType, *ReturnValueName, *GeneratePureClassName(FuncItem.RetType));
 	}
 	
 	OutStr += EndLinePrintf(TEXT("\treturn 1;"));
@@ -221,6 +225,62 @@ FString FConfigClassGenerator::GenerateRegVariableName() const
 {
 	return FString::Printf(TEXT("%s_Lib"), *m_ConfigClass.Name);
 
+}
+
+FString FConfigClassGenerator::GeneratePureClassName(const FString& InClassName) const
+{
+	// remove the const,*,& from class name
+	int32 BeginIndex = 0;
+	int32 EndIndex = InClassName.Len()-1;
+
+	while (BeginIndex<InClassName.Len())
+	{ // remove the prefix
+		if (InClassName[BeginIndex]==' ' || InClassName[BeginIndex]=='\t')
+		{
+			++BeginIndex;
+		}
+		else if (InClassName.StartsWith(ANSI_TO_TCHAR("const "), ESearchCase::CaseSensitive))
+		{
+			BeginIndex += 6;
+		}
+		else if (InClassName.StartsWith(ANSI_TO_TCHAR("class "), ESearchCase::CaseSensitive))
+		{
+			BeginIndex += 6;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	while (EndIndex >= BeginIndex)
+	{ // remove the suffix
+		if (InClassName[EndIndex] == ' '  || InClassName[EndIndex] == '&')
+		{
+			--EndIndex;
+		}
+		else if (InClassName[EndIndex] == '\t' || InClassName[EndIndex] == '*')
+		{
+			--EndIndex;
+		}
+		else if (InClassName.EndsWith(ANSI_TO_TCHAR("const"), ESearchCase::CaseSensitive))
+		{
+			BeginIndex -= 5;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (EndIndex >= BeginIndex)
+	{
+		return InClassName.Mid(BeginIndex, EndIndex - BeginIndex + 1);
+	}
+	else
+	{
+		return FString("");
+	}
 }
 
 void FConfigClassGenerator::Unity(FString &OutStr)

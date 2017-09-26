@@ -27,9 +27,9 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 
 	FPaths::GamePluginsDir();
 
-	DebugLog(TEXT("m_RootLocalPath: %s"), *m_RootLocalPath);
-	DebugLog(TEXT("m_RootBuildPath: %s"), *m_RootBuildPath);
-	DebugLog(TEXT("m_OutputDirectory: %s"), *m_OutDir);
+// 	DebugLog(TEXT("m_RootLocalPath: %s"), *m_RootLocalPath);
+// 	DebugLog(TEXT("m_RootBuildPath: %s"), *m_RootBuildPath);
+// 	DebugLog(TEXT("m_OutputDirectory: %s"), *m_OutDir);
 }
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
@@ -72,12 +72,19 @@ void FScriptGeneratorManager::AdjustBeforeSaveToFile()
 
 void FScriptGeneratorManager::ExportConfigClasses()
 {
-	TArray<FConfigClass> ConfigClasses;
-	ParseConfigClass(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::ClassConfigFileRelativePath, ConfigClasses);
+	TArray<FString> ConfigClassFileNames;
+	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, ConfigClassFileNames, ConfigFilePath);
 
-	for (const FConfigClass& ClassItem : ConfigClasses)
+	for (const FString&ConfigClassFileName : ConfigClassFileNames)
 	{
-		ExportConfigClass(ClassItem);
+		TArray<FConfigClass> ConfigClasses;
+		ParseConfigClass(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::ClassConfigFileRelativeFolder/ConfigClassFileName, ConfigClasses);
+
+		for (const FConfigClass& ClassItem : ConfigClasses)
+		{
+			ExportConfigClass(ClassItem);
+		}
 	}
 }
 
@@ -248,10 +255,8 @@ void FScriptGeneratorManager::SaveConfigClassesToFiles()
 
 void FScriptGeneratorManager::FinishExportPost()
 {
-	DebugLog(TEXT("FinishExportPost"));
 	GenerateAndSaveAllHeaderFile();
 	GererateLoadAllDefineFile();
-	DebugLog(TEXT("FinishExportPost end"));
 }
 
 void FScriptGeneratorManager::GenerateAndSaveAllHeaderFile()
@@ -280,36 +285,22 @@ void FScriptGeneratorManager::GererateLoadAllDefineFile()
 {
 	FString LoadAllDefineFileName("LoadAllDefine.h");
 	FString LoadAllDefineFile;
-	DebugLog(TEXT("FinishExportPost 1"));
 
 	LoadAllDefineFile += EndLinePrintf(TEXT("#pragma once"));
 	LoadAllDefineFile += EndLinePrintf(TEXT("#ifndef Def_LoadAll"));
-	//LoadAllDefineFile += FString::Printf(TEXT("#define Def_LoadAll() \r\n\\"));
-	LoadAllDefineFile += EndLinePrintf(TEXT("#define Def_LoadAll() \\"));
-
-
+	LoadAllDefineFile += EndLinePrintf(TEXT("#define Def_LoadAll(InLuaState) \\"));
 
 	for (auto &MapItem : m_Generators)
 	{
 		IScriptGenerator *pGenerator = MapItem.Value;
 		if (pGenerator->GetType() == NS_LuaGenerator::EConfigClass)
 		{
-			DebugLog(TEXT("FinishExportPost 2"));
-
-			LoadAllDefineFile += EndLinePrintf(TEXT("\tFLuaUtil::RegisterClass(%s, \"%s\");\\"), *pGenerator->GetRegName(), *pGenerator->GetKey());
-			DebugLog(TEXT("FinishExportPost 3"));
-
+			LoadAllDefineFile += EndLinePrintf(TEXT("\tFLuaUtil::RegisterClass(InLuaState, %s, \"%s\");\\"), *pGenerator->GetRegName(), *pGenerator->GetKey());
 		}
 	}
-	DebugLog(TEXT("FinishExportPost 4"));
-
 
 	LoadAllDefineFile += EndLinePrintf(TEXT(""));
-	DebugLog(TEXT("FinishExportPost 8"));
-
 	LoadAllDefineFile += EndLinePrintf(TEXT("#endif"));
-
-	DebugLog(TEXT("FinishExportPost 9"));
 
 	if (!FFileHelper::SaveStringToFile(LoadAllDefineFile, *(m_OutDir / LoadAllDefineFileName)))
 	{

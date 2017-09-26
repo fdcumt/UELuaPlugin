@@ -1,101 +1,102 @@
 #include "LuaUtil.h"
 
-void FLuaUtil::RegisterClass(const luaL_Reg ClassFunctions[], const char *ClassName)
+void FLuaUtil::RegisterClass(lua_State *InLuaState, const luaL_Reg ClassFunctions[], const char *ClassName)
 {
-	AddClass(ClassName);
-	OpenClass(ClassName);
-	RegisterClassFunctions(ClassFunctions);
-	CloseClass();
+	AddClass(InLuaState, ClassName);
+	OpenClass(InLuaState,ClassName);
+	RegisterClassFunctions(InLuaState,ClassFunctions);
+	CloseClass(InLuaState);
 }
 
-void FLuaUtil::AddClass(const char *ClassName)
+void FLuaUtil::AddClass(lua_State *InLuaState, const char *ClassName)
 { // 将class作为table,添加到lua全局变量中
-	if (ExistClass(ClassName))
+	if (ExistClass(InLuaState, ClassName))
 	{
 		return;
 	}
 
 	// 创建元表moduleName,并放入全局表(l_gt)中
-	lua_pushvalue(g_LuaState, LUA_GLOBALSINDEX); // 打开l_gt表,放入栈顶
-	lua_pushstring(g_LuaState, ClassName); // 把moduleName入栈,作为Key
-	luaL_newmetatable(g_LuaState, ClassName);// 创建元表,并压栈
+	lua_pushvalue(InLuaState, LUA_GLOBALSINDEX); // 打开l_gt表,放入栈顶
+	lua_pushstring(InLuaState, ClassName); // 把moduleName入栈,作为Key
+	luaL_newmetatable(InLuaState, ClassName);// 创建元表,并压栈
 
 	{// 设置表内容
-		InitMetaFuncs();  // 设置元操作
-		InitUserDefinedFuncs(ClassName); // 设置用户自定义操作
+		InitMetaFuncs(InLuaState);  // 设置元操作
+		InitUserDefinedFuncs(InLuaState, ClassName); // 设置用户自定义操作
 	}
 
-	lua_rawset(g_LuaState, -3); // 将全局表ModuleName放入l_gt表中,并弹出两个参数
-	lua_pop(g_LuaState, 1); // 把栈顶l_gt表弹出
+	lua_rawset(InLuaState, -3); // 将全局表ModuleName放入l_gt表中,并弹出两个参数
+	lua_pop(InLuaState, 1); // 把栈顶l_gt表弹出
 }
 
-void FLuaUtil::OpenClass(const char *ClassName)
+void FLuaUtil::OpenClass(lua_State *InLuaState, const char *ClassName)
 {
-	lua_pushvalue(g_LuaState, LUA_GLOBALSINDEX); // 打开l_gt表,放入栈顶
-	lua_pushstring(g_LuaState, ClassName); // 把moduleName入栈,作为Key
-	lua_rawget(g_LuaState, -2);
+	lua_pushvalue(InLuaState, LUA_GLOBALSINDEX); // 打开l_gt表,放入栈顶
+	lua_pushstring(InLuaState, ClassName); // 把moduleName入栈,作为Key
+	lua_rawget(InLuaState, -2);
 }
 
-void FLuaUtil::CloseClass()
+void FLuaUtil::CloseClass(lua_State *InLuaState)
 {
-	lua_pop(g_LuaState, 2);
+	lua_pop(InLuaState, 2);
 }
 
-void FLuaUtil::RegisterClassFunctions( const luaL_Reg ClassFunctions[])
+void FLuaUtil::RegisterClassFunctions( lua_State *InLuaState, const luaL_Reg ClassFunctions[])
 { // 注册函数
 	for (int32 i=0; ClassFunctions[i].name!=nullptr; ++i)
 	{
 		if (ClassFunctions[i].func!=nullptr)
 		{
 			lua_CFunction func = ClassFunctions[i].func;
-			AddClassFunction(ClassFunctions[i].name, func);
+			AddClassFunction(InLuaState, ClassFunctions[i].name, func);
 		}
 	}
 }
 
-void FLuaUtil::AddClassFunction(const char *FuncName, lua_CFunction &luaFunction)
+void FLuaUtil::AddClassFunction(lua_State *InLuaState, const char *FuncName, lua_CFunction &luaFunction)
 {
-	lua_pushstring(g_LuaState, FuncName);
-	lua_pushcfunction(g_LuaState, luaFunction);
-	lua_rawset(g_LuaState, -3);
+	lua_pushstring(InLuaState, FuncName);
+	lua_pushcfunction(InLuaState, luaFunction);
+	lua_rawset(InLuaState, -3);
 }
 
-void FLuaUtil::InitMetaFuncs()
+void FLuaUtil::InitMetaFuncs(lua_State *InLuaState)
 {
-
+	lua_pushvalue(InLuaState, -1);
+	lua_setfield(InLuaState, -2, "__index");
 }
 
-void FLuaUtil::InitUserDefinedFuncs(const char *ClassName)
+void FLuaUtil::InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName)
 {
 	{ // 设定变量,是否是cppclass
-		lua_pushstring(g_LuaState, "IsCppClass");
-		lua_pushboolean(g_LuaState, true);
-		lua_rawset(g_LuaState, -3);
+		lua_pushstring(InLuaState, "IsCppClass");
+		lua_pushboolean(InLuaState, true);
+		lua_rawset(InLuaState, -3);
 	}
 
 	{ // 获取className
-		lua_pushstring(g_LuaState, "ClassName");
-		lua_pushstring(g_LuaState, ClassName);
-		lua_rawset(g_LuaState, -3);
+		lua_pushstring(InLuaState, "ClassName");
+		lua_pushstring(InLuaState, ClassName);
+		lua_rawset(InLuaState, -3);
 	}
 
 }
 
-bool FLuaUtil::ExistData(void *p)
+bool FLuaUtil::ExistData(lua_State *InLuaState, void *p)
 {
-	lua_getfield(g_LuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(g_LuaState, p);
-	lua_rawget(g_LuaState, -2);
-	bool bExist = lua_isnil(g_LuaState, -1);
-	lua_pop(g_LuaState, 2);
+	lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
+	lua_pushlightuserdata(InLuaState, p);
+	lua_rawget(InLuaState, -2);
+	bool bExist = !lua_isnil(InLuaState, -1);
+	lua_pop(InLuaState, 2);
 	return bExist;
 }
 
-bool FLuaUtil::ExistClass(const char *ClassName)
+bool FLuaUtil::ExistClass(lua_State *InLuaState, const char *ClassName)
 {
-	lua_getglobal(g_LuaState, ClassName);
-	bool bExistClass = lua_istable(g_LuaState, -1)==1;
-	lua_pop(g_LuaState, 1);
+	lua_getglobal(InLuaState, ClassName);
+	bool bExistClass = lua_istable(InLuaState, -1)==1;
+	lua_pop(InLuaState, 1);
 	return bExistClass;
 }
 
@@ -119,195 +120,195 @@ void FLuaUtil::TemplateLogFatal(const FString &Content)
 	LuaWrapperLog(Fatal, TEXT("%s"), *Content);
 }
 
-int32 FLuaUtil::Push(uint8 value)
+int32 FLuaUtil::Push(lua_State *InLuaState,uint8 value)
 {
-	lua_pushboolean(g_LuaState, !!value);
+	lua_pushboolean(InLuaState, !!value);
 	return 1;
 }
 
-int32 FLuaUtil::Push(int32 value)
+int32 FLuaUtil::Push(lua_State *InLuaState,int32 value)
 {
-	lua_pushinteger(g_LuaState, value);
+	lua_pushinteger(InLuaState, value);
 	return 1;
 }
 
-int32 FLuaUtil::Push(float value)
+int32 FLuaUtil::Push(lua_State *InLuaState, float value)
 {
-	lua_pushnumber(g_LuaState, value);
+	lua_pushnumber(InLuaState, value);
 	return 1;
 }
 
-int32 FLuaUtil::Push(double value)
+int32 FLuaUtil::Push(lua_State *InLuaState,double value)
 {
-	lua_pushnumber(g_LuaState, value);
+	lua_pushnumber(InLuaState, value);
 	return 1;
 }
 
-int32 FLuaUtil::Push(bool value)
+int32 FLuaUtil::Push(lua_State *InLuaState,bool value)
 {
-	lua_pushboolean(g_LuaState, value);
+	lua_pushboolean(InLuaState, value);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FString& value)
+int32 FLuaUtil::Push(lua_State *InLuaState,const FString& value)
 {
-	lua_pushstring(g_LuaState, TCHAR_TO_ANSI(*value));
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value));
 	return 1;
 }
 
-int32 FLuaUtil::Push(const char* value)
+int32 FLuaUtil::Push(lua_State *InLuaState,const char* value)
 {
-	lua_pushstring(g_LuaState, value);
+	lua_pushstring(InLuaState, value);
 	return 1;
 }
 
 
-int32 FLuaUtil::Push()
+int32 FLuaUtil::Push(lua_State *InLuaState)
 {
 	return 0;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<uint8> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<uint8> &&value)
 {
-	lua_pushinteger(g_LuaState, value.m_ClassObj);
+	lua_pushinteger(InLuaState, value.m_ClassObj);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<int32> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<int32> &&value)
 {
-	lua_pushinteger(g_LuaState, value.m_ClassObj);
+	lua_pushinteger(InLuaState, value.m_ClassObj);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<float> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<float> &&value)
 {
-	lua_pushnumber(g_LuaState, value.m_ClassObj);
+	lua_pushnumber(InLuaState, value.m_ClassObj);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<double> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState,const FLuaClassType<double> &&value)
 {
-	lua_pushnumber(g_LuaState, value.m_ClassObj);
+	lua_pushnumber(InLuaState, value.m_ClassObj);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<bool> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState,const FLuaClassType<bool> &&value)
 {
-	lua_pushboolean(g_LuaState, value.m_ClassObj);
+	lua_pushboolean(InLuaState, value.m_ClassObj);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<const char*> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState,const FLuaClassType<const char*> &&value)
 {
-	lua_pushstring(g_LuaState, value.m_ClassObj);
+	lua_pushstring(InLuaState, value.m_ClassObj);
 	return 1;
 }
 
-int32 FLuaUtil::Push(const FLuaClassType<const FString&> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState,const FLuaClassType<const FString&> &&value)
 {
-	lua_pushstring(g_LuaState, TCHAR_TO_ANSI(*value.m_ClassObj));
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj));
 	return 1;
 }
 
-void FLuaUtil::Pop()
+void FLuaUtil::Pop(lua_State *InLuaState)
 {
-	lua_pop(g_LuaState, 1);
+	lua_pop(InLuaState, 1);
 }
 
-void FLuaUtil::Pop(uint8 &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, uint8 &ReturnValue)
 {
-	ReturnValue = lua_tointeger(g_LuaState, -1);
-	Pop();
+	ReturnValue = lua_tointeger(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(float &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, float &ReturnValue)
 {
-	ReturnValue = lua_tonumber(g_LuaState, -1);
-	Pop();
+	ReturnValue = lua_tonumber(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(double &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, double &ReturnValue)
 {
-	ReturnValue = lua_tonumber(g_LuaState, -1);
-	Pop();
+	ReturnValue = lua_tonumber(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(bool &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, bool &ReturnValue)
 {
-	ReturnValue = !!(lua_toboolean(g_LuaState, -1));
-	Pop();
+	ReturnValue = !!(lua_toboolean(InLuaState, -1));
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FText &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FText &ReturnValue)
 {
-	ReturnValue = FText::FromString(luaL_checkstring(g_LuaState, -1));
-	Pop();
+	ReturnValue = FText::FromString(luaL_checkstring(InLuaState, -1));
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FName &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FName &ReturnValue)
 {
-	ReturnValue = FName(luaL_checkstring(g_LuaState, -1));
-	Pop();
+	ReturnValue = FName(luaL_checkstring(InLuaState, -1));
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FString &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FString &ReturnValue)
 {
-	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(g_LuaState, -1)));
-	Pop();
+	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(InLuaState, -1)));
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(int32 &ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, int32 &ReturnValue)
 {
-	ReturnValue = lua_tointeger(g_LuaState, -1);
-	Pop();
+	ReturnValue = lua_tointeger(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<uint8> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<uint8> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tointeger(g_LuaState, -1);
-	Pop();
+	ReturnValue.m_ClassObj = lua_tointeger(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<int32> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<int32> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tointeger(g_LuaState, -1);
-	Pop();
+	ReturnValue.m_ClassObj = lua_tointeger(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<float> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<float> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tonumber(g_LuaState, -1);
-	Pop();
+	ReturnValue.m_ClassObj = lua_tonumber(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<double> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<double> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tonumber(g_LuaState, -1);
-	Pop();
+	ReturnValue.m_ClassObj = lua_tonumber(InLuaState, -1);
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<bool> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<bool> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_toboolean(g_LuaState, -1)==1;
-	Pop();
+	ReturnValue.m_ClassObj = lua_toboolean(InLuaState, -1)==1;
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<FText> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<FText> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FText::FromString(ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
-	Pop();
+	ReturnValue.m_ClassObj = FText::FromString(ANSI_TO_TCHAR(lua_tostring(InLuaState, -1)));
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<FName> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<FName> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FName(ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
-	Pop();
+	ReturnValue.m_ClassObj = FName(ANSI_TO_TCHAR(lua_tostring(InLuaState, -1)));
+	Pop(InLuaState);
 }
 
-void FLuaUtil::Pop(FLuaClassType<FString> &&ReturnValue)
+void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<FString> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FString(ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
-	Pop();
+	ReturnValue.m_ClassObj = FString(ANSI_TO_TCHAR(lua_tostring(InLuaState, -1)));
+	Pop(InLuaState);
 }
 
 int32 LuaErrHandleFunc(lua_State*LuaState)

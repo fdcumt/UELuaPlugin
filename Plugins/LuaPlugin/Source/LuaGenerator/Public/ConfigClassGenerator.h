@@ -40,7 +40,8 @@ private:
 private:
 	void AddToMap(const char *MapType, const FString &InKey, const FString &InValue, TMap<FString, FString> &InMap );
 	void GeneratorFunctionName(const FConfigFunction &FuncItem, FString &OutStr);
-	FString GenerateRegVariableName() const ;
+	FString GenerateRegVariableName() const;
+	FString GeneratePureClassName(const FString& InClassName) const;
 
 private:
 	void Unity(FString &OutStr);
