@@ -7,6 +7,7 @@
 #include "ConfigClassGenerator.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonSerializer.h"
+#include "ConfigClassDefine.h"
 
 FScriptGeneratorManager::FScriptGeneratorManager()
 {
@@ -25,11 +26,7 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 	m_RootBuildPath = RootBuildPath;
 	m_IncludeBase = IncludeBase;
 
-	FPaths::GamePluginsDir();
-
-// 	DebugLog(TEXT("m_RootLocalPath: %s"), *m_RootLocalPath);
-// 	DebugLog(TEXT("m_RootBuildPath: %s"), *m_RootBuildPath);
-// 	DebugLog(TEXT("m_OutputDirectory: %s"), *m_OutDir);
+	InitConfig();
 }
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
@@ -72,11 +69,7 @@ void FScriptGeneratorManager::AdjustBeforeSaveToFile()
 
 void FScriptGeneratorManager::ExportConfigClasses()
 {
-	TArray<FString> ConfigClassFileNames;
-	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
-	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, ConfigClassFileNames, ConfigFilePath);
-
-	for (const FString&ConfigClassFileName : ConfigClassFileNames)
+	for (const FString&ConfigClassFileName : NS_LuaGenerator::ClassConfigFileNames)
 	{
 		TArray<FConfigClass> ConfigClasses;
 		ParseConfigClass(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::ClassConfigFileRelativeFolder/ConfigClassFileName, ConfigClasses);
@@ -121,113 +114,7 @@ void FScriptGeneratorManager::ParseConfigClass(const FString &&FileName, TArray<
 
 	for (const TSharedPtr<FJsonValue> &pClassInfoItem : JsonClasses)
 	{
-		FConfigClass ConfigClass;
-		const TSharedPtr<FJsonObject> pJsonClass = pClassInfoItem->AsObject();
-		
-		// parse class name
-		if (!pJsonClass->TryGetStringField("ClassName", ConfigClass.Name))
-		{
-			UE_LOG(LogLuaGenerator, Error, TEXT("try get class name error!"));
-			return;
-		}
-
-		// parse class header files 
-		const TArray<TSharedPtr<FJsonValue>> *JsonHeaderFiles;
-		if (!pJsonClass->TryGetArrayField("HeaderFiles", JsonHeaderFiles))
-		{
-			UE_LOG(LogLuaGenerator, Error, TEXT("try get class HeaderFiles error!"));
-			return;
-		}
-		else
-		{
-			for (const TSharedPtr<FJsonValue> &pJsonHeaderFile : *JsonHeaderFiles)
-			{
-				// parse header file
-				FString HeaderFile;
-				if (pJsonHeaderFile->TryGetString(HeaderFile))
-				{
-					ConfigClass.IncludeHeaders.Add(HeaderFile);
-				}
-				else
-				{
-					UE_LOG(LogLuaGenerator, Error, TEXT("try get class header file item error!"));
-					return;
-				}
-			}
-		}
-
-		// parse class parent name
-		if (!pJsonClass->TryGetStringField("ParentName", ConfigClass.ParentName))
-		{
-			UE_LOG(LogLuaGenerator, Error, TEXT("try get class ParentName error!"));
-			return;
-		}
-
-		// parse class functions 
-		const TArray<TSharedPtr<FJsonValue>> *JsonFunctions;
-		if (!pJsonClass->TryGetArrayField("Functions", JsonFunctions))
-		{
-			UE_LOG(LogLuaGenerator, Error, TEXT("try get class functions error!"));
-			return;
-		}
-		else
-		{
-			for (const TSharedPtr<FJsonValue> &pFunctionInfoItem : *JsonFunctions)
-			{
-				FConfigFunction functionInfo;
-				const TSharedPtr<FJsonObject> pJsonFunction = pFunctionInfoItem->AsObject();
-				
-				// parse function name
-				if (!pJsonFunction->TryGetStringField("FuncName", functionInfo.Name))
-				{
-					UE_LOG(LogLuaGenerator, Error, TEXT("try get Function name error!"));
-					return;
-				}
-
-				// parse function is static 
-				if (!pJsonFunction->TryGetBoolField("IsStatic", functionInfo.bStatic))
-				{
-					UE_LOG(LogLuaGenerator, Error, TEXT("try get function IsStatic error!"));
-					return;
-				}
-
-				// parse function RetType 
-				if (!pJsonFunction->TryGetStringField("RetType", functionInfo.RetType))
-				{
-					UE_LOG(LogLuaGenerator, Error, TEXT("try get function RetType error!"));
-					return;
-				}
-
-				// parse function param types
-				const TArray<TSharedPtr<FJsonValue>> *JsonFuncParamTypes;
-				if (!pJsonFunction->TryGetArrayField("ParamTypes", JsonFuncParamTypes))
-				{
-					UE_LOG(LogLuaGenerator, Error, TEXT("try get class function ParamTypes error!"));
-					return;
-				}
-				else
-				{
-					for (const TSharedPtr<FJsonValue> &pFuncParamTypeInfo : *JsonFuncParamTypes)
-					{
-						// parse function param
-						FString ParamType;
-						if (pFuncParamTypeInfo->TryGetString(ParamType))
-						{
-							functionInfo.ParamTypes.Add(ParamType);
-						}
-						else
-						{
-							UE_LOG(LogLuaGenerator, Error, TEXT("try get class function ParamType item error!"));
-							return;
-						}
-					}
-				}
-
-				ConfigClass.Functions.Add(functionInfo);
-			}
-		}
-
-		OutConfigClasses.Add(ConfigClass);
+		OutConfigClasses.Add(FConfigClass(pClassInfoItem->AsObject()));
 	}
 }
 
@@ -251,6 +138,17 @@ void FScriptGeneratorManager::SaveConfigClassesToFiles()
 			pGenerator->SaveToFile();
 		}
 	}
+}
+
+void FScriptGeneratorManager::InitConfig()
+{
+	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+
+	// init ClassConfigFileNames
+	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, NS_LuaGenerator::ClassConfigFileNames, ConfigFilePath);
+
+	// init baseTypes
+	GConfig->GetArray(NS_LuaGenerator::BaseTypeSection, NS_LuaGenerator::BaseTypeKey, NS_LuaGenerator::BaseTypes, ConfigFilePath);
 }
 
 void FScriptGeneratorManager::FinishExportPost()

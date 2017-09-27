@@ -1,6 +1,7 @@
 #pragma once
 #include "GeneratorDefine.h"
 #include "IScriptGenerator.h"
+#include "ConfigClassDefine.h"
 
 class FScriptGeneratorManager
 {
@@ -21,6 +22,7 @@ private:
 private: // save to file
 	void SaveToFiles();
 	void SaveConfigClassesToFiles();
+	void InitConfig();
 
 private: // finish export post
 	void FinishExportPost();

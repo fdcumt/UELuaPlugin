@@ -34,24 +34,16 @@ namespace NS_LuaGenerator
 	extern const TCHAR* NotSupportClassSection;
 	extern const TCHAR* NotSupportClassKey;
 
+	extern const TCHAR* BaseTypeSection;
+	extern const TCHAR* BaseTypeKey;
+	extern TArray<FString> BaseTypes;
+
 	extern const TCHAR* ConfigClassFilesSection;
 	extern const TCHAR* ConfigClassFileKey;
 	extern const FString ClassConfigFileRelativeFolder;
+	extern TArray<FString> ClassConfigFileNames;
+
+	bool StringFowwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
+	bool StringBackContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcTailIndex);
 }
-
-struct FConfigFunction
-{
-	FString Name;
-	bool bStatic;
-	FString RetType;
-	TArray<FString> ParamTypes;
-};
-
-struct FConfigClass
-{
-	FString Name;
-	FString ParentName;
-	TArray<FString> IncludeHeaders;
-	TArray<FConfigFunction> Functions;
-};
 

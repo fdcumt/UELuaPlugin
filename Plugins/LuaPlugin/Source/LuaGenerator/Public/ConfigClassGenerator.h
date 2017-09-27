@@ -1,6 +1,7 @@
 #pragma once
 #include "GeneratorDefine.h"
 #include "IScriptGenerator.h"
+#include "ConfigClassDefine.h"
 
 class FConfigClassGenerator : public IScriptGenerator
 {

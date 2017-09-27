@@ -1,10 +1,16 @@
 function Init(num)
-	FMyTest.StaticPrint();
-	FMyTest.StaticPrint1();
-	local test = FMyTest.CreateSelf();
-	LuaPrint.print(type(test));
-	test:SetMember(num)
-	local testMember = test:GetMember();
-	LuaPrint.print(testMember);
+	local test1Obj = FMyTest1.CreateSelf();
+	local testObj = FMyTest.CreateSelf();
+	test1Obj:SetMember(num);
+	testObj:SetMember(test1Obj);
+	LuaPrint.print(test1Obj);
+	test1Obj:Print();
+	testObj:Print();
+	
+	test1Obj:SetMember(4);
+	
+	test1Obj:Print();
+	testObj:Print();
+	
 	return num+3, 4, true;
 end

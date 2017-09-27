@@ -6,14 +6,14 @@ FMyTest* FMyTest::CreateSelf()
 	return new FMyTest();
 }
 
-void FMyTest::SetMember(int32 m)
+void FMyTest::SetMember(FMyTest1 *InTest1)
 {
-	m_member = m;
+	m_member = InTest1;
 }
 
 void FMyTest::Print() const
 {
-	UE_LOG(LogMyProject, Log, TEXT("class memeber m_member is:%d"), m_member);
+	UE_LOG(LogMyProject, Log, TEXT("FMyTest:m_member is:%d"), m_member->GetMember());
 }
 
 void FMyTest::StaticPrint()
@@ -24,4 +24,19 @@ void FMyTest::StaticPrint()
 void FMyTest::StaticPrint1()
 {
 	UE_LOG(LogMyProject, Log, TEXT("StaticPrint111"));
+}
+
+FMyTest1* FMyTest1::CreateSelf()
+{
+	return new FMyTest1();
+}
+
+void FMyTest1::SetMember(int32 m)
+{
+	m_member = m;
+}
+
+void FMyTest1::Print() const
+{
+	UE_LOG(LogMyProject, Log, TEXT("FMyTest1:m_member is:%d"), m_member);
 }

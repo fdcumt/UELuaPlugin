@@ -14,13 +14,39 @@
 			{
 				"FuncName":"GetMember",
 				"IsStatic":"false",
-				"RetType":"int32",
+				"RetType":"FMyTest1*",
 				"ParamTypes":[]
 			},
 			{
-				"FuncName":"StaticPrint1",
-				"IsStatic":"true",
+				"FuncName":"SetMember",
+				"IsStatic":"false",
 				"RetType":"void",
+				"ParamTypes":[" FMyTest1 *"]
+			},
+			{
+				"FuncName":"Print",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":[]
+			}
+		]
+	},
+	{
+		"ClassName":"FMyTest1",
+		"ParentName":"",
+		"HeaderFiles":["SimpleTest.h"],
+		"Functions":
+		[
+			{
+				"FuncName":"CreateSelf",
+				"IsStatic":"true",
+				"RetType":"FMyTest1*",
+				"ParamTypes":[]
+			},
+			{
+				"FuncName":"GetMember",
+				"IsStatic":"false",
+				"RetType":"int32",
 				"ParamTypes":[]
 			},
 			{
@@ -32,12 +58,6 @@
 			{
 				"FuncName":"Print",
 				"IsStatic":"false",
-				"RetType":"void",
-				"ParamTypes":[]
-			},
-			{
-				"FuncName":"StaticPrint",
-				"IsStatic":"true",
 				"RetType":"void",
 				"ParamTypes":[]
 			}

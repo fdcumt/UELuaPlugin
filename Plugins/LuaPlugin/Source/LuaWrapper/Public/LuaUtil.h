@@ -209,7 +209,7 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 
 	if (!ExistData(InLuaState, (void*)value.m_ClassObj))
 	{ // add to table
-		*(void**)lua_newuserdata(InLuaState, sizeof(void *)) = value.m_ClassObj;
+		*(T*)lua_newuserdata(InLuaState, sizeof(T)) = value.m_ClassObj;
 		lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
 		lua_pushlightuserdata(InLuaState, value.m_ClassObj);
 		lua_pushvalue(InLuaState, -3);
@@ -219,7 +219,7 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 
 	// set metatable
 	lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(InLuaState, (void*)value.m_ClassObj);
+	lua_pushlightuserdata(InLuaState, value.m_ClassObj);
 	lua_rawget(InLuaState, -2); // get userdata
 	luaL_getmetatable(InLuaState, value.m_ClassName);
 	lua_setmetatable(InLuaState, -2);
@@ -232,13 +232,13 @@ template <class T>
 void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<T> &&ReturnValue)
 {
 	const char *ClassName = ReturnValue.m_ClassName;
-	if (!ExistClass(InLuaState, ,ReturnValue.m_ClassName))
+	if (!ExistClass(InLuaState, ReturnValue.m_ClassName))
 	{
 		TemplateLogFatal(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), ReturnValue.m_ClassName));
 		return;
 	}
 
-	TouserCppClassType(InLuaState, ReturnValue);
+	TouserCppClassType(InLuaState, Forward<FLuaClassType<T>>(ReturnValue));
 }
 
 template <class T>
@@ -247,10 +247,12 @@ void FLuaUtil::TouserCppClassType(lua_State *InLuaState,  FLuaClassType<T> &&Out
 	if (lua_isnil(InLuaState, -1))
 	{
 		OutValue.m_ClassObj = nullptr;
+		lua_pop(InLuaState, 1);
 	}
 	else if (lua_isuserdata(InLuaState, -1) == 1)
 	{
-		OutValue.m_ClassObj = static_cast<T>(lua_touserdata(InLuaState, -1));
+		OutValue.m_ClassObj = *(static_cast<T*>(lua_touserdata(InLuaState, -1)));
+		lua_pop(InLuaState, 1);
 	}
 	else if (lua_istable(InLuaState, -1))
 	{
