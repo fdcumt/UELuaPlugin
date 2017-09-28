@@ -1,7 +1,7 @@
 [
 	{
 		"ClassName":"FMyTest",
-		"ParentName":"",
+		"ParentNames":[],
 		"HeaderFiles":["SimpleTest.h"],
 		"Functions":
 		[
@@ -33,7 +33,7 @@
 	},
 	{
 		"ClassName":"FMyTest1",
-		"ParentName":"",
+		"ParentNames":[],
 		"HeaderFiles":["SimpleTest.h"],
 		"Functions":
 		[

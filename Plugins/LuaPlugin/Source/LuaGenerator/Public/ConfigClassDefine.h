@@ -3,7 +3,9 @@
 #include "UObjectIterator.h"
 #include "Serialization/JsonSerializer.h"
 
-struct FFunctionParam
+class FConfigClass;
+
+class FFunctionParam
 {
 public:
 	FFunctionParam(int32 InIndex, const FString &InSrcName);
@@ -14,6 +16,12 @@ public:
 	FString DeclareType;
 	FString VariableName;
 	FString UsedVariableStr;
+
+public:
+	FString GetPureType() const;
+	FString GetDeclareType() const;
+	FString GetVariableName() const;
+	FString GetUsedVariableStr() const;
 
 private:
 	bool bReadoutValue;
@@ -30,38 +38,70 @@ private:
 	bool ParamIsPointType();
 };
 
-struct FConfigFunction
+class FConfigFunction
 {
 public:
 	FConfigFunction(const TSharedPtr<FJsonObject> &InJsonObj);
 
 public:
 	bool bStatic;
-	FString Name;
+	bool IsNeedReturn;
+	FString FunctionName;
 	FString RetType;
 	TArray<FString> ParamTypes;
 	TArray<FFunctionParam> Params;
+
+public:
+	FString GetFunctionName() const;
+	FString GetFunctionBodyChunk(const FConfigClass &ConfigClass) const;
+	FString GetInParamsStr() const ;
+	FString GetPureReturnType() const ;
 
 private:
 	void ParseStaticType(const TSharedPtr<FJsonObject> &InJsonObj);
 	void ParseFunctionName(const TSharedPtr<FJsonObject> &InJsonObj);
 	void ParseRetType(const TSharedPtr<FJsonObject> &InJsonObj);
 	void ParseParams(const TSharedPtr<FJsonObject> &InJsonObj);
+	void ParseIsNeedReturn(const TSharedPtr<FJsonObject> &InJsonObj);
+	void AdjustReturnType();
 };
 
-struct FConfigClass
+class FConfigClass
 {
+public:
 	FConfigClass(const TSharedPtr<FJsonObject> &InJson);
-	FString Name;
-	FString ParentName;
+
+public:
+	FString IncludeHeadersChunck;
+	FString FunctionsChunck;
+	FString RegLibChunck;
+	
+public:
+	FString ClassName;
+	TArray<FString> ParentNames;
 	TArray<FString> IncludeHeaders;
 	TArray<FConfigFunction> Functions;
 
-private:
+public:
+	FString GetIncludeFilesChunk();
+	FString GetFunctionsChunk();
+	FString GetRegLibChunk();
+	FString GetClassName() const { return ClassName;}
+
+public:
+	FString GetRegLibName() const;
+	FString GetLuaFunctionName(const FConfigFunction &ConfigFunctions) const;
+
+private: // parse and init
 	void ParseClassName(const TSharedPtr<FJsonObject> &InJsonClass);
 	void ParseIncludeHeaders(const TSharedPtr<FJsonObject> &InJsonClass);
-	void ParseParentName(const TSharedPtr<FJsonObject> &InJsonClass);
+	void ParseParentNames(const TSharedPtr<FJsonObject> &InJsonClass);
 	void ParseFunctions(const TSharedPtr<FJsonObject> &InJsonClass);
+
+private: // generator chunk
+	FString GetFunctionsChunk(const TArray<FConfigFunction> &ConfigFunctions);
+	FString GetFunctionChunk(const FConfigFunction &ConfigFunctions);
+	FString GetRegLibItemsChunk(const TArray<FConfigFunction> &ConfigFunctions);
 };
 
 
