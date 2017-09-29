@@ -48,8 +48,27 @@ void FScriptGeneratorManager::FinishExport()
 {
 	ExportExtrasToMemory();
 	AdjustBeforeSaveToFile();
+
+	InitClassParentManager();
+
 	SaveToFiles();
 	FinishExportPost();
+}
+
+bool FScriptGeneratorManager::ContainClassName(const FString &ClassName)
+{
+	return m_Generators.Contains(ClassName);
+}
+
+TArray<FString> FScriptGeneratorManager::GetParentNames(const FString &ClassName)
+{
+	return m_ClassParentManager.GetParentClassNames(ClassName);
+}
+
+IScriptGenerator* FScriptGeneratorManager::GetGenerator(const FString &ClassName)
+{
+	IScriptGenerator **ppGenerator = m_Generators.Find(ClassName);
+	return ppGenerator == nullptr ? nullptr : *ppGenerator;
 }
 
 bool FScriptGeneratorManager::CanExportClass(IScriptGenerator *InGenerator) const
@@ -65,6 +84,13 @@ void FScriptGeneratorManager::ExportExtrasToMemory()
 void FScriptGeneratorManager::AdjustBeforeSaveToFile()
 {
 
+}
+
+void FScriptGeneratorManager::InitClassParentManager()
+{
+	TArray<IScriptGenerator*> ScriptGenerators;
+	m_Generators.GenerateValueArray(ScriptGenerators);
+	m_ClassParentManager.Init(ScriptGenerators);
 }
 
 void FScriptGeneratorManager::ExportConfigClasses()

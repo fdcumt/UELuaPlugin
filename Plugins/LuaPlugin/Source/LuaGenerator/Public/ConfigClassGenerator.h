@@ -15,11 +15,16 @@ public:
 public:
 	/** FBaseGenerator interface */
 	virtual FString GetKey() const override;
+	virtual FString GetClassName() const override;
 	virtual FString GetFileName() const override;
 	virtual FString GetRegName() const override;
 	virtual bool CanExport() const override;
 	virtual void ExportToMemory() override;
 	virtual void SaveToFile() override;
+	virtual void GetParentNames(TArray<FString> &OutParentNames) const;
+
+public:
+	const TArray<FConfigFunction>& GetConfigFunctions() { return m_ConfigClass.Functions; }
 
 private:
 	void Unity(FString &OutStr);

@@ -14,12 +14,10 @@ private:
 	int32 m_member;
 };
 
-class MYPROJECT_API FMyTest
+class MYPROJECT_API FMyTest : public FMyTest1
 {
 public:
 	static FMyTest* CreateSelf();
-	FMyTest1* GetMember() const { return m_member; }
-	void SetMember( FMyTest1 *InTest1);
 
 	void TestConstPoint(const FMyTest1 *InTest) const;
 	void TestPointRef(FMyTest1 *&InTest) const;

@@ -1,7 +1,7 @@
 [
 	{
 		"ClassName":"FMyTest",
-		"ParentNames":[],
+		"ParentNames":["FMyTest1"],
 		"HeaderFiles":["SimpleTest.h"],
 		"Functions":
 		[

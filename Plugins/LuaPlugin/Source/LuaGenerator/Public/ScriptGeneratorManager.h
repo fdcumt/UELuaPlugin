@@ -2,6 +2,7 @@
 #include "GeneratorDefine.h"
 #include "IScriptGenerator.h"
 #include "ConfigClassDefine.h"
+#include "ClassParentsManager.h"
 
 class FScriptGeneratorManager
 {
@@ -14,10 +15,16 @@ public:
 	void ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged);
 	void FinishExport();
 
+public:
+	bool ContainClassName(const FString &ClassName);
+	TArray<FString> GetParentNames(const FString &ClassName);
+	IScriptGenerator* GetGenerator(const FString &ClassName);
+
 private:
 	bool CanExportClass(IScriptGenerator *InGenerator) const ;
 	void ExportExtrasToMemory();
 	void AdjustBeforeSaveToFile();
+	void InitClassParentManager();
 
 private: // save to file
 	void SaveToFiles();
@@ -37,11 +44,11 @@ private: // config class
 private:
 	void AddGeneratorToMap(IScriptGenerator *InGenerator);
 	
-
 private:
 	FString m_OutDir;
 	FString m_RootLocalPath;
 	FString m_RootBuildPath;
 	FString m_IncludeBase;
 	TMap<FString, IScriptGenerator*> m_Generators;
+	FClassParentManager m_ClassParentManager;
 };

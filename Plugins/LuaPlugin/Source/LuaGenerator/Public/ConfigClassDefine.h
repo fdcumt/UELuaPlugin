@@ -70,11 +70,6 @@ class FConfigClass
 {
 public:
 	FConfigClass(const TSharedPtr<FJsonObject> &InJson);
-
-public:
-	FString IncludeHeadersChunck;
-	FString FunctionsChunck;
-	FString RegLibChunck;
 	
 public:
 	FString ClassName;
@@ -102,6 +97,9 @@ private: // generator chunk
 	FString GetFunctionsChunk(const TArray<FConfigFunction> &ConfigFunctions);
 	FString GetFunctionChunk(const FConfigFunction &ConfigFunctions);
 	FString GetRegLibItemsChunk(const TArray<FConfigFunction> &ConfigFunctions);
+
+private:
+	TSet<FString> m_FunctionNames;
 };
 
 

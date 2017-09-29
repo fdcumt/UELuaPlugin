@@ -13,6 +13,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 #define DebugLog(FormatString, ...)
 #endif
 
+extern class FScriptGeneratorManager *g_ScriptGeneratorManager;
 
 namespace NS_LuaGenerator
 {
@@ -22,10 +23,13 @@ namespace NS_LuaGenerator
 		EConfigClass = 1,
 	};
 
+
+
 	extern FString ProjectPath;
 	extern FString GameModuleName;
 	extern FString ClassScriptHeaderSuffix;
 
+	
 	extern const FString LuaConfigFileRelativePath;
 
 	extern const TCHAR* SupportModuleKey;
@@ -46,4 +50,5 @@ namespace NS_LuaGenerator
 	bool StringFowwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
 	bool StringBackContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcTailIndex);
 }
+
 

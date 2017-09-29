@@ -1,5 +1,7 @@
 #include "GeneratorDefine.h"
 
+FScriptGeneratorManager *g_ScriptGeneratorManager = nullptr;
+
 
 DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
@@ -7,7 +9,7 @@ namespace NS_LuaGenerator
 {
 	FString ProjectPath;
 	FString GameModuleName;
-	FString ClassScriptHeaderSuffix(".script.h"); 
+	FString ClassScriptHeaderSuffix(".script.h");
 
 	const FString LuaConfigFileRelativePath("Config/LuaConfig.ini");
 
@@ -25,6 +27,7 @@ namespace NS_LuaGenerator
 	const TCHAR* ConfigClassFileKey = TEXT("ConfigClassFileName");
 	const FString ClassConfigFileRelativeFolder("Config");
 	TArray<FString> ClassConfigFileNames;
+
 
 	bool StringFowwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex)
 	{

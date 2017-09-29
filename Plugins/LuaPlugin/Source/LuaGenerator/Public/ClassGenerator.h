@@ -28,12 +28,14 @@ public:
 	virtual bool CanExport()const  override;
 	virtual void ExportToMemory() override;
 	virtual void SaveToFile() override;
+	virtual FString GetClassName() const override;
 
 private:
 	void GenerateScriptHeader(FString &OutStr);
 	void GenerateFunctions(FString &OutStr);
 	void GenerateRegister(FString &OutStr);
 	void GenerateScriptTail(FString &OutStr);
+	virtual void GetParentNames(TArray<FString> &OutParentNames) const override;
 
 private:
 	void GenerateRegisterItem(const FString &InFunctionName, FString &OutStr);

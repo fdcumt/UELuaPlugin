@@ -23,6 +23,11 @@ FString FConfigClassGenerator::GetKey() const
 	return m_ConfigClass.GetClassName();
 }
 
+FString FConfigClassGenerator::GetClassName() const
+{
+	return m_ConfigClass.GetClassName();
+}
+
 FString FConfigClassGenerator::GetFileName() const
 {
 	return FString::Printf(TEXT("%s.Script.h"), *m_ConfigClass.GetClassName());
@@ -40,7 +45,7 @@ bool FConfigClassGenerator::CanExport() const
 
 void FConfigClassGenerator::ExportToMemory()
 {
-	SaveToFile();
+
 }
 
 void FConfigClassGenerator::SaveToFile()
@@ -52,6 +57,14 @@ void FConfigClassGenerator::SaveToFile()
 	{
 		UE_LOG(LogLuaGenerator, Error, TEXT("Failed to save header export:%s"), *fileName);
 	}
+}
+
+void FConfigClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
+{
+	OutParentNames.Append(m_ConfigClass.ParentNames);
+
+	UE_LOG(LogLuaGenerator, Error, TEXT("GetParentNames num %d!"), OutParentNames.Num());
+
 }
 
 void FConfigClassGenerator::Unity(FString &OutStr)

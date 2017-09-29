@@ -6,11 +6,6 @@ FMyTest* FMyTest::CreateSelf()
 	return new FMyTest();
 }
 
-void FMyTest::SetMember(FMyTest1 *InTest1)
-{
-	m_member = InTest1;
-}
-
 void FMyTest::TestConstPoint(const FMyTest1 *InTest) const
 {
 	UE_LOG(LogMyProject, Log, TEXT("TestConstPoint: number:%d"), InTest->GetMember());

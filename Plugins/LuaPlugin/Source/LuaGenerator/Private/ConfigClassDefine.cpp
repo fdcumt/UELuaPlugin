@@ -1,5 +1,7 @@
 #include "ConfigClassDefine.h"
 #include "GeneratorDefine.h"
+#include "ConfigClassGenerator.h"
+#include "ScriptGeneratorManager.h"
 
 FFunctionParam::FFunctionParam(int32 InIndex, const FString &InSrcName)
 	: Index(InIndex)
@@ -209,6 +211,18 @@ FString FConfigClass::GetRegLibChunk()
 	// reg body
 	Ret += GetRegLibItemsChunk(Functions);
 
+	// parent reg body
+	TArray<FString> ParentNames = g_ScriptGeneratorManager->GetParentNames(ClassName);
+	for (const FString& ParentName : ParentNames)
+	{
+		IScriptGenerator* pGenerator = g_ScriptGeneratorManager->GetGenerator(ParentName);
+		if (pGenerator && pGenerator->GetType() == NS_LuaGenerator::EConfigClass)
+		{
+			FConfigClassGenerator *pConfigGenerator = (FConfigClassGenerator*)pGenerator;
+			Ret += GetRegLibItemsChunk(pConfigGenerator->GetConfigFunctions());
+		}
+	}
+
 	// reg tail
 	Ret += EndLinePrintf(TEXT("\t{ NULL, NULL }"));
 	Ret += EndLinePrintf(TEXT("};"));
@@ -321,7 +335,23 @@ FString FConfigClass::GetFunctionsChunk(const TArray<FConfigFunction> &ConfigFun
 
 FString FConfigClass::GetFunctionsChunk()
 {
-	return GetFunctionsChunk(Functions);
+	FString FunctionsChunk;
+	// own functions
+	FunctionsChunk += GetFunctionsChunk(Functions);
+
+	// parent class functions
+	TArray<FString> ParentNames = g_ScriptGeneratorManager->GetParentNames(ClassName);
+	for (const FString& ParentName : ParentNames )
+	{
+		IScriptGenerator* pGenerator = g_ScriptGeneratorManager->GetGenerator(ParentName);
+		if (pGenerator && pGenerator->GetType()== NS_LuaGenerator::EConfigClass)
+		{
+			FConfigClassGenerator *pConfigGenerator = (FConfigClassGenerator*)pGenerator;
+			FunctionsChunk += GetFunctionsChunk(pConfigGenerator->GetConfigFunctions());
+		}
+	}
+
+	return FunctionsChunk;
 }
 
 FConfigFunction::FConfigFunction(const TSharedPtr<FJsonObject> &InJsonObj)
@@ -507,10 +537,21 @@ FString FConfigClass::GetRegLibItemsChunk(const TArray<FConfigFunction> &ConfigF
 FString FConfigClass::GetFunctionChunk(const FConfigFunction &ConfigFunction)
 {
 	FString Ret;
+	FString LuaFunctionName = GetLuaFunctionName(ConfigFunction);
 	Ret += EndLinePrintf(TEXT(""));
-	Ret += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaFunctionName(ConfigFunction));
+	Ret += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *LuaFunctionName);
 	Ret += EndLinePrintf(TEXT("{"));
 	Ret += ConfigFunction.GetFunctionBodyChunk(*this);
 	Ret += EndLinePrintf(TEXT("}"));
-	return Ret;
+
+	if (m_FunctionNames.Contains(LuaFunctionName))
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("LuaFunctionName:%s has exist!"), *LuaFunctionName);
+		return FString();
+	}
+	else
+	{
+		m_FunctionNames.Add(LuaFunctionName);
+		return Ret;
+	}
 }

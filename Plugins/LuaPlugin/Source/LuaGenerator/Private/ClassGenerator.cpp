@@ -68,6 +68,11 @@ void FClassGenerator::SaveToFile()
 	}
 }
 
+FString FClassGenerator::GetClassName() const
+{
+	return m_pClass->GetName();
+}
+
 void FClassGenerator::GenerateScriptHeader(FString &OutStr)
 {
 	OutStr += EndLinePrintf(TEXT("#pragma once"));
@@ -236,6 +241,11 @@ void FClassGenerator::GenerateScriptTail(FString &OutStr)
 
 	OutStr += EndLinePrintf(TEXT(""));
 	OutStr += EndLinePrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
+}
+
+void FClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
+{
+
 }
 
 FClassGeneratorConfig FClassGenerator::m_ClassConfig;
