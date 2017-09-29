@@ -12,22 +12,28 @@
 				"ParamTypes":[]
 			},
 			{
-				"FuncName":"GetMember",
-				"IsStatic":"false",
-				"RetType":"FMyTest1*",
-				"ParamTypes":[]
-			},
-			{
-				"FuncName":"SetMember",
+				"FuncName":"TestConstPoint",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":[" FMyTest1 *"]
+				"ParamTypes":["const FMyTest1 *"]
 			},
 			{
-				"FuncName":"Print",
+				"FuncName":"TestPointRef",
 				"IsStatic":"false",
 				"RetType":"void",
-				"ParamTypes":[]
+				"ParamTypes":["FMyTest1 *&"]
+			},
+			{
+				"FuncName":"TestConstRef",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":["const FMyTest1 &"]
+			},
+			{
+				"FuncName":"TestRef",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":["FMyTest1 &"]
 			}
 		]
 	},

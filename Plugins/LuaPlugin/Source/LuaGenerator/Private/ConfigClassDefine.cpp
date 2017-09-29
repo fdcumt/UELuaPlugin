@@ -150,8 +150,6 @@ bool FFunctionParam::ParamIsBaseType()
 {
 	for (const FString &BaseType : NS_LuaGenerator::BaseTypes)
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("PureType:%s, BaseType %s!"), *PureType, *BaseType);
-
 		if (PureType == BaseType)
 		{
 			return true;
@@ -194,7 +192,6 @@ bool FFunctionParam::ParamIsPointType()
 
 FConfigClass::FConfigClass(const TSharedPtr<FJsonObject> &InJsonObj)
 {
-	DebugLog(TEXT("FConfigClass"));
 	ParseClassName(InJsonObj);
 	ParseIncludeHeaders(InJsonObj);
 	ParseParentNames(InJsonObj);
@@ -257,7 +254,6 @@ void FConfigClass::ParseIncludeHeaders(const TSharedPtr<FJsonObject> &InJsonClas
 			FString HeaderFile;
 			if (pJsonHeaderFile->TryGetString(HeaderFile))
 			{
-				UE_LOG(LogLuaGenerator, Error, TEXT("HeaderFile %s!"), *HeaderFile);
 				IncludeHeaders.Add(HeaderFile);
 			}
 			else

@@ -20,7 +20,12 @@ public:
 	static FMyTest* CreateSelf();
 	FMyTest1* GetMember() const { return m_member; }
 	void SetMember( FMyTest1 *InTest1);
-	void Print() const ;
+
+	void TestConstPoint(const FMyTest1 *InTest) const;
+	void TestPointRef(FMyTest1 *&InTest) const;
+	void TestConstRef(const FMyTest1 &InTest) const;
+	void TestRef(FMyTest1 &InTest) const;
+
 
 	static void StaticPrint();
 	static void StaticPrint1();

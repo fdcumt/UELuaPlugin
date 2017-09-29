@@ -11,10 +11,26 @@ void FMyTest::SetMember(FMyTest1 *InTest1)
 	m_member = InTest1;
 }
 
-void FMyTest::Print() const
+void FMyTest::TestConstPoint(const FMyTest1 *InTest) const
 {
-	UE_LOG(LogMyProject, Log, TEXT("FMyTest:m_member is:%d"), m_member->GetMember());
+	UE_LOG(LogMyProject, Log, TEXT("TestConstPoint: number:%d"), InTest->GetMember());
 }
+
+void FMyTest::TestPointRef(FMyTest1 *&InTest) const
+{
+	UE_LOG(LogMyProject, Log, TEXT("TestPointRef: number:%d"), InTest->GetMember());
+}
+
+void FMyTest::TestConstRef(const FMyTest1 &InTest) const
+{
+	UE_LOG(LogMyProject, Log, TEXT("TestConstRef: number:%d"), InTest.GetMember());
+}
+
+void FMyTest::TestRef(FMyTest1 &InTest) const
+{
+	UE_LOG(LogMyProject, Log, TEXT("TestRef: number:%d"), InTest.GetMember());
+}
+
 
 void FMyTest::StaticPrint()
 {
