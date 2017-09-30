@@ -2,7 +2,20 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogMyProject, Log, All);
 
-class MYPROJECT_API FMyTest1
+class MYPROJECT_API FMyTestBase
+{
+public:
+	static FMyTestBase* CreateSelf();
+	float GetMember() const { return m_member; }
+	void SetMember(float m);
+	void Print() const;
+	void TestBaseFunc() const;
+
+private:
+	float m_member;
+};
+
+class MYPROJECT_API FMyTest1 :public FMyTestBase
 {
 public:
 	static FMyTest1* CreateSelf();

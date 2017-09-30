@@ -39,7 +39,7 @@
 	},
 	{
 		"ClassName":"FMyTest1",
-		"ParentNames":[],
+		"ParentNames":["FMyTestBase"],
 		"HeaderFiles":["SimpleTest.h"],
 		"Functions":
 		[
@@ -63,6 +63,44 @@
 			},
 			{
 				"FuncName":"Print",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":[]
+			}
+		]
+	},
+	{
+		"ClassName":"FMyTestBase",
+		"ParentNames":[],
+		"HeaderFiles":["SimpleTest.h"],
+		"Functions":
+		[
+			{
+				"FuncName":"CreateSelf",
+				"IsStatic":"true",
+				"RetType":"FMyTestBase*",
+				"ParamTypes":[]
+			},
+			{
+				"FuncName":"GetMember",
+				"IsStatic":"false",
+				"RetType":"float",
+				"ParamTypes":[]
+			},
+			{
+				"FuncName":"SetMember",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":["float"]
+			},
+			{
+				"FuncName":"Print",
+				"IsStatic":"false",
+				"RetType":"void",
+				"ParamTypes":[]
+			},
+			{
+				"FuncName":"TestBaseFunc",
 				"IsStatic":"false",
 				"RetType":"void",
 				"ParamTypes":[]

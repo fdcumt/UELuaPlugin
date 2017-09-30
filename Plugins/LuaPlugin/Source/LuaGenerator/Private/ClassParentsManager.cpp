@@ -133,13 +133,19 @@ void FClassParentManager::InitParentMatrix(const TArray<IScriptGenerator*> &Clas
 		for (const FString &ParentName : ParentNames)
 		{
 			int32 ParentIndex = GetClassIndex(ParentName);
-			UE_LOG(LogLuaGenerator, Error, TEXT("InitParentMatrix GeneratorClassName:%s, ParentName:%s, classIndex:%d, parentIndex:%d!"), 
-				*ParentName,
-				*GeneratorClassName,
-				GeneratorIndex,
-				ParentIndex);
-
 			m_ParentClassMatrix[GeneratorIndex][ParentIndex] = true;
+		}
+	}
+
+	// flody algorithm, cal is reachable
+	for (int32 k=0; k<m_ClassNum; ++k)
+	{
+		for (int32 i=0; i<m_ClassNum; ++i)
+		{
+			for (int32 j=0; j<m_ClassNum; ++j)
+			{
+				m_ParentClassMatrix[i][j] = m_ParentClassMatrix[i][j] || (m_ParentClassMatrix[i][k] && m_ParentClassMatrix[k][j]);
+			}
 		}
 	}
 }

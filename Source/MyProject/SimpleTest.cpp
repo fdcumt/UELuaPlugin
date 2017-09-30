@@ -51,3 +51,23 @@ void FMyTest1::Print() const
 {
 	UE_LOG(LogMyProject, Log, TEXT("FMyTest1:m_member is:%d"), m_member);
 }
+
+FMyTestBase* FMyTestBase::CreateSelf()
+{
+	return new FMyTestBase;
+}
+
+void FMyTestBase::SetMember(float m)
+{
+	m_member = m;
+}
+
+void FMyTestBase::Print() const
+{
+	UE_LOG(LogMyProject, Log, TEXT("FMyTestBase:m_member is:%f"), m_member);
+}
+
+void FMyTestBase::TestBaseFunc() const
+{
+	UE_LOG(LogMyProject, Log, TEXT("TestBaseFunc"));
+}
