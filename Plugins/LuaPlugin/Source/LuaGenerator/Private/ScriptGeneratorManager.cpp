@@ -1,6 +1,6 @@
 #include "ScriptGeneratorManager.h"
 #include "UnrealType.h"
-#include "ClassGenerator.h"
+#include "UClassGenerator.h"
 #include "GeneratorDefine.h"
 #include "Misc/FileHelper.h"
 #include "UObjectIterator.h"
@@ -31,7 +31,7 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
 {
-	IScriptGenerator *pGenerator = new FClassGenerator(Class, m_OutDir);
+	IScriptGenerator *pGenerator = new FUClassGenerator(Class, m_OutDir, SourceHeaderFilename);
 	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
 	{
 		pGenerator->ExportToMemory();
@@ -41,6 +41,8 @@ void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHe
 	{
 		SafeDelete(pGenerator);
 	}
+
+	DebugLog(TEXT("SourceHeaderFilename:%s"), *SourceHeaderFilename);
 }
 
 void FScriptGeneratorManager::FinishExport()
@@ -108,7 +110,7 @@ void FScriptGeneratorManager::ExportConfigClasses()
 
 void FScriptGeneratorManager::ExportConfigClass(const FConfigClass& ClassItem)
 {
-	IScriptGenerator *pGenerator = FConfigClassGenerator::CreateGenerator(ClassItem, m_OutDir);
+	IScriptGenerator *pGenerator = FConfigClassGenerator::CreateGenerator(ClassItem, m_OutDir, );
 	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport() )
 	{
 		pGenerator->ExportToMemory();
