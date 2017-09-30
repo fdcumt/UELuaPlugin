@@ -1,42 +1,42 @@
-#include "ClassGenerator.h"
+#include "UClassGenerator.h"
 #include "UnrealType.h"
 #include "Templates/Casts.h"
 #include "Misc/FileHelper.h"
 #include "UObjectIterator.h"
 
-void FClassGeneratorConfig::Init()
+void FUClassGeneratorConfig::Init()
 {
 	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
 	GConfig->GetArray(NS_LuaGenerator::NotSupportClassSection, NS_LuaGenerator::NotSupportClassKey, m_NotSuportClasses, ConfigFilePath);
 }
 
-bool FClassGeneratorConfig::CanExport(const FString &InClassName)
+bool FUClassGeneratorConfig::CanExport(const FString &InClassName)
 {
 	return !m_NotSuportClasses.Contains(InClassName);
 }
 
-FClassGenerator::FClassGenerator(UClass *InClass, const FString &InOutDir)
-	:IScriptGenerator(NS_LuaGenerator::EUClass, InOutDir)
+FUClassGenerator::FUClassGenerator(UClass *InClass, const FString &InOutDir, const FString& HeaderFile) 
+	: IScriptGenerator(NS_LuaGenerator::EUClass, InOutDir)
+	, m_pClass(InClass)
+	, m_HeaderFileName(HeaderFile)
 {
 	m_FileName.Empty();
 	m_FileContent.Empty();
 	m_FunctionNames.Empty();
-
-	m_pClass = InClass;
 	m_FileName = InClass->GetName() + NS_LuaGenerator::ClassScriptHeaderSuffix; 
 }
 
-FClassGenerator::~FClassGenerator()
+FUClassGenerator::~FUClassGenerator()
 {
 
 }
 
-bool FClassGenerator::CanExport() const
+bool FUClassGenerator::CanExport() const
 {
 	return m_ClassConfig.CanExport(m_pClass->GetName());
 }
 
-void FClassGenerator::ExportToMemory()
+void FUClassGenerator::ExportToMemory()
 {
 	GenerateScriptHeader(m_FileContent);
 	GenerateFunctions(m_FileContent);
@@ -44,7 +44,7 @@ void FClassGenerator::ExportToMemory()
 	GenerateScriptTail(m_FileContent);
 }
 
-void FClassGenerator::SaveToFile()
+void FUClassGenerator::SaveToFile()
 {
 	FString fileName = m_OutDir/m_pClass->GetName() + NS_LuaGenerator::ClassScriptHeaderSuffix;
 	if (!FFileHelper::SaveStringToFile(m_FileContent, *fileName))
@@ -53,19 +53,24 @@ void FClassGenerator::SaveToFile()
 	}
 }
 
-FString FClassGenerator::GetClassName() const
+FString FUClassGenerator::GetClassName() const
 {
 	return m_pClass->GetName();
 }
 
-void FClassGenerator::GenerateScriptHeader(FString &OutStr)
+void FUClassGenerator::GenerateScriptHeader(FString &OutStr)
 {
 	OutStr += EndLinePrintf(TEXT("#pragma once"));
 	OutStr += EndLinePrintf(TEXT("PRAGMA_DISABLE_DEPRECATION_WARNINGS"));
 	OutStr += EndLinePrintf(TEXT(""));
 }
 
-void FClassGenerator::GenerateFunctions(FString &OutStr)
+void FUClassGenerator::GenerateIncludeHeader(FString &OutStr)
+{
+	OutStr += EndLinePrintf(TEXT("#include \"%s\""), *m_HeaderFileName);
+}
+
+void FUClassGenerator::GenerateFunctions(FString &OutStr)
 {
 	for (TFieldIterator<UFunction> FuncIt(m_pClass); FuncIt; ++FuncIt)
 	{
@@ -77,7 +82,7 @@ void FClassGenerator::GenerateFunctions(FString &OutStr)
 	}
 }
 
-void FClassGenerator::GenerateSingleFunction(UFunction *InFunction, FString &OutStr)
+void FUClassGenerator::GenerateSingleFunction(UFunction *InFunction, FString &OutStr)
 {
 	OutStr += EndLinePrintf(TEXT(""));
 	OutStr += EndLinePrintf(TEXT("static int32 %s_%s(lua_State* L)"), *m_pClass->GetName(), *InFunction->GetFName().ToString());
@@ -86,12 +91,12 @@ void FClassGenerator::GenerateSingleFunction(UFunction *InFunction, FString &Out
 	OutStr += EndLinePrintf(TEXT("}"));
 }
 
-void FClassGenerator::AddFunctionToRegister(UFunction *InFunction)
+void FUClassGenerator::AddFunctionToRegister(UFunction *InFunction)
 {
 	m_FunctionNames.Add(InFunction->GetName());
 }
 
-void FClassGenerator::GenerateFunctionParam(UProperty *InParam, int32 InIndex, FString &OutStr)
+void FUClassGenerator::GenerateFunctionParam(UProperty *InParam, int32 InIndex, FString &OutStr)
 {
 	FString propertyType = GetPropertyType(InParam, CPPF_ArgumentOrReturnValue);
 	//DebugLog(TEXT("GetPropertyType type:%s"), *propertyType);
@@ -134,7 +139,7 @@ void FClassGenerator::GenerateFunctionParam(UProperty *InParam, int32 InIndex, F
 	}
 }
 
-void FClassGenerator::GenerateFunctionParams(UFunction *InFunction, FString &OutStr)
+void FUClassGenerator::GenerateFunctionParams(UFunction *InFunction, FString &OutStr)
 {
 	int32 index = 0;
 	for (TFieldIterator<UProperty> ParamIt(InFunction); ParamIt; ++ParamIt, ++index)
@@ -143,12 +148,12 @@ void FClassGenerator::GenerateFunctionParams(UFunction *InFunction, FString &Out
 	}
 }
 
-void FClassGenerator::GeneratorCheckParamsNumCode(UFunction *InFunction, FString &OutStr)
+void FUClassGenerator::GeneratorCheckParamsNumCode(UFunction *InFunction, FString &OutStr)
 {
 
 }
 
-FString FClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/*=0*/)
+FString FUClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/*=0*/)
 {
 	static FString EnumDecl(TEXT("enum "));
 	static FString StructDecl(TEXT("struct "));
@@ -184,7 +189,7 @@ FString FClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/*
 	return PropertyType;
 }
 
-void FClassGenerator::GenerateRegister(FString &OutStr)
+void FUClassGenerator::GenerateRegister(FString &OutStr)
 {
 	OutStr += EndLinePrintf(TEXT(""));
 	OutStr += EndLinePrintf(TEXT("static const luaL_Reg %s_Lib[] ="), *m_pClass->GetName());
@@ -199,17 +204,17 @@ void FClassGenerator::GenerateRegister(FString &OutStr)
 	OutStr += EndLinePrintf(TEXT("};"));
 }
 
-void FClassGenerator::GenerateRegisterItem(const FString &InFunctionName, FString &OutStr)
+void FUClassGenerator::GenerateRegisterItem(const FString &InFunctionName, FString &OutStr)
 {
 	OutStr += EndLinePrintf(TEXT("\t{ \"%s\", %s},"), *InFunctionName, *GenerateRegisterFuncName(*InFunctionName, *m_pClass->GetName()) );
 }
 
-FString FClassGenerator::GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName)
+FString FUClassGenerator::GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName)
 {
 	return ClassName + TEXT("_") + InFunctionName;
 }
 
-bool FClassGenerator::CanExportFunction(UFunction *InFunction)
+bool FUClassGenerator::CanExportFunction(UFunction *InFunction)
 {
 	if ( (InFunction->FunctionFlags&FUNC_Public) && (InFunction->FunctionFlags & FUNC_RequiredAPI))
 	{
@@ -221,17 +226,17 @@ bool FClassGenerator::CanExportFunction(UFunction *InFunction)
 	}
 }
 
-void FClassGenerator::GenerateScriptTail(FString &OutStr)
+void FUClassGenerator::GenerateScriptTail(FString &OutStr)
 {
 
 	OutStr += EndLinePrintf(TEXT(""));
 	OutStr += EndLinePrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
 }
 
-void FClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
+void FUClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
 {
 
 }
 
-FClassGeneratorConfig FClassGenerator::m_ClassConfig;
+FUClassGeneratorConfig FUClassGenerator::m_ClassConfig;
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "IScriptGenerator.h"
 
-class FClassGeneratorConfig
+class FUClassGeneratorConfig
 {
 public:
 	void Init();
@@ -11,11 +11,11 @@ private:
 	TArray<FString> m_NotSuportClasses;
 };
 
-class FClassGenerator : public IScriptGenerator
+class FUClassGenerator : public IScriptGenerator
 {
 public:
-	FClassGenerator(UClass *InClass, const FString &InOutDir);
-	virtual ~FClassGenerator();
+	FUClassGenerator(UClass *InClass, const FString &InOutDir, const FString& HeaderFileName);
+	virtual ~FUClassGenerator();
 
 public:
 	/** FBaseGenerator interface */
@@ -29,6 +29,7 @@ public:
 
 private:
 	void GenerateScriptHeader(FString &OutStr);
+	void GenerateIncludeHeader(FString &OutStr);
 	void GenerateFunctions(FString &OutStr);
 	void GenerateRegister(FString &OutStr);
 	void GenerateScriptTail(FString &OutStr);
@@ -50,7 +51,8 @@ private:
 	FString m_FileName;
 	FString m_FileContent;
 	TArray<FString> m_FunctionNames;
+	FString m_HeaderFileName;
 	
 public:
-	static FClassGeneratorConfig m_ClassConfig;
+	static FUClassGeneratorConfig m_ClassConfig;
 };
