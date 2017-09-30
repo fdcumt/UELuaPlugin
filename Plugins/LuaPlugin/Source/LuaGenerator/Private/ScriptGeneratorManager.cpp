@@ -31,8 +31,7 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
 {
-	IScriptGenerator *pGenerator = FClassGenerator::CreateGenerator(Class, m_OutDir);
-
+	IScriptGenerator *pGenerator = new FClassGenerator(Class, m_OutDir);
 	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
 	{
 		pGenerator->ExportToMemory();

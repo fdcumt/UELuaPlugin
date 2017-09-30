@@ -62,9 +62,6 @@ void FConfigClassGenerator::SaveToFile()
 void FConfigClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
 {
 	OutParentNames.Append(m_ConfigClass.ParentNames);
-
-	UE_LOG(LogLuaGenerator, Error, TEXT("GetParentNames num %d!"), OutParentNames.Num());
-
 }
 
 void FConfigClassGenerator::Unity(FString &OutStr)

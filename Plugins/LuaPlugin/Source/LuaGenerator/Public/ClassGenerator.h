@@ -14,9 +14,6 @@ private:
 class FClassGenerator : public IScriptGenerator
 {
 public:
-	static IScriptGenerator* CreateGenerator(UObject *InObj, const FString &OutDir);
-
-public:
 	FClassGenerator(UClass *InClass, const FString &InOutDir);
 	virtual ~FClassGenerator();
 

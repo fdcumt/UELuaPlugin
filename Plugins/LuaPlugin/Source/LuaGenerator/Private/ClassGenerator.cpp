@@ -15,21 +15,6 @@ bool FClassGeneratorConfig::CanExport(const FString &InClassName)
 	return !m_NotSuportClasses.Contains(InClassName);
 }
 
-IScriptGenerator* FClassGenerator::CreateGenerator(UObject *InObj, const FString &OutDir)
-{
-	UClass *pClass = Cast<UClass>(InObj);
-
-	if (pClass)
-	{
-		return new FClassGenerator(pClass, OutDir);
-	}
-	else
-	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("FClassGenerator::CreateGenerator error"));
-		return nullptr;
-	}
-}
-
 FClassGenerator::FClassGenerator(UClass *InClass, const FString &InOutDir)
 	:IScriptGenerator(NS_LuaGenerator::EUClass, InOutDir)
 {

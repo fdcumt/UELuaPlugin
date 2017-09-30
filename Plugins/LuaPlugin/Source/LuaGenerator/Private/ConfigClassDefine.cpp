@@ -546,7 +546,7 @@ FString FConfigClass::GetFunctionChunk(const FConfigFunction &ConfigFunction)
 
 	if (m_FunctionNames.Contains(LuaFunctionName))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("LuaFunctionName:%s has exist!"), *LuaFunctionName);
+		//UE_LOG(LogLuaGenerator, Error, TEXT("LuaFunctionName:%s has exist!"), *LuaFunctionName);
 		return FString();
 	}
 	else

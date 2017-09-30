@@ -21,8 +21,6 @@ FClassParentManager::~FClassParentManager()
 void FClassParentManager::Init(const TArray<IScriptGenerator*> &ClassGenerators)
 {
 	int32 ClassNum = ClassGenerators.Num();
-	UE_LOG(LogLuaGenerator, Error, TEXT("FClassParentManager::Init num is:%d!"), ClassNum);
-
 
 	if (ClassNum <= 0)
 	{
@@ -43,7 +41,6 @@ TArray<FString> FClassParentManager::GetParentClassNames(const FString &ClassNam
 	int32 *pIndex = m_ClassName2Index.Find(ClassName);
 	if (pIndex)
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("GetParentClassNames className:%s, parent index %d"), *ClassName, *pIndex);
 		for ( int32 ParentIndex : m_ParentIndexs[*pIndex])
 		{
 			FString *pClasName = m_Index2ClassName.Find(ParentIndex);
@@ -77,7 +74,6 @@ int32 FClassParentManager::GetClassIndex(const FString &InClassName)
 	{
 		if (g_ScriptGeneratorManager->ContainClassName(InClassName))
 		{
-			UE_LOG(LogLuaGenerator, Error, TEXT("GetClassIndex InClassName %s!"), *InClassName);
 			m_ClassName2Index.Add(InClassName, m_FirstAvailableIndex);
 			m_Index2ClassName.Add(m_FirstAvailableIndex, InClassName);
 			++m_FirstAvailableIndex;
