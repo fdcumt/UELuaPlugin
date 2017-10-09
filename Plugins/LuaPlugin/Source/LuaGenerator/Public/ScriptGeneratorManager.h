@@ -28,6 +28,7 @@ private:
 
 private: // save to file
 	void SaveToFiles();
+	void SaveUClassesToFiles();
 	void SaveConfigClassesToFiles();
 	void InitConfig();
 

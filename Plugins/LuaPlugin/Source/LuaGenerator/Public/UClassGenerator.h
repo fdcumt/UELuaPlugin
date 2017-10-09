@@ -1,5 +1,6 @@
 #pragma once
 #include "IScriptGenerator.h"
+#include "BaseLuaFuncReg.h"
 
 class FUClassGeneratorConfig
 {
@@ -20,37 +21,28 @@ public:
 public:
 	/** FBaseGenerator interface */
 	virtual FString GetKey() const override { return m_pClass->GetName(); }
-	virtual FString GetFileName() const override { return m_FileName; }
-	virtual FString GetRegName() const override { return FString(""); };
+	virtual FString GetFileName() const override;
+	virtual FString GetRegName() const override;
 	virtual bool CanExport()const  override;
 	virtual void ExportToMemory() override;
 	virtual void SaveToFile() override;
 	virtual FString GetClassName() const override;
 
 private:
-	void GenerateScriptHeader(FString &OutStr);
-	void GenerateIncludeHeader(FString &OutStr);
-	void GenerateFunctions(FString &OutStr);
-	void GenerateRegister(FString &OutStr);
-	void GenerateScriptTail(FString &OutStr);
 	virtual void GetParentNames(TArray<FString> &OutParentNames) const override;
 
 private:
-	void GenerateRegisterItem(const FString &InFunctionName, FString &OutStr);
-	FString GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName);
+	FString GetFileHeader();
+	FString GetFileInclude();
+	FString GetFileFunctionContents();
+	FString GetFileRegContents();
 	bool CanExportFunction(UFunction *InFunction);
-	void GenerateSingleFunction(UFunction *InFunction, FString &OutStr);
-	void AddFunctionToRegister(UFunction *InFunction);
-	void GenerateFunctionParam(UProperty *InParam, int32 InIndex, FString &OutStr);
-	void GenerateFunctionParams(UFunction *InFunction, FString &OutStr);
-	void GeneratorCheckParamsNumCode(UFunction *InFunction, FString &OutStr);
-	FString GetPropertyType(UProperty *InParam, uint32 PortFlags=0);
+	FExportFunctionInfo GetFunctionInfo(UFunction* InFunction);
+	FString GetPropertyType(UProperty *InParam, uint32 PortFlags = 0);
 
 private:
 	UClass *m_pClass;
-	FString m_FileName;
-	FString m_FileContent;
-	TArray<FString> m_FunctionNames;
+	FBaseFuncReg m_LuaFuncReg;
 	FString m_HeaderFileName;
 	
 public:

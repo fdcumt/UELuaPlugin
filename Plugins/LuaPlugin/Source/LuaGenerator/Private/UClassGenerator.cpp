@@ -20,10 +20,7 @@ FUClassGenerator::FUClassGenerator(UClass *InClass, const FString &InOutDir, con
 	, m_pClass(InClass)
 	, m_HeaderFileName(HeaderFile)
 {
-	m_FileName.Empty();
-	m_FileContent.Empty();
-	m_FunctionNames.Empty();
-	m_FileName = InClass->GetName() + NS_LuaGenerator::ClassScriptHeaderSuffix; 
+	m_LuaFuncReg.Init(InClass->GetName());
 }
 
 FUClassGenerator::~FUClassGenerator()
@@ -38,119 +35,34 @@ bool FUClassGenerator::CanExport() const
 
 void FUClassGenerator::ExportToMemory()
 {
-	GenerateScriptHeader(m_FileContent);
-	GenerateFunctions(m_FileContent);
-	GenerateRegister(m_FileContent);
-	GenerateScriptTail(m_FileContent);
+	for (TFieldIterator<UFunction> FuncIt(m_pClass /*, EFieldIteratorFlags::ExcludeSuper*/); FuncIt; ++FuncIt)
+	{
+		UFunction* Function = *FuncIt;
+		if (CanExportFunction(Function))
+		{
+			m_LuaFuncReg.AddFunction(GetFunctionInfo(Function));
+		}
+	}
 }
 
 void FUClassGenerator::SaveToFile()
 {
-	FString fileName = m_OutDir/m_pClass->GetName() + NS_LuaGenerator::ClassScriptHeaderSuffix;
-	if (!FFileHelper::SaveStringToFile(m_FileContent, *fileName))
+	FString FileContent;
+	FString FilePathName = m_OutDir/GetFileName();
+	FileContent += GetFileHeader();
+	FileContent += GetFileInclude();
+	FileContent += GetFileFunctionContents();
+	FileContent += GetFileRegContents();
+
+	if (!FFileHelper::SaveStringToFile(FileContent, *FilePathName))
 	{
-		UE_LOG(LogLuaGenerator, Error, TEXT("Failed to save header export:%s"), *fileName);
+		UE_LOG(LogLuaGenerator, Error, TEXT("Failed to save header export:%s"), *GetFileName());
 	}
 }
 
 FString FUClassGenerator::GetClassName() const
 {
 	return m_pClass->GetName();
-}
-
-void FUClassGenerator::GenerateScriptHeader(FString &OutStr)
-{
-	OutStr += EndLinePrintf(TEXT("#pragma once"));
-	OutStr += EndLinePrintf(TEXT("PRAGMA_DISABLE_DEPRECATION_WARNINGS"));
-	OutStr += EndLinePrintf(TEXT(""));
-}
-
-void FUClassGenerator::GenerateIncludeHeader(FString &OutStr)
-{
-	OutStr += EndLinePrintf(TEXT("#include \"%s\""), *m_HeaderFileName);
-}
-
-void FUClassGenerator::GenerateFunctions(FString &OutStr)
-{
-	for (TFieldIterator<UFunction> FuncIt(m_pClass); FuncIt; ++FuncIt)
-	{
-		if (CanExportFunction(*FuncIt))
-		{
-			AddFunctionToRegister(*FuncIt);
-			GenerateSingleFunction(*FuncIt, OutStr);
-		}
-	}
-}
-
-void FUClassGenerator::GenerateSingleFunction(UFunction *InFunction, FString &OutStr)
-{
-	OutStr += EndLinePrintf(TEXT(""));
-	OutStr += EndLinePrintf(TEXT("static int32 %s_%s(lua_State* L)"), *m_pClass->GetName(), *InFunction->GetFName().ToString());
-	OutStr += EndLinePrintf(TEXT("{"));
-	GenerateFunctionParams(InFunction, OutStr);
-	OutStr += EndLinePrintf(TEXT("}"));
-}
-
-void FUClassGenerator::AddFunctionToRegister(UFunction *InFunction)
-{
-	m_FunctionNames.Add(InFunction->GetName());
-}
-
-void FUClassGenerator::GenerateFunctionParam(UProperty *InParam, int32 InIndex, FString &OutStr)
-{
-	FString propertyType = GetPropertyType(InParam, CPPF_ArgumentOrReturnValue);
-	//DebugLog(TEXT("GetPropertyType type:%s"), *propertyType);
-
-	if (InParam->IsA(UIntProperty::StaticClass()) ||
-		InParam->IsA(UUInt32Property::StaticClass()) ||
-		InParam->IsA(UInt64Property::StaticClass()) ||
-		InParam->IsA(UUInt16Property::StaticClass()))
-	{
-		//DebugLog(TEXT("Function param type:%s"), TEXT("int32"));
-	}
-	else if (InParam->IsA(UFloatProperty::StaticClass()))
-	{
-		//DebugLog(TEXT("Function param type:%s"), TEXT("float"));
-	}
-	else if (InParam->IsA(UStrProperty::StaticClass()))
-	{
-		//DebugLog(TEXT("Function param type:%s"), TEXT("FString"));
-	}
-	else if (InParam->IsA(UNameProperty::StaticClass()))
-	{
-		//DebugLog(TEXT("Function param type:%s"), TEXT("FName"));
-	}
-	else if (InParam->IsA(UBoolProperty::StaticClass()))
-	{
-		//DebugLog(TEXT("Function param type:%s"), TEXT("bool"));
-	}
-	else if (InParam->IsA(UStructProperty::StaticClass()))
-	{
-		UStructProperty* StructProp = CastChecked<UStructProperty>(InParam);
-		//DebugLog(TEXT("Function param type:%s"), *StructProp->Struct->GetName());
-	}
-	else if (InParam->IsA(UClassProperty::StaticClass()))
-	{
-
-	}
-	else if (InParam->IsA(UObjectPropertyBase::StaticClass()))
-	{
-		
-	}
-}
-
-void FUClassGenerator::GenerateFunctionParams(UFunction *InFunction, FString &OutStr)
-{
-	int32 index = 0;
-	for (TFieldIterator<UProperty> ParamIt(InFunction); ParamIt; ++ParamIt, ++index)
-	{
-		GenerateFunctionParam(*ParamIt, index, OutStr);
-	}
-}
-
-void FUClassGenerator::GeneratorCheckParamsNumCode(UFunction *InFunction, FString &OutStr)
-{
-
 }
 
 FString FUClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/*=0*/)
@@ -189,48 +101,84 @@ FString FUClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/
 	return PropertyType;
 }
 
-void FUClassGenerator::GenerateRegister(FString &OutStr)
+FString FUClassGenerator::GetFileName() const
 {
-	OutStr += EndLinePrintf(TEXT(""));
-	OutStr += EndLinePrintf(TEXT("static const luaL_Reg %s_Lib[] ="), *m_pClass->GetName());
-	OutStr += EndLinePrintf(TEXT("{"));
-
-	for (const FString &FunctionName : m_FunctionNames)
-	{
-		GenerateRegisterItem(FunctionName, OutStr);
-	}
-
-	OutStr += EndLinePrintf(TEXT("\t{ NULL, NULL }"));
-	OutStr += EndLinePrintf(TEXT("};"));
+	return m_pClass->GetName()+NS_LuaGenerator::ClassScriptHeaderSuffix;
 }
 
-void FUClassGenerator::GenerateRegisterItem(const FString &InFunctionName, FString &OutStr)
+FString FUClassGenerator::GetRegName() const
 {
-	OutStr += EndLinePrintf(TEXT("\t{ \"%s\", %s},"), *InFunctionName, *GenerateRegisterFuncName(*InFunctionName, *m_pClass->GetName()) );
+	return FString::Printf(TEXT("%s_Lib"), *m_pClass->GetName());
 }
 
-FString FUClassGenerator::GenerateRegisterFuncName(const FString &InFunctionName, const FString &ClassName)
+FString FUClassGenerator::GetFileHeader()
 {
-	return ClassName + TEXT("_") + InFunctionName;
+	FString StrContent;
+	StrContent += EndLinePrintf(TEXT("#pragma once"));
+	StrContent += EndLinePrintf(TEXT(""));
+	return StrContent;
+}
+
+FString FUClassGenerator::GetFileInclude()
+{
+	FString StrContent;
+	StrContent += EndLinePrintf(TEXT("#include \"%s\""), *m_HeaderFileName);
+	return StrContent;
+}
+
+FString FUClassGenerator::GetFileFunctionContents()
+{
+	return m_LuaFuncReg.GetFunctionContents();
+}
+
+FString FUClassGenerator::GetFileRegContents()
+{
+	return m_LuaFuncReg.GetRegLibContents();
 }
 
 bool FUClassGenerator::CanExportFunction(UFunction *InFunction)
 {
-	if ( (InFunction->FunctionFlags&FUNC_Public) && (InFunction->FunctionFlags & FUNC_RequiredAPI))
-	{
-		return true;
-	}
-	else
+	if (InFunction->FunctionFlags&FUNC_Delegate)
 	{
 		return false;
 	}
+	else
+	{
+		return true;
+	}
 }
 
-void FUClassGenerator::GenerateScriptTail(FString &OutStr)
+FExportFunctionInfo FUClassGenerator::GetFunctionInfo(UFunction* InFunction)
 {
+	FExportFunctionInfo functionInfo;
 
-	OutStr += EndLinePrintf(TEXT(""));
-	OutStr += EndLinePrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
+	// init function name 
+	functionInfo.FunctionName = InFunction->GetName();
+
+	// init function return type
+	UProperty *RetProperty = InFunction->GetReturnProperty();
+	if (RetProperty)
+	{
+		functionInfo.ReturnType.Init(GetPropertyType(RetProperty));
+	}
+	else
+	{
+		functionInfo.ReturnType.Init(FString("void"));
+	}
+	
+	// init function param list
+	for (TFieldIterator<UProperty> ParamIt(InFunction); ParamIt; ++ParamIt)
+	{
+		UProperty* Param = *ParamIt;
+		if (!(Param->GetPropertyFlags() & CPF_ReturnParm))
+		{
+			FVariableType FuncParam;
+			FuncParam.Init(GetPropertyType(Param));
+			functionInfo.FunctionParams.ParamTypes.Add(FuncParam);
+		}
+	}
+
+	return functionInfo;
 }
 
 void FUClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const

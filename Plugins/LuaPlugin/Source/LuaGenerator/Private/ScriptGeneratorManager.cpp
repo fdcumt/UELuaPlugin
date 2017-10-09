@@ -41,8 +41,6 @@ void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHe
 	{
 		SafeDelete(pGenerator);
 	}
-
-	DebugLog(TEXT("SourceHeaderFilename:%s"), *SourceHeaderFilename);
 }
 
 void FScriptGeneratorManager::FinishExport()
@@ -110,7 +108,7 @@ void FScriptGeneratorManager::ExportConfigClasses()
 
 void FScriptGeneratorManager::ExportConfigClass(const FConfigClass& ClassItem)
 {
-	IScriptGenerator *pGenerator = FConfigClassGenerator::CreateGenerator(ClassItem, m_OutDir, );
+	IScriptGenerator *pGenerator = FConfigClassGenerator::CreateGenerator(ClassItem, m_OutDir);
 	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport() )
 	{
 		pGenerator->ExportToMemory();
@@ -152,7 +150,20 @@ void FScriptGeneratorManager::AddGeneratorToMap(IScriptGenerator *InGenerator)
 
 void FScriptGeneratorManager::SaveToFiles()
 {
+	SaveUClassesToFiles();
 	SaveConfigClassesToFiles();
+}
+
+void FScriptGeneratorManager::SaveUClassesToFiles()
+{
+	for (auto &MapItem : m_Generators)
+	{
+		IScriptGenerator *pGenerator = MapItem.Value;
+		if (pGenerator->GetType() == NS_LuaGenerator::EUClass)
+		{
+			pGenerator->SaveToFile();
+		}
+	}
 }
 
 void FScriptGeneratorManager::SaveConfigClassesToFiles()
@@ -187,20 +198,23 @@ void FScriptGeneratorManager::FinishExportPost()
 void FScriptGeneratorManager::GenerateAndSaveAllHeaderFile()
 {
 	FString AllHeaderFileName("AllHeaders.h");
-	FString AllHeaderFile;
+	TSet<FString> HeaderFileNames;
+	FString AllHeaderFileContent;
 
-	AllHeaderFile += EndLinePrintf(TEXT("#pragma once"));
+	AllHeaderFileContent += EndLinePrintf(TEXT("#pragma once"));
 
 	for (auto &MapItem : m_Generators)
 	{
 		IScriptGenerator *pGenerator = MapItem.Value;
-		if (pGenerator->GetType() == NS_LuaGenerator::EConfigClass)
-		{
-			AllHeaderFile += EndLinePrintf(TEXT("#include \"%s\""), *pGenerator->GetFileName());
-		}
+		HeaderFileNames.Add(*pGenerator->GetFileName());
 	}
 
-	if (!FFileHelper::SaveStringToFile(AllHeaderFile, *(m_OutDir/AllHeaderFileName)))
+	for (const FString &FileName : HeaderFileNames)
+	{
+		AllHeaderFileContent += EndLinePrintf(TEXT("#include \"%s\""), *FileName);
+	}
+
+	if (!FFileHelper::SaveStringToFile(AllHeaderFileContent, *(m_OutDir/AllHeaderFileName)))
 	{
 		UE_LOG(LogLuaGenerator, Error, TEXT("Failed to save AllHeaders.h:%s"), *(m_OutDir / AllHeaderFileName));
 	}
@@ -209,6 +223,7 @@ void FScriptGeneratorManager::GenerateAndSaveAllHeaderFile()
 void FScriptGeneratorManager::GererateLoadAllDefineFile()
 {
 	FString LoadAllDefineFileName("LoadAllDefine.h");
+	TMap<FString, FString> RegLibsMap;
 	FString LoadAllDefineFile;
 
 	LoadAllDefineFile += EndLinePrintf(TEXT("#pragma once"));
@@ -218,10 +233,14 @@ void FScriptGeneratorManager::GererateLoadAllDefineFile()
 	for (auto &MapItem : m_Generators)
 	{
 		IScriptGenerator *pGenerator = MapItem.Value;
-		if (pGenerator->GetType() == NS_LuaGenerator::EConfigClass)
-		{
-			LoadAllDefineFile += EndLinePrintf(TEXT("\tFLuaUtil::RegisterClass(InLuaState, %s, \"%s\");\\"), *pGenerator->GetRegName(), *pGenerator->GetKey());
-		}
+		RegLibsMap.Add(pGenerator->GetRegName(), pGenerator->GetKey());
+	}
+
+	for (auto &RegLibItem : RegLibsMap)
+	{
+		FString RegLibName = RegLibItem.Key;
+		FString LuaClassName = RegLibItem.Value;
+		LoadAllDefineFile += EndLinePrintf(TEXT("\tFLuaUtil::RegisterClass(InLuaState, %s, \"%s\");\\"), *RegLibName, *LuaClassName);
 	}
 
 	LoadAllDefineFile += EndLinePrintf(TEXT(""));
