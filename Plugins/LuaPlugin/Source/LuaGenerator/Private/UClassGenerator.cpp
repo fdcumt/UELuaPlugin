@@ -3,6 +3,7 @@
 #include "Templates/Casts.h"
 #include "Misc/FileHelper.h"
 #include "UObjectIterator.h"
+#include "ScriptGeneratorManager.h"
 
 void FUClassGeneratorConfig::Init()
 {
@@ -65,42 +66,6 @@ FString FUClassGenerator::GetClassName() const
 	return m_pClass->GetName();
 }
 
-FString FUClassGenerator::GetPropertyType(UProperty *Property, uint32 PortFlags/*=0*/)
-{
-	static FString EnumDecl(TEXT("enum "));
-	static FString StructDecl(TEXT("struct "));
-	static FString ClassDecl(TEXT("class "));
-	static FString TEnumAsByteDecl(TEXT("TEnumAsByte<enum "));
-	static FString TSubclassOfDecl(TEXT("TSubclassOf<class "));
-
-	FString PropertyType = Property->GetCPPType(NULL, PortFlags);
-	if (Property->IsA(UArrayProperty::StaticClass()))
-	{
-		auto PropertyArr = Cast<UArrayProperty>(Property);
-		FString inerTypeCpp = GetPropertyType(PropertyArr->Inner, CPPF_ArgumentOrReturnValue);
-		if (inerTypeCpp == "EObjectTypeQuery")
-			inerTypeCpp = "TEnumAsByte<EObjectTypeQuery> ";
-		PropertyType = FString::Printf(TEXT("TArray<%s>"), *inerTypeCpp);
-	}
-	// Strip any forward declaration keywords
-	if (PropertyType.StartsWith(EnumDecl) || PropertyType.StartsWith(StructDecl) || PropertyType.StartsWith(ClassDecl))
-	{
-		int FirstSpaceIndex = PropertyType.Find(TEXT(" "));
-		PropertyType = PropertyType.Mid(FirstSpaceIndex + 1);
-	}
-	else if (PropertyType.StartsWith(TEnumAsByteDecl))
-	{
-		int FirstSpaceIndex = PropertyType.Find(TEXT(" "));
-		PropertyType = TEXT("TEnumAsByte<") + PropertyType.Mid(FirstSpaceIndex + 1);
-	}
-	else if (PropertyType.StartsWith(TSubclassOfDecl))
-	{
-		int FirstSpaceIndex = PropertyType.Find(TEXT(" "));
-		PropertyType = TEXT("TSubclassOf<") + PropertyType.Mid(FirstSpaceIndex + 1);
-	}
-	return PropertyType;
-}
-
 FString FUClassGenerator::GetFileName() const
 {
 	return m_pClass->GetName()+NS_LuaGenerator::ClassScriptHeaderSuffix;
@@ -115,7 +80,6 @@ FString FUClassGenerator::GetFileHeader()
 {
 	FString StrContent;
 	StrContent += EndLinePrintf(TEXT("#pragma once"));
-	StrContent += EndLinePrintf(TEXT(""));
 	return StrContent;
 }
 
@@ -138,46 +102,18 @@ FString FUClassGenerator::GetFileRegContents()
 
 bool FUClassGenerator::CanExportFunction(UFunction *InFunction)
 {
-	if (InFunction->FunctionFlags&FUNC_Delegate)
+	if (InFunction->FunctionFlags & FUNC_Delegate)
 	{
 		return false;
 	}
-	else
-	{
-		return true;
-	}
+	
+	return true;
 }
 
 FExportFunctionInfo FUClassGenerator::GetFunctionInfo(UFunction* InFunction)
 {
 	FExportFunctionInfo functionInfo;
-
-	// init function name 
-	functionInfo.FunctionName = InFunction->GetName();
-
-	// init function return type
-	UProperty *RetProperty = InFunction->GetReturnProperty();
-	if (RetProperty)
-	{
-		functionInfo.ReturnType.Init(GetPropertyType(RetProperty));
-	}
-	else
-	{
-		functionInfo.ReturnType.Init(FString("void"));
-	}
-	
-	// init function param list
-	for (TFieldIterator<UProperty> ParamIt(InFunction); ParamIt; ++ParamIt)
-	{
-		UProperty* Param = *ParamIt;
-		if (!(Param->GetPropertyFlags() & CPF_ReturnParm))
-		{
-			FVariableType FuncParam;
-			FuncParam.Init(GetPropertyType(Param));
-			functionInfo.FunctionParams.ParamTypes.Add(FuncParam);
-		}
-	}
-
+	functionInfo.InitByUFunction(InFunction);
 	return functionInfo;
 }
 

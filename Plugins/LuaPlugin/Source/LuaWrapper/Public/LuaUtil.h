@@ -178,7 +178,7 @@ private: // not export Function
 	static void CloseClass(lua_State *InLuaState);
 	static void RegisterClassFunctions( lua_State *InLuaState, const luaL_Reg ClassFunctions[]);
 	static void AddClassFunction(lua_State *InLuaState, const char *FuncName, lua_CFunction &luaFunction);
-	static void InitMetaFuncs(lua_State *InLuaState); // 初始化元表中的元操作
+	static void InitMetaMethods(lua_State *InLuaState); // 初始化元表中的元操作
 	static void InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName); // 初始化元表中的自定义操作
 	static bool ExistData(lua_State *InLuaState, void *p);
 	static bool ExistClass(lua_State *InLuaState, const char *ClassName);

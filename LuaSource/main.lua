@@ -19,5 +19,8 @@ function Init(num)
 	LuaPrint.print("MyTest");
 	MyTest:TestBaseFunc()
 ]]
+	local TestBase = FMyTestBase.CreateSelf();
+	TestBase.mVariable = 10;
+	LuaPrint.print("aaa"..TestBase.mVariable);
 	return num+3, 4, true;
 end

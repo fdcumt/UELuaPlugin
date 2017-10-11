@@ -198,6 +198,7 @@ FConfigClass::FConfigClass(const TSharedPtr<FJsonObject> &InJsonObj)
 	ParseIncludeHeaders(InJsonObj);
 	ParseParentNames(InJsonObj);
 	ParseFunctions(InJsonObj);
+	ParseVariables(InJsonObj);
 }
 
 FString FConfigClass::GetRegLibChunk()
@@ -221,6 +222,13 @@ FString FConfigClass::GetRegLibChunk()
 			FConfigClassGenerator *pConfigGenerator = (FConfigClassGenerator*)pGenerator;
 			Ret += GetRegLibItemsChunk(pConfigGenerator->GetConfigFunctions());
 		}
+	}
+
+	// variable reg body
+	for (const FConfigVariable& ConfigVariableItem : Variables)
+	{
+		Ret += EndLinePrintf(TEXT("\t{ \"Get_%s\", %s_Get_%s },"), *ConfigVariableItem.VariableName, *ClassName, *ConfigVariableItem.VariableName);
+		Ret += EndLinePrintf(TEXT("\t{ \"Set_%s\", %s_Set_%s },"), *ConfigVariableItem.VariableName, *ClassName, *ConfigVariableItem.VariableName);
 	}
 
 	// reg tail
@@ -323,6 +331,22 @@ void FConfigClass::ParseFunctions(const TSharedPtr<FJsonObject> &InJsonClass)
 	}
 }
 
+void FConfigClass::ParseVariables(const TSharedPtr<FJsonObject> &InJsonClass)
+{
+	const TArray<TSharedPtr<FJsonValue>> *JsonVariables;
+	if (InJsonClass->TryGetArrayField("Variables", JsonVariables))
+	{
+		for (const TSharedPtr<FJsonValue> &pVariableInfoItem : *JsonVariables)
+		{
+			Variables.Add(FConfigVariable(pVariableInfoItem->AsObject()));
+		}
+	}
+	else
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("try get class variables error!"));
+	}
+}
+
 FString FConfigClass::GetFunctionsChunk(const TArray<FConfigFunction> &ConfigFunctions)
 {
 	FString RetChunk;
@@ -351,6 +375,11 @@ FString FConfigClass::GetFunctionsChunk()
 		}
 	}
 
+	// variables function truncks
+	for (const FConfigVariable& VariableItem : Variables)
+	{
+		FunctionsChunk += VariableItem.GetVariableTrunck(ClassName);
+	}
 	return FunctionsChunk;
 }
 
@@ -395,13 +424,15 @@ FString FConfigFunction::GetFunctionBodyChunk(const FConfigClass &ConfigClass) c
 	{
 		Ret += EndLinePrintf(TEXT("\t%s RetValue = %s"), *RetType, *CallFuncStr);
 		Ret += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(RetValue, \"%s\"));"), *RetType, *GetPureReturnType());
+		Ret += EndLinePrintf(TEXT("\treturn 1;"));
 	}
 	else
 	{
 		Ret += EndLinePrintf(TEXT("\t%s"), *CallFuncStr);
+		Ret += EndLinePrintf(TEXT("\treturn 0;"));
 	}
 
-	Ret += EndLinePrintf(TEXT("\treturn 1;"));
+	
 	return Ret;
 }
 
@@ -554,4 +585,81 @@ FString FConfigClass::GetFunctionChunk(const FConfigFunction &ConfigFunction)
 		m_FunctionNames.Add(LuaFunctionName);
 		return Ret;
 	}
+}
+
+FConfigVariable::FConfigVariable(const TSharedPtr<FJsonObject> &InJsonObj)
+{
+	if (!InJsonObj->TryGetBoolField("IsStatic", bStatic))
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("try get Variable IsStatic error!"));
+	}
+
+	if (!InJsonObj->TryGetStringField("Type", VariableType))
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("try get Variable Type error!"));
+	}
+
+	if (!InJsonObj->TryGetStringField("Name", VariableName))
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("try get Variable Name error!"));
+	}
+}
+
+FString FConfigVariable::GetVariableTrunck(const FString &ClassName) const 
+{
+	FString Ret;
+	Ret += GenerateGetVariableTrunck(ClassName);
+	Ret += GenerateSetVariableTrunck(ClassName);
+	return Ret;
+}
+
+FString FConfigVariable::GenerateGetVariableTrunck(const FString &ClassName)const
+{
+	FString Ret;
+	Ret += EndLinePrintf(TEXT(""));
+	Ret += EndLinePrintf(TEXT("static int32 %s_Get_%s(lua_State *InLuaState)"), *ClassName, *VariableName);
+	Ret += EndLinePrintf(TEXT("{"));
+
+	if (bStatic)
+	{
+		Ret = FString::Printf(TEXT("\t%s memberVariable = %s::%s;"), *VariableType, *ClassName, *VariableName);
+	}
+	else
+	{
+		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *ClassName, *ClassName, *ClassName);
+		Ret += EndLinePrintf(TEXT("\t%s memberVariable = pObj->%s;"), *VariableType, *VariableName);
+	}
+
+	Ret += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(memberVariable, \"%s\"));"), *VariableType, *VariableType);
+	Ret += EndLinePrintf(TEXT("\treturn 1;"));
+	Ret += EndLinePrintf(TEXT("}"));
+	return Ret;
+}
+
+FString FConfigVariable::GenerateSetVariableTrunck(const FString &ClassName)const
+{
+	FString Ret;
+	Ret += EndLinePrintf(TEXT(""));
+	Ret += EndLinePrintf(TEXT("static int32 %s_Set_%s(lua_State *InLuaState)"), *ClassName, *VariableName);
+	Ret += EndLinePrintf(TEXT("{"));
+
+
+	Ret += EndLinePrintf(TEXT("\t%s memberVariable;"), *VariableType);
+	Ret += EndLinePrintf(TEXT("\tFLuaUtil::Pop(InLuaState, FLuaClassType<%s>(memberVariable, \"%s\"));"), *VariableType, *VariableType );
+
+	if (bStatic)
+	{
+		Ret = FString::Printf(TEXT("\t%s::%s = memberVariable;"), *ClassName, *VariableName);
+	}
+	else
+	{
+		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *ClassName, *ClassName, *ClassName);
+		Ret += EndLinePrintf(TEXT("\tpObj->%s = memberVariable;"), *VariableName);
+	}
+
+	Ret += EndLinePrintf(TEXT("\treturn 0;"));
+	Ret += EndLinePrintf(TEXT("}"));
+
+	
+	return Ret;
 }

@@ -21,7 +21,7 @@ void FLuaUtil::AddClass(lua_State *InLuaState, const char *ClassName)
 	luaL_newmetatable(InLuaState, ClassName);// 创建元表,并压栈
 
 	{// 设置表内容
-		InitMetaFuncs(InLuaState);  // 设置元操作
+		InitMetaMethods(InLuaState);  // 设置元操作
 		InitUserDefinedFuncs(InLuaState, ClassName); // 设置用户自定义操作
 	}
 
@@ -60,10 +60,63 @@ void FLuaUtil::AddClassFunction(lua_State *InLuaState, const char *FuncName, lua
 	lua_rawset(InLuaState, -3);
 }
 
-void FLuaUtil::InitMetaFuncs(lua_State *InLuaState)
+int32 MetaTableNewIndexFunc(lua_State* L)
 {
-	lua_pushvalue(InLuaState, -1);
-	lua_setfield(InLuaState, -2, "__index");
+	// userdata[key] = value;
+	// stack 1: userdata
+	// stack 2: key
+	// stack 3: value
+	if (lua_isuserdata(L, 1))
+	{
+		lua_getmetatable(L, 1);
+		FString PropertyName = FString(lua_tostring(L, 2));
+		FString SetPropertyFuncName = FString::Printf(TEXT("Set_%s"), *PropertyName);
+		FLuaUtil::Push(L, SetPropertyFuncName);
+		lua_rawget(L, -2); // get function
+		if (!lua_isnil(L, -1))
+		{
+			lua_pushvalue(L, 1);
+			lua_pushvalue(L, 3);
+			lua_call(L, 2, 0);
+		}
+	}
+	else if (lua_istable(L, 1))
+	{
+		lua_rawset(L, -3);
+	}
+	return 0;
+}
+
+
+int32 MetaTableIndexFunc(lua_State* L)
+{
+	// userdata[key];
+	// stack 1: userdata
+	// stack 2: key
+	if (lua_isuserdata(L, 1))
+	{
+		lua_getmetatable(L, 1);
+		FString PropertyName = FString(lua_tostring(L, 2));
+		FString GetPropertyFuncName = FString::Printf(TEXT("Get_%s"), *PropertyName);
+		FLuaUtil::Push(L, GetPropertyFuncName);
+		lua_rawget(L, -2); // get function
+		if (!lua_isnil(L, -1))
+		{
+			lua_pushvalue(L, 1);
+			lua_call(L, 1, 1);
+		}
+	}
+	return 1;
+}
+
+void FLuaUtil::InitMetaMethods(lua_State *InLuaState)
+{
+	lua_pushstring(InLuaState, "__index");
+	lua_pushcfunction(InLuaState, MetaTableIndexFunc);
+	lua_rawset(InLuaState, -3);
+	lua_pushstring(InLuaState, "__newindex");
+	lua_pushcfunction(InLuaState, MetaTableNewIndexFunc);
+	lua_rawset(InLuaState, -3);
 }
 
 void FLuaUtil::InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName)

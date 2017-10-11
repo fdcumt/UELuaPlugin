@@ -66,6 +66,24 @@ private:
 	void AdjustReturnType();
 };
 
+class FConfigVariable
+{
+public:
+	FConfigVariable(const TSharedPtr<FJsonObject> &InJson);
+
+public:
+	bool bStatic;
+	FString VariableType;
+	FString VariableName;
+
+public:
+	FString GetVariableTrunck(const FString &ClassName) const ;
+
+private:
+	FString GenerateGetVariableTrunck(const FString &ClassName)const;
+	FString GenerateSetVariableTrunck(const FString &ClassName)const;
+};
+
 class FConfigClass
 {
 public:
@@ -76,6 +94,7 @@ public:
 	TArray<FString> ParentNames;
 	TArray<FString> IncludeHeaders;
 	TArray<FConfigFunction> Functions;
+	TArray<FConfigVariable> Variables;
 
 public:
 	FString GetIncludeFilesChunk();
@@ -92,6 +111,7 @@ private: // parse and init
 	void ParseIncludeHeaders(const TSharedPtr<FJsonObject> &InJsonClass);
 	void ParseParentNames(const TSharedPtr<FJsonObject> &InJsonClass);
 	void ParseFunctions(const TSharedPtr<FJsonObject> &InJsonClass);
+	void ParseVariables(const TSharedPtr<FJsonObject> &InJsonClass);
 
 private: // generator chunk
 	FString GetFunctionsChunk(const TArray<FConfigFunction> &ConfigFunctions);

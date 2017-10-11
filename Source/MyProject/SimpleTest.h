@@ -10,6 +10,8 @@ public:
 	void SetMember(float m);
 	void Print() const;
 	void TestBaseFunc() const;
+public:
+	int32 mVariable;
 
 private:
 	float m_member;
@@ -40,6 +42,8 @@ public:
 
 	static void StaticPrint();
 	static void StaticPrint1();
+
+
 
 private:
 	FMyTest1 *m_member;

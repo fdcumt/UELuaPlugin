@@ -35,6 +35,9 @@
 				"RetType":"void",
 				"ParamTypes":["FMyTest1 &"]
 			}
+		],
+		"Variables":
+		[
 		]
 	},
 	{
@@ -67,6 +70,9 @@
 				"RetType":"void",
 				"ParamTypes":[]
 			}
+		],
+		"Variables":
+		[
 		]
 	},
 	{
@@ -104,6 +110,14 @@
 				"IsStatic":"false",
 				"RetType":"void",
 				"ParamTypes":[]
+			}
+		],
+		"Variables":
+		[
+			{
+				"Type":"int32",
+				"Name":"mVariable",
+				"IsStatic":"false"
 			}
 		]
 	}

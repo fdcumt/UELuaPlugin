@@ -23,6 +23,28 @@ namespace NS_LuaGenerator
 		EConfigClass = 1,
 	};
 
+	enum EVariableType
+	{
+		EBaseType, // int,uint16,uinit32,uint64,float,char*,bool
+		EPoint,
+		EObjectBase,
+		EFName,
+		EText,
+		EFString,
+		EClass,
+		ETArray,
+		EWeakObject,
+		EStruct,
+		EByte,
+		EEnum,
+		ETSubclassOf,
+		EMulticastDelegate,
+		ETMap,
+		ETSet,
+		EVoid,
+		EUnknow,
+	};
+
 
 
 	extern FString ProjectPath;
@@ -47,7 +69,9 @@ namespace NS_LuaGenerator
 	extern const FString ClassConfigFileRelativeFolder;
 	extern TArray<FString> ClassConfigFileNames;
 
-	bool StringFowwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
+	EVariableType ResolvePropertyType(UProperty *pProperty);
+	FString GetPropertyType(UProperty *Property, uint32 PortFlags = 0);
+	bool StringForwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
 	bool StringBackContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcTailIndex);
 }
 

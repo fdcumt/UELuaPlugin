@@ -1,27 +1,33 @@
 #pragma once
+#include "GeneratorDefine.h"
 
-struct FVariableType
+struct FVariableTypeInfo
 {
 public:
-	void Init(const FString &InOriginalType);
+	void InitByUProperty(UProperty *pProperty);
 
 public:
 	FString OriginalType;
-};
-
-struct FFunctionParamInfo
-{
-	TArray<FVariableType> ParamTypes;
-
-public:
-	int32 GetParamNum() const { return ParamTypes.Num(); }
+	FString DeclareType;
+	bool bDereference;
+	bool bSupportNow;
+	NS_LuaGenerator::EVariableType eVariableType;
 };
 
 struct FExportFunctionInfo
 {
+public:
+	void InitByUFunction(UFunction* InFunction);
+
+public:
+	bool bStatic;
+	bool bSupportNow;
 	FString FunctionName;
-	FFunctionParamInfo FunctionParams;
-	FVariableType ReturnType;
+	TArray<FVariableTypeInfo> FunctionParams;
+	FVariableTypeInfo ReturnType;
+
+private:
+	bool CanExportFunction(UFunction* InFunction);
 };
 
 class FBaseFuncReg

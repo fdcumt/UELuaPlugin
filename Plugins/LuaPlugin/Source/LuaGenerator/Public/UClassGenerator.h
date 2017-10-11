@@ -38,13 +38,12 @@ private:
 	FString GetFileRegContents();
 	bool CanExportFunction(UFunction *InFunction);
 	FExportFunctionInfo GetFunctionInfo(UFunction* InFunction);
-	FString GetPropertyType(UProperty *InParam, uint32 PortFlags = 0);
 
 private:
 	UClass *m_pClass;
 	FBaseFuncReg m_LuaFuncReg;
 	FString m_HeaderFileName;
-	
+
 public:
 	static FUClassGeneratorConfig m_ClassConfig;
 };

@@ -11,6 +11,11 @@ public:
 	~FScriptGeneratorManager();
 
 public:
+	TSet<FString> m_VariableTypes;
+	FString m_LogContent;
+	TSet<FString> m_PropertyType;
+
+public:
 	void Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase);
 	void ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged);
 	void FinishExport();

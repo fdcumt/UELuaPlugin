@@ -193,6 +193,15 @@ void FScriptGeneratorManager::FinishExportPost()
 {
 	GenerateAndSaveAllHeaderFile();
 	GererateLoadAllDefineFile();
+
+	FString PropertyTypes;
+	for (const FString &Item : m_PropertyType)
+	{
+		PropertyTypes += Item;
+	}
+
+	FFileHelper::SaveStringToFile(PropertyTypes, *(m_OutDir / FString("PropertyTypes.txt")));
+	FFileHelper::SaveStringToFile(m_LogContent, *(m_OutDir / FString("GeneratorLog.txt")));
 }
 
 void FScriptGeneratorManager::GenerateAndSaveAllHeaderFile()
