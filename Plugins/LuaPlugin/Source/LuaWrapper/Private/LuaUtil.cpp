@@ -93,9 +93,12 @@ int32 MetaTableIndexFunc(lua_State* L)
 	// userdata[key];
 	// stack 1: userdata
 	// stack 2: key
-	if (lua_isuserdata(L, 1))
+	lua_getmetatable(L, 1);
+	lua_pushvalue(L, -2);
+	lua_rawget(L, -2);
+	if (lua_isnil(L, -1))
 	{
-		lua_getmetatable(L, 1);
+		lua_pop(L, 1);
 		FString PropertyName = FString(lua_tostring(L, 2));
 		FString GetPropertyFuncName = FString::Printf(TEXT("Get_%s"), *PropertyName);
 		FLuaUtil::Push(L, GetPropertyFuncName);
@@ -111,14 +114,14 @@ int32 MetaTableIndexFunc(lua_State* L)
 
 void FLuaUtil::InitMetaMethods(lua_State *InLuaState)
 {
-	lua_pushvalue(InLuaState, -1);
-	lua_setfield(InLuaState, -2, "__index");
-// 	lua_pushstring(InLuaState, "__index");
-// 	lua_pushcfunction(InLuaState, MetaTableIndexFunc);
-// 	lua_rawset(InLuaState, -3);
-// 	lua_pushstring(InLuaState, "__newindex");
-// 	lua_pushcfunction(InLuaState, MetaTableNewIndexFunc);
-// 	lua_rawset(InLuaState, -3);
+// 	lua_pushvalue(InLuaState, -1);
+// 	lua_setfield(InLuaState, -2, "__index");
+	lua_pushstring(InLuaState, "__index");
+	lua_pushcfunction(InLuaState, MetaTableIndexFunc);
+	lua_rawset(InLuaState, -3);
+	lua_pushstring(InLuaState, "__newindex");
+	lua_pushcfunction(InLuaState, MetaTableNewIndexFunc);
+	lua_rawset(InLuaState, -3);
 }
 
 void FLuaUtil::InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName)
