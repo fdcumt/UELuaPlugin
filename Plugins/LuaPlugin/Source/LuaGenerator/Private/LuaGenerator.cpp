@@ -22,7 +22,7 @@ void FLuaGenerator::ShutdownModule()
 
 FString FLuaGenerator::GetGeneratedCodeModuleName() const
 {
-	return NS_LuaGenerator::GameModuleName;
+	return g_LuaConfigManager->GameModuleName;
 }
 
 bool FLuaGenerator::ShouldExportClassesForModule(const FString& ModuleName, EBuildModuleType::Type ModuleType, const FString& ModuleGeneratedIncludeDirectory) const
@@ -32,31 +32,12 @@ bool FLuaGenerator::ShouldExportClassesForModule(const FString& ModuleName, EBui
 
 bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 {
-	// if support the target, the project must have the config file(LuaConfig.ini), in config folder.
-	if (FPaths::IsProjectFilePathSet())
-	{
-		FString ProjectFilePath = FPaths::GetProjectFilePath();
-		FString projectPath = FPaths::GetPath(ProjectFilePath);
-		FConfigFile* File = GConfig->Find(projectPath/NS_LuaGenerator::LuaConfigFileRelativePath, false);
-		if (File != nullptr)
-		{
-			FProjectDescriptor ProjectDescriptor;
-			FText OutError;
-
-			// FPaths::GetProjectFilePath() return the  path of project's .uproject file
-			ProjectDescriptor.Load(ProjectFilePath, OutError);
-
-			// init the GameModuleName by the first module name in the file of ProjectName.uproject 
-			ProjectDescriptor.Modules[0].Name.ToString(NS_LuaGenerator::GameModuleName); 
-			return true;
-		}
-	}
-	return false;
+	return !g_LuaConfigManager->ProjectPath.IsEmpty() && !g_LuaConfigManager->GameModuleName.IsEmpty();
 }
 
 void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
-	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / g_LuaConfigManager->LuaConfigFileRelativePath;
 	GConfig->GetArray(NS_LuaGenerator::SupportModuleSection, NS_LuaGenerator::SupportModuleKey, m_SupportedModules, ConfigFilePath);
 
 	g_ScriptGeneratorManager->Initialize(RootLocalPath, RootBuildPath, OutputDirectory, IncludeBase);

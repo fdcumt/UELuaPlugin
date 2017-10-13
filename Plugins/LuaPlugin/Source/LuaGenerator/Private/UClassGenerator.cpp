@@ -7,7 +7,7 @@
 
 void FUClassGeneratorConfig::Init()
 {
-	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / g_LuaConfigManager->LuaConfigFileRelativePath;
 	GConfig->GetArray(NS_LuaGenerator::NotSupportClassSection, NS_LuaGenerator::NotSupportClassKey, m_NotSuportClasses, ConfigFilePath);
 }
 
@@ -62,7 +62,7 @@ FString FUClassGenerator::GetClassName() const
 
 FString FUClassGenerator::GetFileName() const
 {
-	return GetClassName() +NS_LuaGenerator::ClassScriptHeaderSuffix;
+	return GetClassName() +g_LuaConfigManager->ClassScriptHeaderSuffix;
 }
 
 FString FUClassGenerator::GetRegName() const

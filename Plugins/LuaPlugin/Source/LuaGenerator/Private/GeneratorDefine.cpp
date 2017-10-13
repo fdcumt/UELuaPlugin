@@ -11,11 +11,6 @@ DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
 namespace NS_LuaGenerator
 {
-	
-	FString GameModuleName;
-	FString ClassScriptHeaderSuffix(".script.h");
-
-	const FString LuaConfigFileRelativePath("Config/LuaConfig.ini");
 
 	const TCHAR* SupportModuleSection = TEXT("SupportModule");
 	const TCHAR* SupportModuleKey = TEXT("SupportModuleKey");

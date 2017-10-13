@@ -211,7 +211,7 @@ void FScriptGeneratorManager::SaveConfigClassesToFiles()
 
 void FScriptGeneratorManager::InitConfig()
 {
-	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / g_LuaConfigManager->LuaConfigFileRelativePath;
 
 	// init ClassConfigFileNames
 	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, NS_LuaGenerator::ClassConfigFileNames, ConfigFilePath);

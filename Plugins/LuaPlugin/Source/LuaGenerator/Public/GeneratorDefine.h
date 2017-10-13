@@ -49,12 +49,6 @@ namespace NS_LuaGenerator
 		EUnknow,
 	};
 
-	extern FString GameModuleName;
-	extern FString ClassScriptHeaderSuffix;
-
-	
-	extern const FString LuaConfigFileRelativePath;
-
 	extern const TCHAR* SupportModuleKey;
 	extern const TCHAR* SupportModuleSection;
 
