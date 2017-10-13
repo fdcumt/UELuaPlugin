@@ -156,6 +156,7 @@ FExtraFuncMemberInfo FUStructGenerator::GenerateDestoryExportFunction()
 	FString &funcBody = ExtraFuncDestory.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pStruct = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *GetClassName(), *GetClassName(), *GetClassName());
 	funcBody += EndLinePrintf(TEXT("\tif(pStruct) delete pStruct;"));
+	funcBody += EndLinePrintf(TEXT("\tpStruct = nullptr;"));
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraFuncDestory;
 }

@@ -49,9 +49,6 @@ namespace NS_LuaGenerator
 		EUnknow,
 	};
 
-
-
-	extern FString ProjectPath;
 	extern FString GameModuleName;
 	extern FString ClassScriptHeaderSuffix;
 

@@ -11,7 +11,7 @@ DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
 namespace NS_LuaGenerator
 {
-	FString ProjectPath;
+	
 	FString GameModuleName;
 	FString ClassScriptHeaderSuffix(".script.h");
 

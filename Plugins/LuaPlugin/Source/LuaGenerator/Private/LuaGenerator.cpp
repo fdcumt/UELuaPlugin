@@ -7,14 +7,16 @@
 
 void FLuaGenerator::StartupModule()
 {
-	m_LuaScriptGenerator = new FScriptGeneratorManager();
-	g_ScriptGeneratorManager = m_LuaScriptGenerator;
+	g_LuaConfigManager = new FLuaConfigManager();
+	g_ScriptGeneratorManager = new FScriptGeneratorManager();
+	g_LuaConfigManager->Init();
 	IModularFeatures::Get().RegisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
 void FLuaGenerator::ShutdownModule()
 {
-	delete m_LuaScriptGenerator;
+	delete g_ScriptGeneratorManager;
+	delete g_LuaConfigManager;
 	IModularFeatures::Get().UnregisterModularFeature(TEXT("ScriptGenerator"), this);
 }
 
@@ -34,8 +36,8 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 	if (FPaths::IsProjectFilePathSet())
 	{
 		FString ProjectFilePath = FPaths::GetProjectFilePath();
-		NS_LuaGenerator::ProjectPath = FPaths::GetPath(ProjectFilePath);
-		FConfigFile* File = GConfig->Find(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::LuaConfigFileRelativePath, false);
+		FString projectPath = FPaths::GetPath(ProjectFilePath);
+		FConfigFile* File = GConfig->Find(projectPath/NS_LuaGenerator::LuaConfigFileRelativePath, false);
 		if (File != nullptr)
 		{
 			FProjectDescriptor ProjectDescriptor;
@@ -54,20 +56,20 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 
 void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
-	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
 	GConfig->GetArray(NS_LuaGenerator::SupportModuleSection, NS_LuaGenerator::SupportModuleKey, m_SupportedModules, ConfigFilePath);
 
-	m_LuaScriptGenerator->Initialize(RootLocalPath, RootBuildPath, OutputDirectory, IncludeBase);
+	g_ScriptGeneratorManager->Initialize(RootLocalPath, RootBuildPath, OutputDirectory, IncludeBase);
 }
 
 void FLuaGenerator::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
 {
-	m_LuaScriptGenerator->ExportClass(Class, SourceHeaderFilename, GeneratedHeaderFilename, bHasChanged);
+	g_ScriptGeneratorManager->ExportClass(Class, SourceHeaderFilename, GeneratedHeaderFilename, bHasChanged);
 }
 
 void FLuaGenerator::FinishExport()
 {
-	m_LuaScriptGenerator->FinishExport();
+	g_ScriptGeneratorManager->FinishExport();
 }
 
 FString FLuaGenerator::GetGeneratorName() const

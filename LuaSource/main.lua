@@ -30,8 +30,8 @@ function Init(num)
 	]]
 	
 	local hitResult = FHitResult.New();
-	hitResult:Set_FaceIndex(10);
-
+	hitResult:Set_FaceIndex(20);
+	LuaPrint.print("aaa"..hitResult.FaceIndex);
 	hitResult:Destory();
 	
 	return num+3, 4, true;

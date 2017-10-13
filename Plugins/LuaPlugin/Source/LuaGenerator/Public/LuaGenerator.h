@@ -24,5 +24,4 @@ public:
 
 protected:
 	TArray<FString> m_SupportedModules;
-	FScriptGeneratorManager *m_LuaScriptGenerator;
 };

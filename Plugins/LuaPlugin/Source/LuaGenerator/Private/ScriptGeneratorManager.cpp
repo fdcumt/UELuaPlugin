@@ -23,7 +23,7 @@ FScriptGeneratorManager::~FScriptGeneratorManager()
 
 void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
-	m_OutDir = NS_LuaGenerator::ProjectPath/FString("Plugins/LuaPlugin/Intermediate/Build/Win64/UE4Editor/Inc/LuaWrapper");
+	m_OutDir = g_LuaConfigManager->ProjectPath/FString("Plugins/LuaPlugin/Intermediate/Build/Win64/UE4Editor/Inc/LuaWrapper");
 	m_RootLocalPath = RootLocalPath;
 	m_RootBuildPath = RootBuildPath;
 	m_IncludeBase = IncludeBase;
@@ -100,7 +100,7 @@ void FScriptGeneratorManager::ExportConfigClasses()
 	for (const FString&ConfigClassFileName : NS_LuaGenerator::ClassConfigFileNames)
 	{
 		TArray<FConfigClass> ConfigClasses;
-		ParseConfigClass(NS_LuaGenerator::ProjectPath/NS_LuaGenerator::ClassConfigFileRelativeFolder/ConfigClassFileName, ConfigClasses);
+		ParseConfigClass(g_LuaConfigManager->ProjectPath/NS_LuaGenerator::ClassConfigFileRelativeFolder/ConfigClassFileName, ConfigClasses);
 
 		for (const FConfigClass& ClassItem : ConfigClasses)
 		{
@@ -211,10 +211,9 @@ void FScriptGeneratorManager::SaveConfigClassesToFiles()
 
 void FScriptGeneratorManager::InitConfig()
 {
-	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
 
 	// init luaconfig
-	g_LuaConfigManager = new FLuaConfigManager;
 	g_LuaConfigManager->Init();
 
 	// init ClassConfigFileNames
