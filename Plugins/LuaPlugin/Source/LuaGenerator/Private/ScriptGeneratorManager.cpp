@@ -213,9 +213,6 @@ void FScriptGeneratorManager::InitConfig()
 {
 	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
 
-	// init luaconfig
-	g_LuaConfigManager->Init();
-
 	// init ClassConfigFileNames
 	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, NS_LuaGenerator::ClassConfigFileNames, ConfigFilePath);
 
