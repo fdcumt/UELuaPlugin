@@ -47,6 +47,10 @@ private: // config class
 	void ExportConfigClass(const FConfigClass& ClassItem);
 	void ParseConfigClass(const FString &&FileName, TArray<FConfigClass> &OutConfigClasses);
 
+private: // UStruct
+	void ExportUStructs();
+	void ExportUStruct(UScriptStruct *pScriptStruct);
+
 private:
 	void AddGeneratorToMap(IScriptGenerator *InGenerator);
 	

@@ -111,12 +111,14 @@ int32 MetaTableIndexFunc(lua_State* L)
 
 void FLuaUtil::InitMetaMethods(lua_State *InLuaState)
 {
-	lua_pushstring(InLuaState, "__index");
-	lua_pushcfunction(InLuaState, MetaTableIndexFunc);
-	lua_rawset(InLuaState, -3);
-	lua_pushstring(InLuaState, "__newindex");
-	lua_pushcfunction(InLuaState, MetaTableNewIndexFunc);
-	lua_rawset(InLuaState, -3);
+	lua_pushvalue(InLuaState, -1);
+	lua_setfield(InLuaState, -2, "__index");
+// 	lua_pushstring(InLuaState, "__index");
+// 	lua_pushcfunction(InLuaState, MetaTableIndexFunc);
+// 	lua_rawset(InLuaState, -3);
+// 	lua_pushstring(InLuaState, "__newindex");
+// 	lua_pushcfunction(InLuaState, MetaTableNewIndexFunc);
+// 	lua_rawset(InLuaState, -3);
 }
 
 void FLuaUtil::InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName)

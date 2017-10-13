@@ -18,9 +18,21 @@ function Init(num)
 	Test1:TestBaseFunc()
 	LuaPrint.print("MyTest");
 	MyTest:TestBaseFunc()
-]]
+
 	local TestBase = FMyTestBase.CreateSelf();
 	TestBase.mVariable = 10;
 	LuaPrint.print("aaa"..TestBase.mVariable);
+
+
+	local TestBase = FMyTestBase.CreateSelf();
+	TestBase.mVariable = 10;
+	LuaPrint.print("aaa"..TestBase.mVariable);
+	]]
+	
+	local hitResult = FHitResult.New();
+	hitResult:Set_FaceIndex(10);
+
+	hitResult:Destory();
+	
 	return num+3, 4, true;
 end

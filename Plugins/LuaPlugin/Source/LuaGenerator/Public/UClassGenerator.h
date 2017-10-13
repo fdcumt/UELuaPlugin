@@ -20,7 +20,7 @@ public:
 
 public:
 	/** FBaseGenerator interface */
-	virtual FString GetKey() const override { return m_pClass->GetName(); }
+	virtual FString GetKey() const override { return GetClassName(); }
 	virtual FString GetFileName() const override;
 	virtual FString GetRegName() const override;
 	virtual bool CanExport()const  override;
@@ -31,13 +31,16 @@ public:
 private:
 	virtual void GetParentNames(TArray<FString> &OutParentNames) const override;
 
+public:
+	void ExportDataMembersToMemory();
+	void ExportFunctionMembersToMemory();
+
 private:
 	FString GetFileHeader();
 	FString GetFileInclude();
 	FString GetFileFunctionContents();
 	FString GetFileRegContents();
 	bool CanExportFunction(UFunction *InFunction);
-	FExportFunctionInfo GetFunctionInfo(UFunction* InFunction);
 
 private:
 	UClass *m_pClass;

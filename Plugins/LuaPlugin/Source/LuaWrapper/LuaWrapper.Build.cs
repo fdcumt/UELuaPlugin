@@ -28,8 +28,10 @@ public class LuaWrapper : ModuleRules
 			new string[]
 			{
 				"Core",
+                "Engine",
                 "CoreUObject",
                 "Slate",
+                "InputCore",
                 "MyProject",
             });
 

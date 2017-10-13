@@ -1,4 +1,5 @@
 #pragma once
+#include "LuaConfigManager.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 
@@ -14,19 +15,22 @@ DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 #endif
 
 extern class FScriptGeneratorManager *g_ScriptGeneratorManager;
+extern class FLuaConfigManager *g_LuaConfigManager;
 
 namespace NS_LuaGenerator
 {
 	enum E_GeneratorType
 	{
 		EUClass = 0,
-		EConfigClass = 1,
+		EUStruct = 1,
+		EConfigClass = 2,
 	};
 
 	enum EVariableType
 	{
 		EBaseType, // int,uint16,uinit32,uint64,float,char*,bool
 		EPoint,
+		EMutilPoint, 
 		EObjectBase,
 		EFName,
 		EText,
@@ -70,9 +74,13 @@ namespace NS_LuaGenerator
 	extern TArray<FString> ClassConfigFileNames;
 
 	EVariableType ResolvePropertyType(UProperty *pProperty);
-	FString GetPropertyType(UProperty *Property, uint32 PortFlags = 0);
+	int32 CalcStarNum(const FString &InStr);
+	FString GetFuncParamPropertyType(UProperty *Property, uint32 PortFlags = 0);
+	FString GetDataMemberPropertyType(UProperty *Property, uint32 PortFlags = 0);
 	bool StringForwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
 	bool StringBackContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcTailIndex);
+	bool CanExportProperty(UProperty *InProperty);
+	bool CanExportFunction(UFunction *InFunction);
 }
 
 

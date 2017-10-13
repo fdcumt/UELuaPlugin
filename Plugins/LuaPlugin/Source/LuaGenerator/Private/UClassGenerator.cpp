@@ -21,7 +21,7 @@ FUClassGenerator::FUClassGenerator(UClass *InClass, const FString &InOutDir, con
 	, m_pClass(InClass)
 	, m_HeaderFileName(HeaderFile)
 {
-	m_LuaFuncReg.Init(InClass->GetName());
+	m_LuaFuncReg.Init(GetClassName());
 }
 
 FUClassGenerator::~FUClassGenerator()
@@ -31,19 +31,13 @@ FUClassGenerator::~FUClassGenerator()
 
 bool FUClassGenerator::CanExport() const
 {
-	return m_ClassConfig.CanExport(m_pClass->GetName());
+	return m_ClassConfig.CanExport(GetClassName());
 }
 
 void FUClassGenerator::ExportToMemory()
 {
-	for (TFieldIterator<UFunction> FuncIt(m_pClass /*, EFieldIteratorFlags::ExcludeSuper*/); FuncIt; ++FuncIt)
-	{
-		UFunction* Function = *FuncIt;
-		if (CanExportFunction(Function))
-		{
-			m_LuaFuncReg.AddFunction(GetFunctionInfo(Function));
-		}
-	}
+	ExportDataMembersToMemory();
+	ExportFunctionMembersToMemory();
 }
 
 void FUClassGenerator::SaveToFile()
@@ -63,17 +57,34 @@ void FUClassGenerator::SaveToFile()
 
 FString FUClassGenerator::GetClassName() const
 {
-	return m_pClass->GetName();
+	return FString("U")+m_pClass->GetName();
 }
 
 FString FUClassGenerator::GetFileName() const
 {
-	return m_pClass->GetName()+NS_LuaGenerator::ClassScriptHeaderSuffix;
+	return GetClassName() +NS_LuaGenerator::ClassScriptHeaderSuffix;
 }
 
 FString FUClassGenerator::GetRegName() const
 {
-	return FString::Printf(TEXT("%s_Lib"), *m_pClass->GetName());
+	return FString::Printf(TEXT("%s_Lib"), *GetClassName());
+}
+
+void FUClassGenerator::ExportDataMembersToMemory()
+{
+
+}
+
+void FUClassGenerator::ExportFunctionMembersToMemory()
+{
+	for (TFieldIterator<UFunction> FuncIt(m_pClass /*, EFieldIteratorFlags::ExcludeSuper*/); FuncIt; ++FuncIt)
+	{
+		UFunction* Function = *FuncIt;
+		if (NS_LuaGenerator::CanExportFunction(Function) && CanExportFunction(Function) && FExportFuncMemberInfo::CanExportFunction(Function))
+		{
+			m_LuaFuncReg.AddFunctionMember(FExportFuncMemberInfo::CreateFunctionMemberInfo(Function));
+		}
+	}
 }
 
 FString FUClassGenerator::GetFileHeader()
@@ -92,7 +103,7 @@ FString FUClassGenerator::GetFileInclude()
 
 FString FUClassGenerator::GetFileFunctionContents()
 {
-	return m_LuaFuncReg.GetFunctionContents();
+	return m_LuaFuncReg.GetFuncContents();
 }
 
 FString FUClassGenerator::GetFileRegContents()
@@ -108,13 +119,6 @@ bool FUClassGenerator::CanExportFunction(UFunction *InFunction)
 	}
 	
 	return true;
-}
-
-FExportFunctionInfo FUClassGenerator::GetFunctionInfo(UFunction* InFunction)
-{
-	FExportFunctionInfo functionInfo;
-	functionInfo.InitByUFunction(InFunction);
-	return functionInfo;
 }
 
 void FUClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const

@@ -209,8 +209,17 @@ FString FConfigClass::GetRegLibChunk()
 	Ret += EndLinePrintf(TEXT("static const luaL_Reg %s[] ="), *GetRegLibName());
 	Ret += EndLinePrintf(TEXT("{"));
 
-	// reg body
-	Ret += GetRegLibItemsChunk(Functions);
+	TSet<FString> FuncNames;
+	TArray<FConfigFunction> configFuncs;
+
+	for (const FConfigFunction &FuncItem : Functions)
+	{
+		if (!FuncNames.Contains(FuncItem.FunctionName))
+		{
+			configFuncs.Add(FuncItem);
+			FuncNames.Add(FuncItem.FunctionName);
+		}
+	}
 
 	// parent reg body
 	TArray<FString> ParentNames = g_ScriptGeneratorManager->GetParentNames(ClassName);
@@ -220,9 +229,18 @@ FString FConfigClass::GetRegLibChunk()
 		if (pGenerator && pGenerator->GetType() == NS_LuaGenerator::EConfigClass)
 		{
 			FConfigClassGenerator *pConfigGenerator = (FConfigClassGenerator*)pGenerator;
-			Ret += GetRegLibItemsChunk(pConfigGenerator->GetConfigFunctions());
+			for (const FConfigFunction &FuncItem : pConfigGenerator->GetConfigFunctions())
+			{
+				if (!FuncNames.Contains(FuncItem.FunctionName))
+				{
+					configFuncs.Add(FuncItem);
+					FuncNames.Add(FuncItem.FunctionName);
+				}
+			}
 		}
 	}
+
+	Ret += GetRegLibItemsChunk(configFuncs);
 
 	// variable reg body
 	for (const FConfigVariable& ConfigVariableItem : Variables)

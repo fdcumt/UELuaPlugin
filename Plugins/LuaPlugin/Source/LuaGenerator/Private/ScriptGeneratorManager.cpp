@@ -8,6 +8,8 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonSerializer.h"
 #include "ConfigClassDefine.h"
+#include "UStructGenerator.h"
+#include "LuaConfigManager.h"
 
 FScriptGeneratorManager::FScriptGeneratorManager()
 {
@@ -16,7 +18,7 @@ FScriptGeneratorManager::FScriptGeneratorManager()
 
 FScriptGeneratorManager::~FScriptGeneratorManager()
 {
-
+	SafeDelete(g_LuaConfigManager);
 }
 
 void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
@@ -78,6 +80,7 @@ bool FScriptGeneratorManager::CanExportClass(IScriptGenerator *InGenerator) cons
 void FScriptGeneratorManager::ExportExtrasToMemory()
 {
 	ExportConfigClasses();
+	ExportUStructs();
 }
 
 void FScriptGeneratorManager::AdjustBeforeSaveToFile()
@@ -143,6 +146,28 @@ void FScriptGeneratorManager::ParseConfigClass(const FString &&FileName, TArray<
 	}
 }
 
+void FScriptGeneratorManager::ExportUStructs()
+{
+	for (TObjectIterator<UScriptStruct> It; It; ++It)
+	{
+		ExportUStruct(*It);
+	}
+}
+
+void FScriptGeneratorManager::ExportUStruct(UScriptStruct *pScriptStruct)
+{
+	IScriptGenerator *pGenerator = FUStructGenerator::CreateGenerator(pScriptStruct, m_OutDir);
+	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
+	{
+		pGenerator->ExportToMemory();
+		AddGeneratorToMap(pGenerator);
+	}
+	else
+	{
+		SafeDelete(pGenerator);
+	}
+}
+
 void FScriptGeneratorManager::AddGeneratorToMap(IScriptGenerator *InGenerator)
 {
 	m_Generators.Add(InGenerator->GetKey(), InGenerator);
@@ -150,8 +175,14 @@ void FScriptGeneratorManager::AddGeneratorToMap(IScriptGenerator *InGenerator)
 
 void FScriptGeneratorManager::SaveToFiles()
 {
-	SaveUClassesToFiles();
-	SaveConfigClassesToFiles();
+// 	SaveUClassesToFiles();
+// 	SaveConfigClassesToFiles();
+
+	for (auto &MapItem : m_Generators)
+	{
+		IScriptGenerator *pGenerator = MapItem.Value;
+		pGenerator->SaveToFile();
+	}
 }
 
 void FScriptGeneratorManager::SaveUClassesToFiles()
@@ -181,6 +212,10 @@ void FScriptGeneratorManager::SaveConfigClassesToFiles()
 void FScriptGeneratorManager::InitConfig()
 {
 	FString ConfigFilePath = NS_LuaGenerator::ProjectPath / NS_LuaGenerator::LuaConfigFileRelativePath;
+
+	// init luaconfig
+	g_LuaConfigManager = new FLuaConfigManager;
+	g_LuaConfigManager->Init();
 
 	// init ClassConfigFileNames
 	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, NS_LuaGenerator::ClassConfigFileNames, ConfigFilePath);
@@ -216,6 +251,11 @@ void FScriptGeneratorManager::GenerateAndSaveAllHeaderFile()
 	{
 		IScriptGenerator *pGenerator = MapItem.Value;
 		HeaderFileNames.Add(*pGenerator->GetFileName());
+	}
+
+	for (const FString &IncludeHeader : g_LuaConfigManager->AdditionalIncludeHeaders)
+	{
+		AllHeaderFileContent += EndLinePrintf(TEXT("#include \"%s\""), *IncludeHeader);
 	}
 
 	for (const FString &FileName : HeaderFileNames)

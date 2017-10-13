@@ -5,7 +5,7 @@
 #define Def_TEXT(Str) #Str
 
 FScriptGeneratorManager *g_ScriptGeneratorManager = nullptr;
-
+FLuaConfigManager *g_LuaConfigManager = nullptr;
 
 DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
@@ -95,7 +95,61 @@ namespace NS_LuaGenerator
 		}
 	}
 
-	FString GetPropertyType(UProperty *Property, uint32 PortFlags/*=0*/)
+	bool CanExportProperty(UProperty *InProperty)
+	{
+		if (InProperty->PropertyFlags & CPF_Deprecated)
+		{
+			return false;
+		}
+
+		if (InProperty->PropertyFlags & CPF_NativeAccessSpecifierProtected)
+		{
+			return false;
+		}
+
+		if (InProperty->PropertyFlags & CPF_NativeAccessSpecifierPrivate)
+		{
+			return false;
+		}
+
+		if (InProperty->GetName().Contains("DEPRECATED"))
+		{
+			return false;
+		}
+
+		if (InProperty->PropertyFlags & CPF_EditorOnly)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CanExportFunction(UFunction *InFunction)
+	{
+		if (InFunction->HasAnyFunctionFlags(FUNC_EditorOnly) ||
+			InFunction->HasAnyFunctionFlags(FUNC_Private) ||
+			InFunction->HasAnyFunctionFlags(FUNC_Protected) )
+		{
+			return false;
+		}
+
+		if (InFunction->GetName().Contains("DEPRECATED") ||
+			InFunction->HasMetaData("Deprecated") ||
+			InFunction->HasMetaData("DeprecatedFunction"))
+		{
+			return false;
+		}
+
+		if (InFunction->GetName() == "ExecuteUbergraph")
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	FString GetFuncParamPropertyType(UProperty *Property, uint32 PortFlags/*=0*/)
 	{
 		static FString EnumDecl(TEXT("enum "));
 		static FString StructDecl(TEXT("struct "));
@@ -110,7 +164,7 @@ namespace NS_LuaGenerator
 		if (Property->IsA(UArrayProperty::StaticClass()))
 		{ // TArray
 			auto PropertyArr = Cast<UArrayProperty>(Property);
-			FString inerTypeCpp = GetPropertyType(PropertyArr->Inner, CPPF_ArgumentOrReturnValue);
+			FString inerTypeCpp = GetFuncParamPropertyType(PropertyArr->Inner, CPPF_ArgumentOrReturnValue);
 			if (inerTypeCpp == "EObjectTypeQuery")
 				inerTypeCpp = "TEnumAsByte<EObjectTypeQuery> ";
 			PropertyType = FString::Printf(TEXT("TArray<%s>"), *inerTypeCpp);
@@ -118,14 +172,14 @@ namespace NS_LuaGenerator
 		else if (Property->IsA(UMapProperty::StaticClass()))
 		{ // TMap
 			UMapProperty *pMapProperty = Cast<UMapProperty>(Property);
-			FString KeyProp = GetPropertyType(pMapProperty->KeyProp, CPPF_ArgumentOrReturnValue);
-			FString ValueProp = GetPropertyType(pMapProperty->ValueProp, CPPF_ArgumentOrReturnValue);
+			FString KeyProp = GetFuncParamPropertyType(pMapProperty->KeyProp, CPPF_ArgumentOrReturnValue);
+			FString ValueProp = GetFuncParamPropertyType(pMapProperty->ValueProp, CPPF_ArgumentOrReturnValue);
 			PropertyType = FString::Printf(TEXT("TMap<%s,%s>"), *KeyProp, *ValueProp);
 		}
 		else if (Property->IsA(USetProperty::StaticClass()))
 		{ // TSet
 			USetProperty *pSetProperty = Cast<USetProperty>(Property);
-			FString ElementProp = GetPropertyType(pSetProperty->ElementProp, CPPF_ArgumentOrReturnValue);
+			FString ElementProp = GetFuncParamPropertyType(pSetProperty->ElementProp, CPPF_ArgumentOrReturnValue);
 			PropertyType = FString::Printf(TEXT("TSet<%s>"), *ElementProp);
 		}
 		// Strip any forward declaration keywords
@@ -160,12 +214,88 @@ namespace NS_LuaGenerator
 		return PropertyType;
 	}
 
+	FString GetDataMemberPropertyType(UProperty *Property, uint32 PortFlags /*= 0*/)
+	{
+#define FlayType CPPF_OptionalValue
+		static FString EnumDecl(TEXT("enum "));
+		static FString StructDecl(TEXT("struct "));
+		static FString ClassDecl(TEXT("class "));
+		static FString TEnumAsByteDecl(TEXT("TEnumAsByte<enum "));
+		static FString TSubclassOfDecl(TEXT("TSubclassOf<class "));
+
+		FString PropertyType = Property->GetCPPType(NULL, PortFlags);
+
+		g_ScriptGeneratorManager->m_LogContent += FString::Printf(TEXT("GetDataMemberPropertyType:%"));
+
+
+		if (Property->PropertyFlags & CPF_BlueprintReadOnly)
+		{
+			g_ScriptGeneratorManager->m_LogContent += FString::Printf(TEXT("bpReadOnly "));
+		}
+
+		g_ScriptGeneratorManager->m_LogContent += FString::Printf(TEXT("%s,"), *PropertyType);
+
+
+
+		if (Property->IsA(UArrayProperty::StaticClass()))
+		{ // TArray
+			auto PropertyArr = Cast<UArrayProperty>(Property);
+			FString inerTypeCpp = GetFuncParamPropertyType(PropertyArr->Inner, FlayType);
+			if (inerTypeCpp == "EObjectTypeQuery")
+				inerTypeCpp = "TEnumAsByte<EObjectTypeQuery> ";
+			PropertyType = FString::Printf(TEXT("TArray<%s>"), *inerTypeCpp);
+		}
+		else if (Property->IsA(UMapProperty::StaticClass()))
+		{ // TMap
+			UMapProperty *pMapProperty = Cast<UMapProperty>(Property);
+			FString KeyProp = GetFuncParamPropertyType(pMapProperty->KeyProp, FlayType);
+			FString ValueProp = GetFuncParamPropertyType(pMapProperty->ValueProp, FlayType);
+			PropertyType = FString::Printf(TEXT("TMap<%s,%s>"), *KeyProp, *ValueProp);
+		}
+		else if (Property->IsA(USetProperty::StaticClass()))
+		{ // TSet
+			USetProperty *pSetProperty = Cast<USetProperty>(Property);
+			FString ElementProp = GetFuncParamPropertyType(pSetProperty->ElementProp, FlayType);
+			PropertyType = FString::Printf(TEXT("TSet<%s>"), *ElementProp);
+		}
+		// Strip any forward declaration keywords
+		if (PropertyType.StartsWith(EnumDecl) || PropertyType.StartsWith(StructDecl) || PropertyType.StartsWith(ClassDecl))
+		{
+			int32 FirstSpaceIndex = PropertyType.Find(TEXT(" "));
+			PropertyType = PropertyType.Mid(FirstSpaceIndex + 1);
+		}
+		else if (PropertyType.StartsWith(TEnumAsByteDecl))
+		{ // TEnumAsByte
+			int32 FirstSpaceIndex = PropertyType.Find(TEXT(" "));
+			PropertyType = TEXT("TEnumAsByte<") + PropertyType.Mid(FirstSpaceIndex + 1);
+		}
+		else if (PropertyType.StartsWith(TSubclassOfDecl))
+		{ // TSubclassOf
+			int32 FirstSpaceIndex = PropertyType.Find(TEXT(" "));
+			PropertyType = TEXT("TSubclassOf<") + PropertyType.Mid(FirstSpaceIndex + 1);
+		}
+
+		int32 LastCharIndex = PropertyType.Len() - 1;
+		while (LastCharIndex >= 0 && PropertyType[LastCharIndex] == ' ')
+		{
+			--LastCharIndex;
+		}
+
+		if (LastCharIndex >= 0)
+		{
+			PropertyType = PropertyType.Left(LastCharIndex + 1);
+		}
+
+		g_ScriptGeneratorManager->m_LogContent += FString::Printf(TEXT(",%s\r\n"), *PropertyType);
+		return PropertyType;
+	}
+
 	EVariableType ResolvePropertyType(UProperty *pProperty)
 	{
 		EVariableType eVariableType = EVariableType::EUnknow;
 		FString PropertyType;
 		bool bRecognize = false;
-		FString OriginalType = GetPropertyType(pProperty);
+		FString OriginalType = GetFuncParamPropertyType(pProperty);
 		PropertyType += FString::Printf(TEXT("UPropertyRealType:%s"), *OriginalType);
 		
 		if (pProperty->IsA(UIntProperty::StaticClass()) ||
@@ -183,11 +313,18 @@ namespace NS_LuaGenerator
 
 		if (pProperty->IsA(UObjectPropertyBase::StaticClass()) && !pProperty->IsA(UClassProperty::StaticClass()))
 		{
-			if (OriginalType.Contains("*"))
+			int32 StarNum = CalcStarNum(OriginalType);
+			if (StarNum==1)
 			{
 				eVariableType = EVariableType::EPoint;
 				bRecognize = true;
 				PropertyType += FString::Printf(TEXT(",EPoint"));
+			}
+			else if (StarNum > 1)
+			{
+				eVariableType = EVariableType::EMutilPoint;
+				bRecognize = true;
+				PropertyType += FString::Printf(TEXT(",EMutilPoint"));
 			}
 			else
 			{
@@ -220,11 +357,18 @@ namespace NS_LuaGenerator
 
 		if (pProperty->IsA(UClassProperty::StaticClass()))
 		{
-			if (OriginalType.Contains("*"))
+			int32 StarNum = CalcStarNum(OriginalType);
+			if (StarNum==1)
 			{
 				eVariableType = EVariableType::EPoint;
 				bRecognize = true;
 				PropertyType += FString::Printf(TEXT(",EPoint"));
+			}
+			else if (StarNum>1)
+			{
+				eVariableType = EVariableType::EMutilPoint;
+				bRecognize = true;
+				PropertyType += FString::Printf(TEXT(",EMutilPoint"));
 			}
 			else if (OriginalType.StartsWith("TSubclassOf<"))
 			{
@@ -401,6 +545,19 @@ namespace NS_LuaGenerator
 		g_ScriptGeneratorManager->m_PropertyType.Add(PropertyType);
 
 		return eVariableType;
+	}
+
+	int32 CalcStarNum(const FString &InStr)
+	{
+		int32 StarNum = 0;
+		for (int32 i=0; i<InStr.Len(); ++i)
+		{
+			if (InStr[i] == '*')
+			{
+				++StarNum;
+			}
+		}
+		return StarNum;
 	}
 
 }

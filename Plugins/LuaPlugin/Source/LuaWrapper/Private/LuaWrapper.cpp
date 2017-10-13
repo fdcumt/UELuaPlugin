@@ -1,4 +1,5 @@
 #include "LuaWrapper.h"
+#include "Core.h"
 #include "LuaUtil.h"
 #include "LuaWrapperDefine.h"
 #include "AllHeaders.h"

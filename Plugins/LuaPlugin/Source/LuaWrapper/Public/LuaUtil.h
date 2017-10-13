@@ -86,7 +86,7 @@ private:
 		if (lua_pcall(g_LuaState, paramCount, RetTypeNum.m_num, -(paramCount + 2)))
 		{
 			FString log = FString::Printf(TEXT("call r impl found an error: %s!!!"), ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
-			TemplateLogFatal(log);
+			TemplateLogError(log);
 		}
 	}
 
@@ -122,7 +122,7 @@ public: // push args
 	template<typename T>
 	static int Push(lua_State *InLuaState, const T& value)
 	{
-		TemplateLogFatal(TEXT("not find this arg type"));
+		TemplateLogError(TEXT("not find this arg type"));
 	}
 
 	static int32 Push(lua_State *InLuaState);
@@ -197,7 +197,7 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 	if (!ExistClass(InLuaState, value.m_ClassName))
 	{
 		FString log = FString::Printf(TEXT("push error, not export this class:%s"), ANSI_TO_TCHAR(value.m_ClassName));
-		TemplateLogFatal(log);
+		TemplateLogError(log);
 		return 1;
 	}
 
@@ -209,7 +209,9 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 
 	if (!ExistData(InLuaState, (void*)value.m_ClassObj))
 	{ // add to table
+	  // 这个函数分配分配一块指定大小的内存块， 把内存块地址作为一个完整的 userdata 压入堆栈，并返回这个地址。
 		*(T*)lua_newuserdata(InLuaState, sizeof(T)) = value.m_ClassObj;
+		// 把 t[k] 值压入堆栈
 		lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
 		lua_pushlightuserdata(InLuaState, value.m_ClassObj);
 		lua_pushvalue(InLuaState, -3);
@@ -234,7 +236,7 @@ void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<T> &&ReturnValue)
 	const char *ClassName = ReturnValue.m_ClassName;
 	if (!ExistClass(InLuaState, ReturnValue.m_ClassName))
 	{
-		TemplateLogFatal(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), ReturnValue.m_ClassName));
+		TemplateLogError(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), ReturnValue.m_ClassName));
 		return;
 	}
 
@@ -263,6 +265,6 @@ void FLuaUtil::TouserCppClassType(lua_State *InLuaState,  FLuaClassType<T> &&Out
 	}
 	else
 	{
-		TemplateLogFatal(TEXT("TouserCppClassType error"));
+		TemplateLogError(TEXT("TouserCppClassType error"));
 	}
 }
