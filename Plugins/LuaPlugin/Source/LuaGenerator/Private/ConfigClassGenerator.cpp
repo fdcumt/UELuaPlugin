@@ -30,7 +30,7 @@ FString FConfigClassGenerator::GetClassName() const
 
 FString FConfigClassGenerator::GetFileName() const
 {
-	return FString::Printf(TEXT("%s.Script.h"), *m_ConfigClass.GetClassName());
+	return m_ConfigClass.GetClassName() + g_LuaConfigManager->ClassScriptHeaderSuffix;
 }
 
 FString FConfigClassGenerator::GetRegName() const

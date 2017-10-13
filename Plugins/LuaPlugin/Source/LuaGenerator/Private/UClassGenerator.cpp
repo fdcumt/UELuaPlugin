@@ -5,17 +5,6 @@
 #include "UObjectIterator.h"
 #include "ScriptGeneratorManager.h"
 
-void FUClassGeneratorConfig::Init()
-{
-	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / g_LuaConfigManager->LuaConfigFileRelativePath;
-	GConfig->GetArray(NS_LuaGenerator::NotSupportClassSection, NS_LuaGenerator::NotSupportClassKey, m_NotSuportClasses, ConfigFilePath);
-}
-
-bool FUClassGeneratorConfig::CanExport(const FString &InClassName)
-{
-	return !m_NotSuportClasses.Contains(InClassName);
-}
-
 FUClassGenerator::FUClassGenerator(UClass *InClass, const FString &InOutDir, const FString& HeaderFile) 
 	: IScriptGenerator(NS_LuaGenerator::EUClass, InOutDir)
 	, m_pClass(InClass)
@@ -31,7 +20,7 @@ FUClassGenerator::~FUClassGenerator()
 
 bool FUClassGenerator::CanExport() const
 {
-	return m_ClassConfig.CanExport(GetClassName());
+	return !g_LuaConfigManager->NotSuportClasses.Contains(GetClassName());
 }
 
 void FUClassGenerator::ExportToMemory()
@@ -125,6 +114,4 @@ void FUClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
 {
 
 }
-
-FUClassGeneratorConfig FUClassGenerator::m_ClassConfig;
 

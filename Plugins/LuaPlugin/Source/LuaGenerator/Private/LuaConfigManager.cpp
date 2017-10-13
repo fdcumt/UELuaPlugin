@@ -6,14 +6,20 @@ void FLuaConfigManager::Init()
 {
 	ProjectPath.Empty();
 	GameModuleName.Empty();
-	ClassScriptHeaderSuffix = FString(".script.h");
-	LuaConfigFileRelativePath = FString("Config/LuaConfig.ini");
+
+	ClassScriptHeaderSuffix = ".script.h";
+	ClassConfigFileRelativeFolder = "Config";
 
 	FString ProjectFilePath = FPaths::GetProjectFilePath();
 	ProjectPath = FPaths::GetPath(ProjectFilePath);
-
+	LuaConfigFileRelativePath = FString("Config/LuaConfig.ini");
 	FString ConfigFilePath = ProjectPath / LuaConfigFileRelativePath;
+
+	GConfig->GetArray(TEXT("BaseType"), TEXT("BaseTypeKey"), BaseTypes, ConfigFilePath);
 	GConfig->GetArray(TEXT("SupportStructs"), TEXT("SupportStruct"), SupportStructs, ConfigFilePath);
+	GConfig->GetArray(TEXT("SupportModule"), TEXT("SupportModuleKey"), SupportedModules, ConfigFilePath);
+	GConfig->GetArray(TEXT("NotSupportClass"), TEXT("NotSupportClassKey"), NotSuportClasses, ConfigFilePath);
+	GConfig->GetArray(TEXT("ConfigClassFiles"), TEXT("ConfigClassFileName"), ClassConfigFileNames, ConfigFilePath);
 	GConfig->GetArray(TEXT("AdditionalIncludeHeaders"), TEXT("IncludeHeader"), AdditionalIncludeHeaders, ConfigFilePath);
 
 	if (FPaths::IsProjectFilePathSet())

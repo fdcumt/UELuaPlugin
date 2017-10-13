@@ -28,7 +28,7 @@ FString FUStructGenerator::GetKey() const
 
 FString FUStructGenerator::GetFileName() const
 {
-	return GetClassName() + ".script.h";
+	return GetClassName()+g_LuaConfigManager->ClassScriptHeaderSuffix;
 }
 
 FString FUStructGenerator::GetRegName() const

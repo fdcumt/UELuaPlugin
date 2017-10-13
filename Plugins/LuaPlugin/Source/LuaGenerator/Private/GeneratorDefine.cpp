@@ -11,23 +11,6 @@ DEFINE_LOG_CATEGORY(LogLuaGenerator);
 
 namespace NS_LuaGenerator
 {
-
-	const TCHAR* SupportModuleSection = TEXT("SupportModule");
-	const TCHAR* SupportModuleKey = TEXT("SupportModuleKey");
-
-	const TCHAR* NotSupportClassSection = TEXT("NotSupportClass");
-	const TCHAR* NotSupportClassKey = TEXT("NotSupportClassKey");
-
-	const TCHAR* BaseTypeSection = TEXT("BaseType");
-	const TCHAR* BaseTypeKey = TEXT("BaseTypeKey");
-	TArray<FString> BaseTypes;
-
-	const TCHAR* ConfigClassFilesSection = TEXT("ConfigClassFiles");
-	const TCHAR* ConfigClassFileKey = TEXT("ConfigClassFileName");
-	const FString ClassConfigFileRelativeFolder("Config");
-	TArray<FString> ClassConfigFileNames;
-
-
 	bool StringForwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex)
 	{
 		int32 SubIndex = 0;

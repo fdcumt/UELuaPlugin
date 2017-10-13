@@ -150,7 +150,7 @@ void FFunctionParam::GenerateIsNeedReadout()
 
 bool FFunctionParam::ParamIsBaseType()
 {
-	for (const FString &BaseType : NS_LuaGenerator::BaseTypes)
+	for (const FString &BaseType : g_LuaConfigManager->BaseTypes)
 	{
 		if (PureType == BaseType)
 		{

@@ -49,21 +49,6 @@ namespace NS_LuaGenerator
 		EUnknow,
 	};
 
-	extern const TCHAR* SupportModuleKey;
-	extern const TCHAR* SupportModuleSection;
-
-	extern const TCHAR* NotSupportClassSection;
-	extern const TCHAR* NotSupportClassKey;
-
-	extern const TCHAR* BaseTypeSection;
-	extern const TCHAR* BaseTypeKey;
-	extern TArray<FString> BaseTypes;
-
-	extern const TCHAR* ConfigClassFilesSection;
-	extern const TCHAR* ConfigClassFileKey;
-	extern const FString ClassConfigFileRelativeFolder;
-	extern TArray<FString> ClassConfigFileNames;
-
 	EVariableType ResolvePropertyType(UProperty *pProperty);
 	int32 CalcStarNum(const FString &InStr);
 	FString GetFuncParamPropertyType(UProperty *Property, uint32 PortFlags = 0);

@@ -2,16 +2,6 @@
 #include "IScriptGenerator.h"
 #include "BaseLuaFuncReg.h"
 
-class FUClassGeneratorConfig
-{
-public:
-	void Init();
-	bool CanExport(const FString &InClassName);
-
-private:
-	TArray<FString> m_NotSuportClasses;
-};
-
 class FUClassGenerator : public IScriptGenerator
 {
 public:
@@ -46,7 +36,4 @@ private:
 	UClass *m_pClass;
 	FBaseFuncReg m_LuaFuncReg;
 	FString m_HeaderFileName;
-
-public:
-	static FUClassGeneratorConfig m_ClassConfig;
 };

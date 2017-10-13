@@ -21,7 +21,4 @@ public:
 	virtual void ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged) override;
 	virtual void FinishExport() override;
 	virtual FString GetGeneratorName() const override;
-
-protected:
-	TArray<FString> m_SupportedModules;
 };

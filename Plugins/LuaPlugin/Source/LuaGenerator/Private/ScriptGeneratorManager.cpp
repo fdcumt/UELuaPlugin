@@ -97,10 +97,10 @@ void FScriptGeneratorManager::InitClassParentManager()
 
 void FScriptGeneratorManager::ExportConfigClasses()
 {
-	for (const FString&ConfigClassFileName : NS_LuaGenerator::ClassConfigFileNames)
+	for (const FString&ConfigClassFileName : g_LuaConfigManager->ClassConfigFileNames)
 	{
 		TArray<FConfigClass> ConfigClasses;
-		ParseConfigClass(g_LuaConfigManager->ProjectPath/NS_LuaGenerator::ClassConfigFileRelativeFolder/ConfigClassFileName, ConfigClasses);
+		ParseConfigClass(g_LuaConfigManager->ProjectPath/g_LuaConfigManager->ClassConfigFileRelativeFolder/ConfigClassFileName, ConfigClasses);
 
 		for (const FConfigClass& ClassItem : ConfigClasses)
 		{
@@ -211,13 +211,7 @@ void FScriptGeneratorManager::SaveConfigClassesToFiles()
 
 void FScriptGeneratorManager::InitConfig()
 {
-	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / g_LuaConfigManager->LuaConfigFileRelativePath;
 
-	// init ClassConfigFileNames
-	GConfig->GetArray(NS_LuaGenerator::ConfigClassFilesSection, NS_LuaGenerator::ConfigClassFileKey, NS_LuaGenerator::ClassConfigFileNames, ConfigFilePath);
-
-	// init baseTypes
-	GConfig->GetArray(NS_LuaGenerator::BaseTypeSection, NS_LuaGenerator::BaseTypeKey, NS_LuaGenerator::BaseTypes, ConfigFilePath);
 }
 
 void FScriptGeneratorManager::FinishExportPost()

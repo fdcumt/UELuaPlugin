@@ -27,7 +27,7 @@ FString FLuaGenerator::GetGeneratedCodeModuleName() const
 
 bool FLuaGenerator::ShouldExportClassesForModule(const FString& ModuleName, EBuildModuleType::Type ModuleType, const FString& ModuleGeneratedIncludeDirectory) const
 {
-	return m_SupportedModules.Contains(ModuleName);
+	return g_LuaConfigManager->SupportedModules.Contains(ModuleName);
 }
 
 bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
@@ -37,9 +37,6 @@ bool FLuaGenerator::SupportsTarget(const FString& TargetName) const
 
 void FLuaGenerator::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
-	FString ConfigFilePath = g_LuaConfigManager->ProjectPath / g_LuaConfigManager->LuaConfigFileRelativePath;
-	GConfig->GetArray(NS_LuaGenerator::SupportModuleSection, NS_LuaGenerator::SupportModuleKey, m_SupportedModules, ConfigFilePath);
-
 	g_ScriptGeneratorManager->Initialize(RootLocalPath, RootBuildPath, OutputDirectory, IncludeBase);
 }
 
