@@ -172,7 +172,7 @@ FString FBaseFuncReg::GetLuaGetDataMemberFuncContent(const FExportDataMemberInfo
 	}
 	else
 	{
-		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
+		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
 		RetContents += EndLinePrintf(TEXT("\t%s memberVariable = (%s)%spObj->%s;"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.AssignValuePrefix, *VariableInfo.VariableName);
 		RetContents += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(memberVariable, \"%s\"));"), *VariableInfo.DeclareType, *VariableInfo.PureType);
 	}
@@ -200,8 +200,8 @@ FString FBaseFuncReg::GetLuaSetDataMemberFuncContent(const FExportDataMemberInfo
 	else
 	{
 		RetContents += EndLinePrintf(TEXT("\t%s NewValue;"), *VariableInfo.DeclareType);
-		RetContents += EndLinePrintf(TEXT("\tFLuaUtil::Pop(InLuaState, FLuaClassType<%s>(NewValue, \"%s\"));"), *VariableInfo.DeclareType, *VariableInfo.PureType);
-		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
+		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
+		RetContents += EndLinePrintf(TEXT("\tFLuaUtil::TouserData(InLuaState, 2, FLuaClassType<%s>(NewValue, \"%s\"));"), *VariableInfo.DeclareType, *VariableInfo.PureType);
 		RetContents += EndLinePrintf(TEXT("\tpObj->%s = %sNewValue;"), *VariableInfo.VariableName, *VariableInfo.UsedSelfVarPrefix);
 	}
 

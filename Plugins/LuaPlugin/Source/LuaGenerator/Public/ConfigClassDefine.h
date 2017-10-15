@@ -49,7 +49,7 @@ public:
 	FString FunctionName;
 	FString RetType;
 	TArray<FString> ParamTypes;
-	TArray<FFunctionParam> Params;
+	TArray<FFunctionParam> FuncParams;
 
 public:
 	FString GetFunctionName() const;
@@ -74,6 +74,8 @@ public:
 public:
 	bool bStatic;
 	FString VariableType;
+	FString DeclareType;
+	FString DeclareType;
 	FString VariableName;
 
 public:

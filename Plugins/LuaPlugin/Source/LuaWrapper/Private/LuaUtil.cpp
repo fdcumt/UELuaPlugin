@@ -121,7 +121,8 @@ void FLuaUtil::InitMetaMethods(lua_State *InLuaState)
 	lua_rawset(InLuaState, -3);
 	lua_pushstring(InLuaState, "__newindex");
 	lua_pushcfunction(InLuaState, MetaTableNewIndexFunc);
-	lua_rawset(InLuaState, -3);
+	lua_rawset(InLuaState, -3);
+
 }
 
 void FLuaUtil::InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName)
@@ -268,105 +269,84 @@ int32 FLuaUtil::Push(lua_State *InLuaState,const FLuaClassType<const FString&> &
 	return 1;
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, uint8 &ReturnValue)
 {
-	lua_pop(InLuaState, 1);
+	ReturnValue = lua_tointeger(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, uint8 &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, float &ReturnValue)
 {
-	ReturnValue = lua_tointeger(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue = lua_tonumber(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, float &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, double &ReturnValue)
 {
-	ReturnValue = lua_tonumber(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue = lua_tonumber(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, double &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, bool &ReturnValue)
 {
-	ReturnValue = lua_tonumber(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue = !!(lua_toboolean(InLuaState, LuaStackIndex));
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, bool &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FText &ReturnValue)
 {
-	ReturnValue = !!(lua_toboolean(InLuaState, -1));
-	Pop(InLuaState);
+	ReturnValue = FText::FromString(luaL_checkstring(InLuaState, LuaStackIndex));
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FText &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FName &ReturnValue)
 {
-	ReturnValue = FText::FromString(luaL_checkstring(InLuaState, -1));
-	Pop(InLuaState);
+	ReturnValue = FName(luaL_checkstring(InLuaState, LuaStackIndex));
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FName &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FString &ReturnValue)
 {
-	ReturnValue = FName(luaL_checkstring(InLuaState, -1));
-	Pop(InLuaState);
+	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(InLuaState, LuaStackIndex)));
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FString &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, int32 &ReturnValue)
 {
-	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(InLuaState, -1)));
-	Pop(InLuaState);
+	ReturnValue = lua_tointeger(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, int32 &ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<uint8> &&ReturnValue)
 {
-	ReturnValue = lua_tointeger(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = lua_tointeger(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<uint8> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<int32> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tointeger(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = lua_tointeger(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<int32> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<float> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tointeger(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = lua_tonumber(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<float> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<double> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tonumber(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = lua_tonumber(InLuaState, LuaStackIndex);
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<double> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<bool> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_tonumber(InLuaState, -1);
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = lua_toboolean(InLuaState, LuaStackIndex)==1;
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<bool> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FText> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = lua_toboolean(InLuaState, -1)==1;
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = FText::FromString(ANSI_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<FText> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FName> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FText::FromString(ANSI_TO_TCHAR(lua_tostring(InLuaState, -1)));
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = FName(ANSI_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
 }
 
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<FName> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FString> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FName(ANSI_TO_TCHAR(lua_tostring(InLuaState, -1)));
-	Pop(InLuaState);
-}
-
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<FString> &&ReturnValue)
-{
-	ReturnValue.m_ClassObj = FString(ANSI_TO_TCHAR(lua_tostring(InLuaState, -1)));
-	Pop(InLuaState);
+	ReturnValue.m_ClassObj = FString(ANSI_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
 }
 
 int32 LuaErrHandleFunc(lua_State*LuaState)

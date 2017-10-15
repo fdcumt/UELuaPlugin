@@ -417,13 +417,19 @@ FString FConfigFunction::GetFunctionName() const
 
 FString FConfigFunction::GetFunctionBodyChunk(const FConfigClass &ConfigClass) const
 {
+	int32 luaStackIndex = 1;
 	FString Ret;
 	FString CallFuncStr;
 
-	for (int32 i=Params.Num()-1; i>=0; --i)
+	if (bStatic)
 	{
-		Ret += EndLinePrintf(TEXT("\t%s %s;"), *Params[i].GetDeclareType(), *Params[i].GetVariableName());
-		Ret += EndLinePrintf(TEXT("\tFLuaUtil::Pop(InLuaState, FLuaClassType<%s>(%s, \"%s\"));"), *Params[i].GetDeclareType(), *Params[i].GetVariableName(), *Params[i].GetPureType());
+		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, %d, \"%s\");"), *ConfigClass.GetClassName(), *ConfigClass.GetClassName(), luaStackIndex, *ConfigClass.GetClassName());
+		++luaStackIndex;
+	}
+
+	for (int32 i=0; i<FuncParams.Num(); ++i, ++luaStackIndex)
+	{
+		Ret += EndLinePrintf(TEXT("\t%s %s = FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *FuncParams[i].GetDeclareType(), *FuncParams[i].GetVariableName(), *FuncParams[i].GetDeclareType(), luaStackIndex, *FuncParams[i].GetPureType());
 	}
 
 	CallFuncStr = FString::Printf(TEXT("%s(%s);"), *FunctionName, *GetInParamsStr());
@@ -434,7 +440,6 @@ FString FConfigFunction::GetFunctionBodyChunk(const FConfigClass &ConfigClass) c
 	}
 	else
 	{
-		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *ConfigClass.GetClassName(), *ConfigClass.GetClassName(), *ConfigClass.GetClassName());
 		CallFuncStr = FString::Printf(TEXT("pObj->%s"), *CallFuncStr);
 	}
 
@@ -450,21 +455,20 @@ FString FConfigFunction::GetFunctionBodyChunk(const FConfigClass &ConfigClass) c
 		Ret += EndLinePrintf(TEXT("\treturn 0;"));
 	}
 
-	
 	return Ret;
 }
 
 FString FConfigFunction::GetInParamsStr() const 
 {
 	FString Ret;
-	for (int32 i=0; i<Params.Num()-1; ++i)
+	for (int32 i=0; i<FuncParams.Num()-1; ++i)
 	{
-		Ret += Params[i].GetUsedVariableStr()+", ";
+		Ret += FuncParams[i].GetUsedVariableStr()+", ";
 	}
 
-	if (Params.Num()>0)
+	if (FuncParams.Num()>0)
 	{
-		Ret += Params[Params.Num()-1].GetUsedVariableStr();
+		Ret += FuncParams[FuncParams.Num()-1].GetUsedVariableStr();
 	}
 
 	return Ret;
@@ -513,7 +517,7 @@ void FConfigFunction::ParseParams(const TSharedPtr<FJsonObject> &InJsonObj)
 			FString StrParam;
 			if (pFuncParamTypeInfo->TryGetString(StrParam))
 			{
-				Params.Add(FFunctionParam(index, StrParam));
+				FuncParams.Add(FFunctionParam(index, StrParam));
 			}
 			else
 			{
@@ -644,7 +648,7 @@ FString FConfigVariable::GenerateGetVariableTrunck(const FString &ClassName)cons
 	}
 	else
 	{
-		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *ClassName, *ClassName, *ClassName);
+		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, \"%s\");"), *ClassName, *ClassName, *ClassName);
 		Ret += EndLinePrintf(TEXT("\t%s memberVariable = pObj->%s;"), *VariableType, *VariableName);
 	}
 
@@ -657,13 +661,19 @@ FString FConfigVariable::GenerateGetVariableTrunck(const FString &ClassName)cons
 FString FConfigVariable::GenerateSetVariableTrunck(const FString &ClassName)const
 {
 	FString Ret;
+	int32 luaStackIndex = 1;
 	Ret += EndLinePrintf(TEXT(""));
 	Ret += EndLinePrintf(TEXT("static int32 %s_Set_%s(lua_State *InLuaState)"), *ClassName, *VariableName);
 	Ret += EndLinePrintf(TEXT("{"));
 
+	if (!bStatic)
+	{
+		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, %d, \"%s\");"), *ClassName, *ClassName, luaStackIndex, *ClassName);
+		++luaStackIndex;
+	}
 
-	Ret += EndLinePrintf(TEXT("\t%s memberVariable;"), *VariableType);
-	Ret += EndLinePrintf(TEXT("\tFLuaUtil::Pop(InLuaState, FLuaClassType<%s>(memberVariable, \"%s\"));"), *VariableType, *VariableType );
+	Ret += EndLinePrintf(TEXT("\t%s memberVariable = FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *VariableType, luaStackIndex, *VariableType, *VariableType );
+	++luaStackIndex;
 
 	if (bStatic)
 	{
@@ -671,7 +681,6 @@ FString FConfigVariable::GenerateSetVariableTrunck(const FString &ClassName)cons
 	}
 	else
 	{
-		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserCppClassType<%s*>(InLuaState, \"%s\");"), *ClassName, *ClassName, *ClassName);
 		Ret += EndLinePrintf(TEXT("\tpObj->%s = memberVariable;"), *VariableName);
 	}
 

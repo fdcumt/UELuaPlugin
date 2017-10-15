@@ -54,7 +54,6 @@ class LUAWRAPPER_API FLuaUtil
 public:
 	static void RegisterClass(lua_State *InLuaState, const luaL_Reg ClassFunctions[], const char *ClassName);
 
-
 public: // call functions 
 	template <class... T>
 	static void Call(const FString &FuncName, T&&... args)
@@ -67,7 +66,6 @@ public: // call functions
 	{
 		CallRImpl(FLuaReturnTypeNum(0), FLuaFuncName(FuncName), Forward<T>(args)...);
 	}
-
 
 public: // call function with return
 	template <class... T>
@@ -94,28 +92,49 @@ private:
 	static void CallRImpl(FLuaReturnTypeNum &&RetTypeNum, T1 &&ReturnValue, T&&... args)
 	{
 		CallRImpl(Forward<FLuaReturnTypeNum>(RetTypeNum+1), Forward<T>(args)...);
-		Pop(g_LuaState, ReturnValue);
+		TouserData(g_LuaState, -1, ReturnValue);
+		lua_pop(g_LuaState, 1);
 	}
-
 
 public:
 	template <class T>
-	static void TouserCppClassType(lua_State *InLuaState, FLuaClassType<T> &&OutValue); // 解析成 cpp class 类型
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<T> &&OutValue);
 
 	template <class T>
-	static T TouserCppClassType(lua_State *InLuaState, const char *ClassName)
+	static T TouserData(lua_State *InLuaState, const int32 LuaStackIndex, const char *ClassName)
 	{
 		T pCppObj;
-		TouserCppClassType(InLuaState, FLuaClassType<T>(pCppObj, ClassName));
+		TouserData(InLuaState, LuaStackIndex, FLuaClassType<T>(pCppObj, ClassName));
 		return pCppObj;
 	}
 
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, uint8   &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, float   &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, double  &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, bool    &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FText   &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FName   &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FString &ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, int32   &ReturnValue);
+
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<uint8>   &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<int32>   &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<float>   &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<double>  &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<bool>    &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FText>   &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FName>   &&ReturnValue);
+	static void TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FString> &&ReturnValue);
+
+private:
+	template <class T>
+	static void TouserDataInner(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<T> &&OutValue);
 
 public: // push args
 	template <class T1, class... T>
 	static int32 Push(lua_State *InLuaState, const T1 &Value, T&&... args)
 	{
-		int32 num = Push(Value);+
+		int32 num = Push(Value);
 		return num + Push(Forward<T>(args)...);
 	}
 
@@ -145,33 +164,6 @@ public: // push args
 	template <class T>
 	static int32 Push(lua_State *InLuaState, const FLuaClassType<T> &&value);
 
-
-
-public:
-	static void Pop(lua_State *InLuaState);
-	static void Pop(lua_State *InLuaState, uint8   &ReturnValue);
-	static void Pop(lua_State *InLuaState, float   &ReturnValue);
-	static void Pop(lua_State *InLuaState, double  &ReturnValue);
-	static void Pop(lua_State *InLuaState, bool    &ReturnValue);
-	static void Pop(lua_State *InLuaState, FText   &ReturnValue);
-	static void Pop(lua_State *InLuaState, FName   &ReturnValue);
-	static void Pop(lua_State *InLuaState, FString &ReturnValue);
-	static void Pop(lua_State *InLuaState, int32   &ReturnValue);
-
-	static void Pop(lua_State *InLuaState, FLuaClassType<uint8>   &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<int32>   &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<float>   &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<double>  &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<bool>    &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<FText>   &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<FName>   &&ReturnValue);
-	static void Pop(lua_State *InLuaState, FLuaClassType<FString> &&ReturnValue);
-
-	template <class T>
-	static void Pop(lua_State *InLuaState, FLuaClassType<T> &&value);
-	
-
-
 private: // not export Function
 	static void AddClass(lua_State *InLuaState, const char *ClassName);
 	static void OpenClass(lua_State *InLuaState, const char *ClassName);
@@ -188,7 +180,6 @@ private: // log
 	static void TemplateLogWarning(const FString &Content);
 	static void TemplateLogError(const FString &Content);
 	static void TemplateLogFatal(const FString &Content);
-
 };
 
 template <class T>
@@ -231,40 +222,40 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 }
 
 template <class T>
-void FLuaUtil::Pop(lua_State *InLuaState, FLuaClassType<T> &&ReturnValue)
+void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<T> &&ReturnValue)
 {
 	const char *ClassName = ReturnValue.m_ClassName;
-	if (!ExistClass(InLuaState, ReturnValue.m_ClassName))
+	if (!ExistClass(InLuaState, LuaStackIndex, ReturnValue.m_ClassName))
 	{
 		TemplateLogError(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), ReturnValue.m_ClassName));
 		return;
 	}
 
-	TouserCppClassType(InLuaState, Forward<FLuaClassType<T>>(ReturnValue));
+	TouserDataInner(InLuaState, LuaStackIndex, Forward<FLuaClassType<T>>(ReturnValue));
 }
 
+
+// get value from lua stack where the position is luaStackIndex
 template <class T>
-void FLuaUtil::TouserCppClassType(lua_State *InLuaState,  FLuaClassType<T> &&OutValue)
+void FLuaUtil::TouserDataInner(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<T> &&OutValue)
 {
-	if (lua_isnil(InLuaState, -1))
+	if (lua_isnil(InLuaState, LuaStackIndex))
 	{
 		OutValue.m_ClassObj = nullptr;
-		lua_pop(InLuaState, 1);
 	}
-	else if (lua_isuserdata(InLuaState, -1) == 1)
+	else if (lua_isuserdata(InLuaState, LuaStackIndex) == 1)
 	{
-		OutValue.m_ClassObj = *(static_cast<T*>(lua_touserdata(InLuaState, -1)));
-		lua_pop(InLuaState, 1);
+		OutValue.m_ClassObj = *(static_cast<T*>(lua_touserdata(InLuaState, LuaStackIndex)));
 	}
-	else if (lua_istable(InLuaState, -1))
+	else if (lua_istable(InLuaState, LuaStackIndex))
 	{
 		lua_pushstring(InLuaState, "CppParent");
-		lua_rawget(InLuaState, -2);
-		lua_replace(InLuaState, -2);
-		TouserCppClassType(InLuaState, Forward<FLuaClassType<T>>(OutValue) );
+		lua_rawget(InLuaState, LuaStackIndex);
+		TouserDataInner(InLuaState, -1, Forward<FLuaClassType<T>>(OutValue) );
+		lua_pop(InLuaState, 1);
 	}
 	else
 	{
-		TemplateLogError(TEXT("TouserCppClassType error"));
+		TemplateLogError(TEXT("TouserData error"));
 	}
 }
