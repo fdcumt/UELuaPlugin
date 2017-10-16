@@ -1,0 +1,26 @@
+[
+	{
+		"ClassName":"USkeletalMeshComponent",
+		"CorrectList":
+		[
+			{
+				"VariableType":"UClass",
+				"VariableName":"AnimBlueprintGeneratedClass",
+				"PureType":"AnimBlueprintGeneratedClass",
+				"DeclareType":"UAnimBlueprintGeneratedClass*"
+			}
+		]
+	},
+	{
+		"ClassName":"UInterpTrackFloatAnimBPParam",
+		"CorrectList":
+		[
+			{
+				"VariableType":"UClass",
+				"VariableName":"AnimBlueprintClass",
+				"PureType":"AnimBlueprintGeneratedClass",
+				"DeclareType":"UAnimBlueprintGeneratedClass*"
+			}
+		]
+	}
+]

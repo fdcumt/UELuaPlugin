@@ -24,12 +24,17 @@ private:
 public:
 	void ExportDataMembersToMemory();
 	void ExportFunctionMembersToMemory();
+	void ExportExtraFuncsToMemory();
+
+private:
+	FExtraFuncMemberInfo GenerateNewExportFunction();
 
 private:
 	FString GetFileHeader();
 	FString GetFileInclude();
 	FString GetFileFunctionContents();
 	FString GetFileRegContents();
+	FString GetFileTailContents();
 	bool CanExportFunction(UFunction *InFunction);
 
 private:

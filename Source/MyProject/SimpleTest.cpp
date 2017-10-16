@@ -1,6 +1,16 @@
 #include "SimpleTest.h"
 DEFINE_LOG_CATEGORY(LogMyProject);
 
+UMyTestClass1::UMyTestClass1(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+UMyTestClass::UMyTestClass(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
 FMyTest* FMyTest::CreateSelf()
 {
 	return new FMyTest();

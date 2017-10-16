@@ -27,6 +27,7 @@ void FUClassGenerator::ExportToMemory()
 {
 	ExportDataMembersToMemory();
 	ExportFunctionMembersToMemory();
+	ExportExtraFuncsToMemory();
 }
 
 void FUClassGenerator::SaveToFile()
@@ -37,6 +38,7 @@ void FUClassGenerator::SaveToFile()
 	FileContent += GetFileInclude();
 	FileContent += GetFileFunctionContents();
 	FileContent += GetFileRegContents();
+	FileContent += GetFileTailContents();
 
 	if (!FFileHelper::SaveStringToFile(FileContent, *FilePathName))
 	{
@@ -46,7 +48,7 @@ void FUClassGenerator::SaveToFile()
 
 FString FUClassGenerator::GetClassName() const
 {
-	return FString("U")+m_pClass->GetName();
+	return FString::Printf(TEXT("%s%s"), m_pClass->GetPrefixCPP(), *m_pClass->GetName());
 }
 
 FString FUClassGenerator::GetFileName() const
@@ -61,7 +63,16 @@ FString FUClassGenerator::GetRegName() const
 
 void FUClassGenerator::ExportDataMembersToMemory()
 {
-
+	for (TFieldIterator<UProperty> PropertyIt(m_pClass/*, EFieldIteratorFlags::ExcludeSuper*/); PropertyIt; ++PropertyIt)
+	{
+		UProperty* pProperty = *PropertyIt;
+		FExportDataMemberInfo DataMemberInfo = FExportDataMemberInfo::CreateExportDataMemberInfo(pProperty);
+		FExportDataMemberInfo CorrectDataInfo = FExportDataMemberInfo::GetCorrectDataMemberInfo(GetClassName(), DataMemberInfo);
+		if (NS_LuaGenerator::CanExportProperty(pProperty) && CorrectDataInfo.CanExportDataMember(pProperty))
+		{
+			m_LuaFuncReg.AddDataMember(CorrectDataInfo);
+		}
+	}
 }
 
 void FUClassGenerator::ExportFunctionMembersToMemory()
@@ -76,10 +87,30 @@ void FUClassGenerator::ExportFunctionMembersToMemory()
 	}
 }
 
+void FUClassGenerator::ExportExtraFuncsToMemory()
+{
+	GenerateNewExportFunction();
+}
+
+FExtraFuncMemberInfo FUClassGenerator::GenerateNewExportFunction()
+{
+	FExtraFuncMemberInfo ExtraFuncNew;
+	ExtraFuncNew.funcName = "New";
+	FString &funcBody = ExtraFuncNew.funcBody;
+	funcBody += EndLinePrintf(TEXT("\tUObject* Outer = FLuaUtil::TouserData<UObject*>(InLuaState, 1, \"UObject\");"));
+	funcBody += EndLinePrintf(TEXT("\tFName Name = FName(luaL_checkstring(L, 2));"));
+	funcBody += EndLinePrintf(TEXT("\t%s* pObj = NewObject<%s>(Outer, Name);"), *GetClassName(), *GetClassName());
+	funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s*>(pObj, \"%s\"));"), *GetClassName(), *GetClassName());
+	funcBody += EndLinePrintf(TEXT("\treturn 1;"));
+
+	return ExtraFuncNew;
+}
+
 FString FUClassGenerator::GetFileHeader()
 {
 	FString StrContent;
 	StrContent += EndLinePrintf(TEXT("#pragma once"));
+	StrContent += EndLinePrintf(TEXT("PRAGMA_DISABLE_DEPRECATION_WARNINGS"));
 	return StrContent;
 }
 
@@ -98,6 +129,14 @@ FString FUClassGenerator::GetFileFunctionContents()
 FString FUClassGenerator::GetFileRegContents()
 {
 	return m_LuaFuncReg.GetRegLibContents();
+}
+
+FString FUClassGenerator::GetFileTailContents()
+{
+	FString StrContent;
+	StrContent += EndLinePrintf(TEXT(""));
+	StrContent += EndLinePrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
+	return StrContent;
 }
 
 bool FUClassGenerator::CanExportFunction(UFunction *InFunction)

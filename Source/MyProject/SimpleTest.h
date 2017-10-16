@@ -3,6 +3,25 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogMyProject, Log, All);
 
+UCLASS()
+class MYPROJECT_API UMyTestClass : public UObject
+{
+	GENERATED_UCLASS_BODY()
+public:
+	int32 mVariable;
+
+};
+
+UCLASS()
+class MYPROJECT_API UMyTestClass1 : public UObject
+{
+	GENERATED_UCLASS_BODY()
+public:
+	DEPRECATED(4.11, "This property is deprecated. Please use AnimClass instead")
+	UPROPERTY(BlueprintReadOnly, Category = Animation, meta = (DeprecationMessage = "This property is deprecated. Please use AnimClass instead"))
+		class UMyTestClass *myTestClass;
+};
+
 class MYPROJECT_API FMyTestBase
 {
 public:

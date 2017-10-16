@@ -1,6 +1,10 @@
 #include "LuaConfigManager.h"
 #include "GeneratorDefine.h"
 #include "ProjectDescriptor.h"
+#include "CoreUObject.h"
+#include "Misc/FileHelper.h"
+#include "UObjectIterator.h"
+#include "Serialization/JsonSerializer.h"
 
 void FLuaConfigManager::Init()
 {
@@ -41,4 +45,83 @@ void FLuaConfigManager::Init()
 
 	// init the GameModuleName by the first module name in the file of ProjectName.uproject 
 	ProjectDescriptor.Modules[0].Name.ToString(GameModuleName);
+
+	InitCorrectVariables();
+
+}
+
+void FLuaConfigManager::InitCorrectVariables()
+{
+	FString JsonStr;
+	TArray<TSharedPtr<FJsonValue>> JsonClasses;
+	FString ConfigFileName = ProjectPath / FString("Config/CorrectVariableType.json");
+	if (!FFileHelper::LoadFileToString(JsonStr, *ConfigFileName))
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables loadFile %s error!"), *ConfigFileName);
+		return;
+	}
+
+	TSharedRef<TJsonReader<TCHAR>> jsonReader = TJsonReaderFactory<TCHAR>::Create(JsonStr);
+	if (!FJsonSerializer::Deserialize(jsonReader, JsonClasses))
+	{
+		UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables from file %s found an error, please check again!"), *ConfigFileName);
+		return;
+	}
+
+	for (const TSharedPtr<FJsonValue> &pClassInfoItem : JsonClasses)
+	{
+		FString className;
+		TArray<FCorrectVariableInfo> correctVariableInfos;
+		TSharedPtr<FJsonObject> pJsonObj = pClassInfoItem->AsObject();
+		if (!pJsonObj->TryGetStringField("ClassName", className))
+		{
+			UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables try get className error!"));
+			return;
+		}
+
+		const TArray<TSharedPtr<FJsonValue>> *JsonCorrects;
+		if (pJsonObj->TryGetArrayField("CorrectList", JsonCorrects))
+		{
+			FCorrectVariableInfo correctVariableInfo;
+			for (const TSharedPtr<FJsonValue> &CorrectItem : *JsonCorrects)
+			{
+				TSharedPtr<FJsonObject> pJsonCorrectItem = CorrectItem->AsObject();
+				if (!pJsonCorrectItem->TryGetStringField("VariableType", correctVariableInfo.VariableType))
+				{
+					UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables try get VariableType error!"));
+					return;
+				}
+				if (!pJsonCorrectItem->TryGetStringField("VariableName", correctVariableInfo.VariableName))
+				{
+					UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables try get VariableName error!"));
+					return;
+				}
+				if (!pJsonCorrectItem->TryGetStringField("PureType", correctVariableInfo.PureType))
+				{
+					UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables try get PureType error!"));
+					return;
+				}
+				if (!pJsonCorrectItem->TryGetStringField("DeclareType", correctVariableInfo.DeclareType))
+				{
+					UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables try get DeclareType error!"));
+					return;
+				}
+			}
+			correctVariableInfos.Add(correctVariableInfo);
+		}
+		else
+		{
+			UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables try get CorrectList error!"));
+		}
+
+		if (!CorrectVariableTypes.Contains(className))
+		{
+			CorrectVariableTypes.Add(className, correctVariableInfos);
+		}
+		else
+		{
+			UE_LOG(LogLuaGenerator, Error, TEXT("FLuaConfigManager::InitCorrectVariables there are same class in config file:%s!"), *ConfigFileName);
+		}
+
+	}
 }

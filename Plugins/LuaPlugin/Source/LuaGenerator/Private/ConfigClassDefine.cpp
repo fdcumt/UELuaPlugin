@@ -630,9 +630,7 @@ FConfigVariable::FConfigVariable(const TSharedPtr<FJsonObject> &InJsonObj)
 FString FConfigVariable::GetVariableTrunck(const FString &ClassName) const 
 {
 	FString Ret;
-	DebugProcedure(TEXT("GenerateGetVariableTrunck"));
 	Ret += GenerateGetVariableTrunck(ClassName);
-	DebugProcedure(TEXT("GenerateSetVariableTrunck"));
 	Ret += GenerateSetVariableTrunck(ClassName);
 	return Ret;
 }

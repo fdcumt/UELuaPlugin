@@ -84,7 +84,7 @@ void FUStructGenerator::SaveToFile()
 
 FString FUStructGenerator::GetClassName() const
 {
-	return FString("F") + m_pScriptStruct->GetName();
+	return FString::Printf(TEXT("%s%s"), m_pScriptStruct->GetPrefixCPP(), *m_pScriptStruct->GetName());
 }
 
 void FUStructGenerator::GetParentNames(TArray<FString> &OutParentNames) const

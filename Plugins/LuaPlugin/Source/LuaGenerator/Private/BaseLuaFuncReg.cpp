@@ -1,213 +1,7 @@
 #include "BaseLuaFuncReg.h"
-#include "GeneratorDefine.h"
 #include "ScriptGeneratorManager.h"
 #include "CoreUObject.h"
 using namespace NS_LuaGenerator;
-
-void FBaseFuncReg::Init(const FString &ClassName)
-{
-	m_ClassName = ClassName;
-}
-
-void FBaseFuncReg::AddExtraFuncMember(const FExtraFuncMemberInfo&ExtraFuncMemberInfo)
-{
-	m_ExtraFuncs.Add(ExtraFuncMemberInfo);
-}
-
-void FBaseFuncReg::AddFunctionMember(const FExportFuncMemberInfo &ExportFuncInfo)
-{
-	m_FunctionMembers.Add(ExportFuncInfo.FunctionName, ExportFuncInfo);
-}
-
-void FBaseFuncReg::AddDataMember(const FExportDataMemberInfo &InDataMemberInfo)
-{
-	m_DataMembers.Add(InDataMemberInfo.VariableInfo.VariableName, InDataMemberInfo);
-}
-
-FString FBaseFuncReg::GetFuncMemberContents()
-{
-	FString FunctionContents;
-	for (const auto &Item : m_FunctionMembers)
-	{
-		const FExportFuncMemberInfo &FunctionItem = Item.Value;
-
-		FunctionContents += EndLinePrintf(TEXT(""));
-		FunctionContents += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaFuncMemberName(FunctionItem.FunctionName));
-		FunctionContents += EndLinePrintf(TEXT("{"));
-
-		if (!FunctionItem.bSupportNow)
-		{
-			for (int32 i = 0; i < FunctionItem.FunctionParams.Num(); ++i)
-			{
-				FunctionContents += EndLinePrintf(TEXT("\t//Param type:%s"), *FunctionItem.FunctionParams[i].OriginalType);
-			}
-			FunctionContents += EndLinePrintf(TEXT("\t//return type:%s"), *FunctionItem.ReturnType.OriginalType);
-		}
-		else
-		{
-			for (int32 i = 0; i < FunctionItem.FunctionParams.Num(); ++i)
-			{
-				FunctionContents += EndLinePrintf(TEXT("\t//OriginalTypeType:%s, DeclareType:%s"), *FunctionItem.FunctionParams[i].OriginalType, *FunctionItem.FunctionParams[i].DeclareType);
-			}
-			FunctionContents += EndLinePrintf(TEXT("\t//return OriginalTypeType:%s, DeclareType:%s"), *FunctionItem.ReturnType.OriginalType, *FunctionItem.ReturnType.DeclareType);
-		}
-
-		if (FunctionItem.ReturnType.OriginalType=="void")
-		{
-			FunctionContents += EndLinePrintf(TEXT("\treturn 0;"));
-		}
-		else
-		{
-			FunctionContents += EndLinePrintf(TEXT("\treturn 1;"));
-		}
-		
-		FunctionContents += EndLinePrintf(TEXT("}"));
-	}
-
-	return FunctionContents;
-}
-
-FString FBaseFuncReg::GetDataMemberContents()
-{
-	FString RetContents;
-	for (const auto &Item : m_DataMembers)
-	{
-		const FExportDataMemberInfo &DataMemberInfo = Item.Value;
-		RetContents += GetLuaGetDataMemberFuncContent(DataMemberInfo);
-		RetContents += GetLuaSetDataMemberFuncContent(DataMemberInfo);
-	}
-	return RetContents;
-}
-
-FString FBaseFuncReg::GetRegLibContents()
-{
-	FString RegLibContents;
-
-	RegLibContents += EndLinePrintf(TEXT(""));
-	RegLibContents += EndLinePrintf(TEXT("static const luaL_Reg %s_Lib[] ="), *m_ClassName);
-	RegLibContents += EndLinePrintf(TEXT("{"));
-
-	for (const auto &Item : m_FunctionMembers)
-	{
-		const FExportFuncMemberInfo &FunctionItem = Item.Value;
-		RegLibContents += EndLinePrintf(TEXT("\t{ \"%s\", %s },"), *FunctionItem.FunctionName, *GetLuaFuncMemberName(FunctionItem.FunctionName));
-	}
-
-	for (const auto &Item : m_DataMembers)
-	{
-		const FExportDataMemberInfo &DataMember = Item.Value;
-		RegLibContents += EndLinePrintf(TEXT("\t{ \"Get_%s\", %s },"), *DataMember.VariableInfo.VariableName, *GetLuaGetDataMemberName(DataMember.VariableInfo.VariableName));
-		RegLibContents += EndLinePrintf(TEXT("\t{ \"Set_%s\", %s },"), *DataMember.VariableInfo.VariableName, *GetLuaSetDataMemberName(DataMember.VariableInfo.VariableName));
-	}
-
-	for (const FExtraFuncMemberInfo &Item : m_ExtraFuncs)
-	{
-		RegLibContents += EndLinePrintf(TEXT("\t{ \"%s\", %s },"), *Item.funcName, *GetLuaFuncMemberName(Item.funcName));
-	}
-
-	RegLibContents += EndLinePrintf(TEXT("\t{ NULL, NULL }"));
-	RegLibContents += EndLinePrintf(TEXT("};"));
-
-	return RegLibContents;
-}
-
-FString FBaseFuncReg::GetFuncContents()
-{
-	FString Ret;
-	Ret += GetFuncMemberContents();
-	Ret += GetDataMemberContents();
-	Ret += GetExtraFuncContents();
-	return Ret;
-}
-
-FString FBaseFuncReg::GetExtraFuncContents()
-{
-	FString Ret;
-	for (const FExtraFuncMemberInfo&Item : m_ExtraFuncs)
-	{
-		Ret += GetExtraFuncContent(Item);
-	}
-	return Ret;
-}
-
-FString FBaseFuncReg::GetLuaFuncMemberName(const FString &FuncName)
-{
-	return m_ClassName + "_" + FuncName;
-}
-
-FString FBaseFuncReg::GetLuaGetDataMemberName(const FString &VariableName)
-{
-	return m_ClassName + "_Get_" + VariableName;
-}
-
-FString FBaseFuncReg::GetLuaSetDataMemberName(const FString &VariableName)
-{
-	return m_ClassName + "_Set_" + VariableName;
-}
-
-FString FBaseFuncReg::GetExtraFuncContent(const FExtraFuncMemberInfo &InDataMemberInfo)
-{
-	FString Ret;
-	Ret += EndLinePrintf(TEXT(""));
-	Ret += EndLinePrintf(TEXT("static int32 %s_%s(lua_State *InLuaState)"), *m_ClassName, *InDataMemberInfo.funcName);
-	Ret += EndLinePrintf(TEXT("{"));
-	Ret += InDataMemberInfo.funcBody;
-	Ret += EndLinePrintf(TEXT("}"));
-
-	return Ret;	
-}
-
-FString FBaseFuncReg::GetLuaGetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo)
-{
-	FString RetContents;
-	const FVariableTypeInfo &VariableInfo = InDataMemberInfo.VariableInfo;
-
-	RetContents += EndLinePrintf(TEXT(""));
-	RetContents += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaGetDataMemberName(VariableInfo.VariableName));
-	RetContents += EndLinePrintf(TEXT("{"));
-	if (!VariableInfo.bSupportNow)
-	{
-		RetContents += EndLinePrintf(TEXT("\t//%s %s;"), *VariableInfo.DeclareType, *VariableInfo.VariableName);
-	}
-	else
-	{
-		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
-		RetContents += EndLinePrintf(TEXT("\t%s memberVariable = (%s)(%s(pObj->%s));"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.AssignValuePrefix, *VariableInfo.VariableName);
-		RetContents += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(memberVariable, \"%s\"));"), *VariableInfo.DeclareType, *VariableInfo.PureType);
-	}
-
-	RetContents += EndLinePrintf(TEXT("\treturn 1;"));
-	RetContents += EndLinePrintf(TEXT("}"));
-
-	return RetContents;
-}
-
-FString FBaseFuncReg::GetLuaSetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo)
-{
-	FString RetContents;
-
-	const FVariableTypeInfo &VariableInfo = InDataMemberInfo.VariableInfo;
-
-	RetContents += EndLinePrintf(TEXT(""));
-	RetContents += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaSetDataMemberName(VariableInfo.VariableName));
-	RetContents += EndLinePrintf(TEXT("{"));
-
-	if (!VariableInfo.bSupportNow)
-	{
-		RetContents += EndLinePrintf(TEXT("\t//%s %s;"), *VariableInfo.DeclareType, *VariableInfo.VariableName);
-	}
-	else
-	{
-		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
-		RetContents += EndLinePrintf(TEXT("\t%s NewValue = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.PureType);
-		RetContents += EndLinePrintf(TEXT("\tpObj->%s = %sNewValue;"), *VariableInfo.VariableName, *VariableInfo.UsedSelfVarPrefix);
-	}
-
-	RetContents += EndLinePrintf(TEXT("\treturn 0;"));
-	RetContents += EndLinePrintf(TEXT("}"));
-
-	return RetContents;
-}
 
 void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 {
@@ -224,9 +18,19 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	eVariableType = ResolvePropertyType(pProperty);
 	DeclareType = OriginalType;
 	PureType = DeclareType;
+	PropertyName = pProperty->GetName();
 	VariableName = pProperty->GetName();
 	UsedSelfVarPrefix = FString("");
 	AssignValuePrefix = FString("");
+
+	CanGenerateSetFunc = true;
+	CanGenerateGetFunc = true;
+
+	if (pProperty->PropertyFlags & CPF_DisableEditOnInstance)
+	{
+		CanGenerateSetFunc = false;
+		CanGenerateGetFunc = true;
+	}
 
 	switch (eVariableType)
 	{
@@ -340,13 +144,232 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 FString FVariableTypeInfo::GetPureType(const FString &InType)
 {
 	// remove star suffix
-	int32 EndIndex = InType.Len()-1;
-	while (EndIndex>=0 && (InType[EndIndex]==' '||InType[EndIndex]=='*'))
+	int32 EndIndex = InType.Len() - 1;
+	while (EndIndex >= 0 && (InType[EndIndex] == ' ' || InType[EndIndex] == '*'))
 	{
 		--EndIndex;
 	}
 
 	return InType.Left(EndIndex + 1);
+}
+
+void FBaseFuncReg::Init(const FString &ClassName)
+{
+	m_ClassName = ClassName;
+}
+
+void FBaseFuncReg::AddExtraFuncMember(const FExtraFuncMemberInfo&ExtraFuncMemberInfo)
+{
+	m_ExtraFuncs.Add(ExtraFuncMemberInfo);
+}
+
+void FBaseFuncReg::AddFunctionMember(const FExportFuncMemberInfo &ExportFuncInfo)
+{
+	m_FunctionMembers.Add(ExportFuncInfo.FunctionName, ExportFuncInfo);
+}
+
+void FBaseFuncReg::AddDataMember(const FExportDataMemberInfo &InDataMemberInfo)
+{
+	m_DataMembers.Add(InDataMemberInfo.VariableInfo.VariableName, InDataMemberInfo);
+}
+
+FString FBaseFuncReg::GetFuncMemberContents()
+{
+	FString FunctionContents;
+	for (const auto &Item : m_FunctionMembers)
+	{
+		const FExportFuncMemberInfo &FunctionItem = Item.Value;
+
+		FunctionContents += EndLinePrintf(TEXT(""));
+		FunctionContents += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaFuncMemberName(FunctionItem.FunctionName));
+		FunctionContents += EndLinePrintf(TEXT("{"));
+
+		if (!FunctionItem.bSupportNow)
+		{
+			for (int32 i = 0; i < FunctionItem.FunctionParams.Num(); ++i)
+			{
+				FunctionContents += EndLinePrintf(TEXT("\t//Param type:%s"), *FunctionItem.FunctionParams[i].OriginalType);
+			}
+			FunctionContents += EndLinePrintf(TEXT("\t//return type:%s"), *FunctionItem.ReturnType.OriginalType);
+		}
+		else
+		{
+			for (int32 i = 0; i < FunctionItem.FunctionParams.Num(); ++i)
+			{
+				FunctionContents += EndLinePrintf(TEXT("\t//OriginalTypeType:%s, DeclareType:%s"), *FunctionItem.FunctionParams[i].OriginalType, *FunctionItem.FunctionParams[i].DeclareType);
+			}
+			FunctionContents += EndLinePrintf(TEXT("\t//return OriginalTypeType:%s, DeclareType:%s"), *FunctionItem.ReturnType.OriginalType, *FunctionItem.ReturnType.DeclareType);
+		}
+
+		if (FunctionItem.ReturnType.OriginalType=="void")
+		{
+			FunctionContents += EndLinePrintf(TEXT("\treturn 0;"));
+		}
+		else
+		{
+			FunctionContents += EndLinePrintf(TEXT("\treturn 1;"));
+		}
+		
+		FunctionContents += EndLinePrintf(TEXT("}"));
+	}
+
+	return FunctionContents;
+}
+
+FString FBaseFuncReg::GetDataMemberContents()
+{
+	FString RetContents;
+	for (const auto &Item : m_DataMembers)
+	{
+		const FExportDataMemberInfo &DataMemberInfo = Item.Value;
+		if (DataMemberInfo.VariableInfo.CanGenerateGetFunc)
+		{
+			RetContents += GetLuaGetDataMemberFuncContent(DataMemberInfo);
+		}
+		
+		if (DataMemberInfo.VariableInfo.CanGenerateSetFunc)
+		{
+			RetContents += GetLuaSetDataMemberFuncContent(DataMemberInfo);
+		}
+	}
+	return RetContents;
+}
+
+FString FBaseFuncReg::GetRegLibContents()
+{
+	FString RegLibContents;
+
+	RegLibContents += EndLinePrintf(TEXT(""));
+	RegLibContents += EndLinePrintf(TEXT("static const luaL_Reg %s_Lib[] ="), *m_ClassName);
+	RegLibContents += EndLinePrintf(TEXT("{"));
+
+	for (const auto &Item : m_FunctionMembers)
+	{
+		const FExportFuncMemberInfo &FunctionItem = Item.Value;
+		RegLibContents += EndLinePrintf(TEXT("\t{ \"%s\", %s },"), *FunctionItem.FunctionName, *GetLuaFuncMemberName(FunctionItem.FunctionName));
+	}
+
+	for (const auto &Item : m_DataMembers)
+	{
+		const FExportDataMemberInfo &DataMember = Item.Value;
+		if (DataMember.VariableInfo.CanGenerateGetFunc)
+		{
+			RegLibContents += EndLinePrintf(TEXT("\t{ \"Get_%s\", %s },"), *DataMember.VariableInfo.VariableName, *GetLuaGetDataMemberName(DataMember.VariableInfo.VariableName));
+		}
+		if (DataMember.VariableInfo.CanGenerateSetFunc)
+		{
+			RegLibContents += EndLinePrintf(TEXT("\t{ \"Set_%s\", %s },"), *DataMember.VariableInfo.VariableName, *GetLuaSetDataMemberName(DataMember.VariableInfo.VariableName));
+		}
+	}
+
+	for (const FExtraFuncMemberInfo &Item : m_ExtraFuncs)
+	{
+		RegLibContents += EndLinePrintf(TEXT("\t{ \"%s\", %s },"), *Item.funcName, *GetLuaFuncMemberName(Item.funcName));
+	}
+
+	RegLibContents += EndLinePrintf(TEXT("\t{ NULL, NULL }"));
+	RegLibContents += EndLinePrintf(TEXT("};"));
+
+	return RegLibContents;
+}
+
+FString FBaseFuncReg::GetFuncContents()
+{
+	FString Ret;
+	Ret += GetFuncMemberContents();
+	Ret += GetDataMemberContents();
+	Ret += GetExtraFuncContents();
+	return Ret;
+}
+
+FString FBaseFuncReg::GetExtraFuncContents()
+{
+	FString Ret;
+	for (const FExtraFuncMemberInfo&Item : m_ExtraFuncs)
+	{
+		Ret += GetExtraFuncContent(Item);
+	}
+	return Ret;
+}
+
+FString FBaseFuncReg::GetLuaFuncMemberName(const FString &FuncName)
+{
+	return m_ClassName + "_" + FuncName;
+}
+
+FString FBaseFuncReg::GetLuaGetDataMemberName(const FString &VariableName)
+{
+	return m_ClassName + "_Get_" + VariableName;
+}
+
+FString FBaseFuncReg::GetLuaSetDataMemberName(const FString &VariableName)
+{
+	return m_ClassName + "_Set_" + VariableName;
+}
+
+FString FBaseFuncReg::GetExtraFuncContent(const FExtraFuncMemberInfo &InDataMemberInfo)
+{
+	FString Ret;
+	Ret += EndLinePrintf(TEXT(""));
+	Ret += EndLinePrintf(TEXT("static int32 %s_%s(lua_State *InLuaState)"), *m_ClassName, *InDataMemberInfo.funcName);
+	Ret += EndLinePrintf(TEXT("{"));
+	Ret += InDataMemberInfo.funcBody;
+	Ret += EndLinePrintf(TEXT("}"));
+
+	return Ret;	
+}
+
+FString FBaseFuncReg::GetLuaGetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo)
+{
+
+	FString RetContents;
+	const FVariableTypeInfo &VariableInfo = InDataMemberInfo.VariableInfo;
+
+	RetContents += EndLinePrintf(TEXT(""));
+	RetContents += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaGetDataMemberName(VariableInfo.VariableName));
+	RetContents += EndLinePrintf(TEXT("{"));
+	if (!VariableInfo.bSupportNow)
+	{
+		RetContents += EndLinePrintf(TEXT("\t//%s %s;"), *VariableInfo.DeclareType, *VariableInfo.VariableName);
+	}
+	else
+	{
+		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
+		RetContents += EndLinePrintf(TEXT("\t%s memberVariable = (%s)%spObj->%s;"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.AssignValuePrefix, *VariableInfo.VariableName);
+		RetContents += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(memberVariable, \"%s\"));"), *VariableInfo.DeclareType, *VariableInfo.PureType);
+	}
+
+	RetContents += EndLinePrintf(TEXT("\treturn 1;"));
+	RetContents += EndLinePrintf(TEXT("}"));
+
+	return RetContents;
+}
+
+FString FBaseFuncReg::GetLuaSetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo)
+{
+	FString RetContents;
+
+	const FVariableTypeInfo &VariableInfo = InDataMemberInfo.VariableInfo;
+
+	RetContents += EndLinePrintf(TEXT(""));
+	RetContents += EndLinePrintf(TEXT("static int32 %s(lua_State *InLuaState)"), *GetLuaSetDataMemberName(VariableInfo.VariableName));
+	RetContents += EndLinePrintf(TEXT("{"));
+
+	if (!VariableInfo.bSupportNow)
+	{
+		RetContents += EndLinePrintf(TEXT("\t//%s %s;"), *VariableInfo.DeclareType, *VariableInfo.VariableName);
+	}
+	else
+	{
+		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
+		RetContents += EndLinePrintf(TEXT("\t%s NewValue = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.PureType);
+		RetContents += EndLinePrintf(TEXT("\tpObj->%s = %sNewValue;"), *VariableInfo.VariableName, *VariableInfo.UsedSelfVarPrefix);
+	}
+
+	RetContents += EndLinePrintf(TEXT("\treturn 0;"));
+	RetContents += EndLinePrintf(TEXT("}"));
+
+	return RetContents;
 }
 
 void FExportFuncMemberInfo::InitByUFunction(UFunction* InFunction)
@@ -406,6 +429,30 @@ FExportDataMemberInfo FExportDataMemberInfo::CreateExportDataMemberInfo(UPropert
 	FExportDataMemberInfo dataMemberInfo;
 	dataMemberInfo.Init(InProperty);
 	return dataMemberInfo;
+}
+
+FExportDataMemberInfo FExportDataMemberInfo::GetCorrectDataMemberInfo(const FString &ClassName, const FExportDataMemberInfo &InDataMemberInfo)
+{
+	FExportDataMemberInfo memberInfo = InDataMemberInfo;
+	TMap<FString, TArray<FCorrectVariableInfo> > &CorrectVariables = g_LuaConfigManager->CorrectVariableTypes;
+	TArray<FCorrectVariableInfo> *pCorrectVariables = CorrectVariables.Find(ClassName);
+	if (!pCorrectVariables)
+	{
+		return memberInfo;
+	}
+	else
+	{
+		for (const FCorrectVariableInfo &Item : *pCorrectVariables)
+		{
+			if (memberInfo.VariableInfo.PureType==Item.VariableType && memberInfo.VariableInfo.PropertyName == Item.VariableName)
+			{
+				memberInfo.VariableInfo.PureType = Item.PureType;
+				memberInfo.VariableInfo.DeclareType = Item.DeclareType;
+				return memberInfo;
+			}
+		}
+	}
+	return memberInfo;
 }
 
 bool FExportDataMemberInfo::CanExportDataMember(UProperty *InProperty)

@@ -10,9 +10,12 @@ public:
 	FString OriginalType;
 	FString DeclareType;
 	FString VariableName;
+	FString PropertyName;
 	FString PureType;
 	FString UsedSelfVarPrefix; 
 	FString AssignValuePrefix;
+	bool CanGenerateSetFunc;
+	bool CanGenerateGetFunc;
 	bool bSupportNow;
 	NS_LuaGenerator::EVariableType eVariableType;
 
@@ -48,6 +51,7 @@ struct FExportDataMemberInfo
 {
 public:
 	static FExportDataMemberInfo CreateExportDataMemberInfo(UProperty *InProperty);
+	static FExportDataMemberInfo GetCorrectDataMemberInfo(const FString &ClassName, const FExportDataMemberInfo &InDataMemberInfo);
 
 public:
 	bool CanExportDataMember(UProperty *InProperty);
