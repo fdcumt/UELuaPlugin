@@ -1,4 +1,5 @@
 #pragma once
+#include "SimpleTest.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogMyProject, Log, All);
 
@@ -47,4 +48,26 @@ public:
 
 private:
 	FMyTest1 *m_member;
+};
+
+
+USTRUCT(BlueprintType)
+struct FBaseStruct
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct)
+		int32 m;
+};
+
+USTRUCT(BlueprintType)
+struct FBaseStruct1
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
+		FBaseStruct m_Struct;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
+		int32 m_Value;
 };

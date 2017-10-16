@@ -15,9 +15,9 @@ void FLuaConfigManager::Init()
 	LuaConfigFileRelativePath = FString("Config/LuaConfig.ini");
 	FString ConfigFilePath = ProjectPath / LuaConfigFileRelativePath;
 
-	GConfig->GetArray(TEXT("BaseType"), TEXT("BaseTypeKey"), BaseTypes, ConfigFilePath);
-	GConfig->GetArray(TEXT("SupportStructs"), TEXT("SupportStruct"), SupportStructs, ConfigFilePath);
-	GConfig->GetArray(TEXT("SupportModule"), TEXT("SupportModuleKey"), SupportedModules, ConfigFilePath);
+	GConfig->GetArray(TEXT("BaseTypes"), TEXT("TypeName"), BaseTypes, ConfigFilePath);
+	GConfig->GetArray(TEXT("SupportStructs"), TEXT("StructName"), SupportStructs, ConfigFilePath);
+	GConfig->GetArray(TEXT("SupportModules"), TEXT("ModuleName"), SupportedModules, ConfigFilePath);
 	GConfig->GetArray(TEXT("NotSupportClass"), TEXT("NotSupportClassKey"), NotSuportClasses, ConfigFilePath);
 	GConfig->GetArray(TEXT("ConfigClassFiles"), TEXT("ConfigClassFileName"), ClassConfigFileNames, ConfigFilePath);
 	GConfig->GetArray(TEXT("AdditionalIncludeHeaders"), TEXT("IncludeHeader"), AdditionalIncludeHeaders, ConfigFilePath);
