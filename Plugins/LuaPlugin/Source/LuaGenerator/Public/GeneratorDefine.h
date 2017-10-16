@@ -14,6 +14,12 @@ DECLARE_LOG_CATEGORY_EXTERN(LogLuaGenerator, Log, All);
 #define DebugLog(FormatString, ...)
 #endif
 
+#if 0
+#define DebugProcedure(FormatString, ...) UE_LOG(LogLuaGenerator, Error, FormatString, ##__VA_ARGS__ )
+#else
+#define DebugProcedure(FormatString, ...)
+#endif
+
 extern class FScriptGeneratorManager *g_ScriptGeneratorManager;
 extern class FLuaConfigManager *g_LuaConfigManager;
 

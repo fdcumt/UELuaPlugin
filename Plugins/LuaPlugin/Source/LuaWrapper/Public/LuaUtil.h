@@ -172,8 +172,8 @@ private: // not export Function
 	static void AddClassFunction(lua_State *InLuaState, const char *FuncName, lua_CFunction &luaFunction);
 	static void InitMetaMethods(lua_State *InLuaState); // 初始化元表中的元操作
 	static void InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName); // 初始化元表中的自定义操作
-	static bool ExistData(lua_State *InLuaState, void *p);
-	static bool ExistClass(lua_State *InLuaState, const char *ClassName);
+	static bool ExistData(lua_State *InLuaState, const FString &UserDataKey);
+	static bool ExistClass(lua_State *InLuaState, const int32 LuaStackIndex, const char *ClassName);
 
 private: // log
 	static void TemplateLogPrint(const FString &Content);
@@ -185,7 +185,7 @@ private: // log
 template <class T>
 int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 { // push class args
-	if (!ExistClass(InLuaState, value.m_ClassName))
+	if (!ExistClass(InLuaState, -1, value.m_ClassName))
 	{
 		FString log = FString::Printf(TEXT("push error, not export this class:%s"), ANSI_TO_TCHAR(value.m_ClassName));
 		TemplateLogError(log);
@@ -198,24 +198,25 @@ int32 FLuaUtil::Push(lua_State *InLuaState, const FLuaClassType<T> &&value)
 		return 1;
 	}
 
-	if (!ExistData(InLuaState, (void*)value.m_ClassObj))
+	FString UserDataKey = FString::Printf(TEXT("%p%s"), (void*)value.m_ClassObj, value.m_ClassName);
+
+	if (!ExistData(InLuaState, UserDataKey))
 	{ // add to table
 	  // 这个函数分配分配一块指定大小的内存块， 把内存块地址作为一个完整的 userdata 压入堆栈，并返回这个地址。
 		*(T*)lua_newuserdata(InLuaState, sizeof(T)) = value.m_ClassObj;
-		// 把 t[k] 值压入堆栈
+		luaL_getmetatable(InLuaState, value.m_ClassName);
+		lua_setmetatable(InLuaState, -2);
 		lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
-		lua_pushlightuserdata(InLuaState, value.m_ClassObj);
+		Push(InLuaState, UserDataKey);
 		lua_pushvalue(InLuaState, -3);
 		lua_rawset(InLuaState, -3);
-		lua_pop(InLuaState, 2); // Pop the LUA_REGISTRYINDEX table and userdata
+		lua_pop(InLuaState, 2); // Pop the userdata
 	}
 
 	// set metatable
 	lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(InLuaState, value.m_ClassObj);
+	Push(InLuaState, UserDataKey);
 	lua_rawget(InLuaState, -2); // get userdata
-	luaL_getmetatable(InLuaState, value.m_ClassName);
-	lua_setmetatable(InLuaState, -2);
 	lua_replace(InLuaState, -2);
 
 	return 1;

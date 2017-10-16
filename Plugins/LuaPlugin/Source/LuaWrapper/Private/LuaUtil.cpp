@@ -10,7 +10,7 @@ void FLuaUtil::RegisterClass(lua_State *InLuaState, const luaL_Reg ClassFunction
 
 void FLuaUtil::AddClass(lua_State *InLuaState, const char *ClassName)
 { // 将class作为table,添加到lua全局变量中
-	if (ExistClass(InLuaState, ClassName))
+	if (ExistClass(InLuaState, -1, ClassName))
 	{
 		return;
 	}
@@ -141,17 +141,17 @@ void FLuaUtil::InitUserDefinedFuncs(lua_State *InLuaState, const char *ClassName
 
 }
 
-bool FLuaUtil::ExistData(lua_State *InLuaState, void *p)
+bool FLuaUtil::ExistData(lua_State *InLuaState, const FString &UserDataKey)
 {
 	lua_getfield(InLuaState, LUA_REGISTRYINDEX, "_existuserdata");
-	lua_pushlightuserdata(InLuaState, p);
+	Push(InLuaState, UserDataKey);
 	lua_rawget(InLuaState, -2);
-	bool bExist = !lua_isnil(InLuaState, -1);
+	bool bExist = lua_isnil(InLuaState, -1)==0;
 	lua_pop(InLuaState, 2);
 	return bExist;
 }
 
-bool FLuaUtil::ExistClass(lua_State *InLuaState, const char *ClassName)
+bool FLuaUtil::ExistClass(lua_State *InLuaState, const int32 LuaStackIndex, const char *ClassName)
 {
 	lua_getglobal(InLuaState, ClassName);
 	bool bExistClass = lua_istable(InLuaState, -1)==1;

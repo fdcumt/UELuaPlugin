@@ -23,12 +23,11 @@ FScriptGeneratorManager::~FScriptGeneratorManager()
 
 void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FString& RootBuildPath, const FString& OutputDirectory, const FString& IncludeBase)
 {
+	DebugProcedure(TEXT("Initialize"));
 	m_OutDir = g_LuaConfigManager->ProjectPath/FString("Plugins/LuaPlugin/Intermediate/Build/Win64/UE4Editor/Inc/LuaWrapper");
 	m_RootLocalPath = RootLocalPath;
 	m_RootBuildPath = RootBuildPath;
 	m_IncludeBase = IncludeBase;
-
-	InitConfig();
 }
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
@@ -47,13 +46,17 @@ void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHe
 
 void FScriptGeneratorManager::FinishExport()
 {
+	DebugProcedure(TEXT("FinishExport"));
 	ExportExtrasToMemory();
+	DebugProcedure(TEXT("ExportExtrasToMemory"));
 	AdjustBeforeSaveToFile();
-
+	DebugProcedure(TEXT("AdjustBeforeSaveToFile"));
 	InitClassParentManager();
-
+	DebugProcedure(TEXT("InitClassParentManager"));
 	SaveToFiles();
+	DebugProcedure(TEXT("SaveToFiles"));
 	FinishExportPost();
+	DebugProcedure(TEXT("FinishExportPost"));
 }
 
 bool FScriptGeneratorManager::ContainClassName(const FString &ClassName)
@@ -175,43 +178,12 @@ void FScriptGeneratorManager::AddGeneratorToMap(IScriptGenerator *InGenerator)
 
 void FScriptGeneratorManager::SaveToFiles()
 {
-// 	SaveUClassesToFiles();
-// 	SaveConfigClassesToFiles();
-
 	for (auto &MapItem : m_Generators)
 	{
+		DebugProcedure(TEXT("saveToFile:%s"), *MapItem.Key);
 		IScriptGenerator *pGenerator = MapItem.Value;
 		pGenerator->SaveToFile();
 	}
-}
-
-void FScriptGeneratorManager::SaveUClassesToFiles()
-{
-	for (auto &MapItem : m_Generators)
-	{
-		IScriptGenerator *pGenerator = MapItem.Value;
-		if (pGenerator->GetType() == NS_LuaGenerator::EUClass)
-		{
-			pGenerator->SaveToFile();
-		}
-	}
-}
-
-void FScriptGeneratorManager::SaveConfigClassesToFiles()
-{
-	for (auto &MapItem : m_Generators)
-	{
-		IScriptGenerator *pGenerator = MapItem.Value;
-		if (pGenerator->GetType()==NS_LuaGenerator::EConfigClass)
-		{
-			pGenerator->SaveToFile();
-		}
-	}
-}
-
-void FScriptGeneratorManager::InitConfig()
-{
-
 }
 
 void FScriptGeneratorManager::FinishExportPost()
@@ -227,6 +199,7 @@ void FScriptGeneratorManager::FinishExportPost()
 
 	FFileHelper::SaveStringToFile(PropertyTypes, *(m_OutDir / FString("PropertyTypes.txt")));
 	FFileHelper::SaveStringToFile(m_LogContent, *(m_OutDir / FString("GeneratorLog.txt")));
+	DebugProcedure(TEXT("FinishExportPost"));
 }
 
 void FScriptGeneratorManager::GenerateAndSaveAllHeaderFile()

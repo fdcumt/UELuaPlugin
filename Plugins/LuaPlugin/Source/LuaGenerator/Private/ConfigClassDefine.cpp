@@ -421,7 +421,7 @@ FString FConfigFunction::GetFunctionBodyChunk(const FConfigClass &ConfigClass) c
 	FString Ret;
 	FString CallFuncStr;
 
-	if (bStatic)
+	if (bStatic==false)
 	{
 		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, %d, \"%s\");"), *ConfigClass.GetClassName(), *ConfigClass.GetClassName(), luaStackIndex, *ConfigClass.GetClassName());
 		++luaStackIndex;
@@ -630,7 +630,9 @@ FConfigVariable::FConfigVariable(const TSharedPtr<FJsonObject> &InJsonObj)
 FString FConfigVariable::GetVariableTrunck(const FString &ClassName) const 
 {
 	FString Ret;
+	DebugProcedure(TEXT("GenerateGetVariableTrunck"));
 	Ret += GenerateGetVariableTrunck(ClassName);
+	DebugProcedure(TEXT("GenerateSetVariableTrunck"));
 	Ret += GenerateSetVariableTrunck(ClassName);
 	return Ret;
 }
@@ -648,7 +650,7 @@ FString FConfigVariable::GenerateGetVariableTrunck(const FString &ClassName)cons
 	}
 	else
 	{
-		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, \"%s\");"), *ClassName, *ClassName, *ClassName);
+		Ret += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *ClassName, *ClassName, *ClassName);
 		Ret += EndLinePrintf(TEXT("\t%s memberVariable = pObj->%s;"), *VariableType, *VariableName);
 	}
 
@@ -672,7 +674,7 @@ FString FConfigVariable::GenerateSetVariableTrunck(const FString &ClassName)cons
 		++luaStackIndex;
 	}
 
-	Ret += EndLinePrintf(TEXT("\t%s memberVariable = FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *VariableType, luaStackIndex, *VariableType, *VariableType );
+	Ret += EndLinePrintf(TEXT("\t%s memberVariable = FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *VariableType, *VariableType, luaStackIndex, *VariableType );
 	++luaStackIndex;
 
 	if (bStatic)

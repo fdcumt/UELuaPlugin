@@ -50,13 +50,38 @@ function Init(num)
 	
 	]]
 	
-	local baseStruct1 = FBaseStruct1.New();
-	FBaseStruct1.m = 32;
-	--local temp = baseStruct1.m_Struct;
-	--hitResult.Distance = 11.0;
 	
-	LuaPrint.print("baseStruct1.m_Value"..baseStruct1.m_Value);
-	--LuaPrint.print("hitResult.Distance"..hitResult.Distance);
+	local baseStruct1 = FBaseStruct1.New();
+	local baseStruct = FBaseStruct.New();
+	local mStruct = FBaseStruct1.Get_m_Struct(baseStruct1);
+	baseStruct.m = 90;
+	baseStruct1.m_Struct = baseStruct;
+	LuaPrint.print("baseStruct1.m_Struct.m,"..baseStruct1.m_Struct.m);
+	baseStruct1.m_Struct.m = 12;
+	LuaPrint.print("baseStruct1.m_Struct.m,"..baseStruct1.m_Struct.m);
+	mStruct.m = 14;
+	LuaPrint.print("mStruct.m:"..mStruct.m);
+	LuaPrint.print("baseStruct1.m_Struct.m,"..baseStruct1.m_Struct.m);
+	--local baseStruct = FBaseStruct.New();
+	--baseStruct.m = 33;
+	--FBaseStruct1.Set_m_Value1(baseStruct1, 10);
+	--local member = FBaseStruct1.Get_m_Struct(baseStruct1);
+	 
+	--local temp = baseStruct1.m_Struct;
+	--member.m = 10;
+	--local member1 = FBaseStruct1.Get_m_Struct(baseStruct1);
+	--baseStruct1.m_Value1 = 32;
+	--member1.m = 15;
+	--baseStruct2.m_Value1 = 35;
+	--local temp = baseStruct2.m_Struct;
+	--baseStruct1.m_Value3 = 38;
+	--temp.m = 11.0;
+	
+	--LuaPrint.print("baseStruct1.m_Value1,"..member.m);
+	--LuaPrint.print("baseStruct2.m_Value1,"..baseStruct2.m_Value1);
+	--LuaPrint.print(""..baseStruct1.m_Value3);
+	--LuaPrint.print("baseStruct1.m_Struct.m"..temp.m);
+	--LuaPrint.print("baseStruct1.m_Struct.m"..baseStruct1.m_Struct.m);
 	
 	
 	return num+3, 4, true;

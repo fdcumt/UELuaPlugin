@@ -52,7 +52,9 @@ void FConfigClassGenerator::SaveToFile()
 {
 	FString fileName = m_OutDir/ GetFileName();
 	FString fileContent;
+	DebugProcedure(TEXT("FConfigClassGenerator::SaveToFile:%s"), *fileName);
 	Unity(fileContent);
+	DebugProcedure(TEXT("FConfigClassGenerator::SaveToFile: unity finish"));
 	if (!FFileHelper::SaveStringToFile(fileContent, *fileName))
 	{
 		UE_LOG(LogLuaGenerator, Error, TEXT("Failed to save header export:%s"), *fileName);

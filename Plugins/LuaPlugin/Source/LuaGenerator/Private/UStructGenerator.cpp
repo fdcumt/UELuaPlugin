@@ -65,10 +65,16 @@ void FUStructGenerator::ExportToMemory()
 
 void FUStructGenerator::SaveToFile()
 {
+	DebugProcedure(TEXT("FUStructGenerator::SaveToFile"));
 	FString FileContent;
 	FString FilePathName = m_OutDir / GetFileName();
+	DebugProcedure(TEXT("FUStructGenerator::SaveToFile:%s"), *GetFileName());
 	FileContent += GetFuncContents();
+	DebugProcedure(TEXT("FUStructGenerator::GetFuncContents"));
+
 	FileContent += GetRegContents();
+	DebugProcedure(TEXT("FUStructGenerator::GetRegContents"));
+
 
 	if (!FFileHelper::SaveStringToFile(FileContent, *FilePathName))
 	{
@@ -154,7 +160,7 @@ FExtraFuncMemberInfo FUStructGenerator::GenerateDestoryExportFunction()
 	FExtraFuncMemberInfo ExtraFuncDestory;
 	ExtraFuncDestory.funcName = "Destory";
 	FString &funcBody = ExtraFuncDestory.funcBody;
-	funcBody += EndLinePrintf(TEXT("\t%s *pStruct = FLuaUtil::TouserData<%s*>(InLuaState, \"%s\");"), *GetClassName(), *GetClassName(), *GetClassName());
+	funcBody += EndLinePrintf(TEXT("\t%s *pStruct = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *GetClassName(), *GetClassName(), *GetClassName());
 	funcBody += EndLinePrintf(TEXT("\tif(pStruct) delete pStruct;"));
 	funcBody += EndLinePrintf(TEXT("\tpStruct = nullptr;"));
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));

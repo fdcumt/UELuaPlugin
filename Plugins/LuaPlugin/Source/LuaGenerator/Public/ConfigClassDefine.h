@@ -75,7 +75,6 @@ public:
 	bool bStatic;
 	FString VariableType;
 	FString DeclareType;
-	FString DeclareType;
 	FString VariableName;
 
 public:
