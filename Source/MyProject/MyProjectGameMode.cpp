@@ -5,6 +5,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "LuaWrapperModule.h"
 #include "LuaUtil.h"
+#include "SimpleTest.h"
 
 DEFINE_LOG_CATEGORY(LogProject);
 
@@ -26,13 +27,18 @@ void AMyProjectGameMode::StartPlay()
 	int32 Ret1 = 0;
 	int32 Ret2 = 0;
 	bool Ret3 = false;
+	AMyProjectGameMode*pSelf = this;
+	//FLuaClassType<AMyProjectGameMode*>(pSelf, "AMyProjectGameMode")
 
+	FBaseStruct1 *pTest = new FBaseStruct1;
 	FLuaUtil::CallR(
 		Ret1,
 		Ret2,
 		Ret3,
-		FLuaFuncName("Init"), 
-		3);
+		FLuaFuncName("Init"),
+		FLuaClassType<AMyProjectGameMode*>(pSelf, "AMyProjectGameMode"),
+		FLuaClassType<FBaseStruct1*>(pTest, "FBaseStruct1")
+	);
 
 	UE_LOG(LogProject, Log, TEXT("ret1:%d,ret2:%d,ret3:%d, "), Ret1, Ret2, (int32)Ret3);
 }

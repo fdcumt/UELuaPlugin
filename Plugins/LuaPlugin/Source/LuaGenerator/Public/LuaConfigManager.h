@@ -1,11 +1,16 @@
 #pragma once
 
-struct FCorrectVariableInfo
+struct FCorrectVariable
 {
 	FString VariableType;
 	FString VariableName;
 	FString PureType;
 	FString DeclareType;
+};
+
+struct FExportConfig
+{
+	TArray<FCorrectVariable> correctVariables;
 };
 
 class FLuaConfigManager
@@ -14,13 +19,15 @@ public:
 	void Init();
 
 private:
-	void InitCorrectVariables();
+	void InitExportConfig();
 
 public:
 	TArray<FString> SupportedModules;
 	TArray<FString> NotSuportClasses;
+	TArray<FString> SupportStructs;
 	TArray<FString> BaseTypes;
 	TArray<FString> ClassConfigFileNames;
+	TArray<FString> AdditionalIncludeHeaders;
 
 	FString ProjectPath;
 	FString GameModuleName;
@@ -28,7 +35,7 @@ public:
 	FString LuaConfigFileRelativePath;
 	FString ClassConfigFileRelativeFolder;
 
-	TArray<FString> SupportStructs;
-	TArray<FString> AdditionalIncludeHeaders;
-	TMap<FString, TArray<FCorrectVariableInfo> > CorrectVariableTypes;
+	// config 
+	TArray<FString> InvalidSetTypes;
+	TMap<FString, FExportConfig> ExportConfig;
 };

@@ -62,6 +62,7 @@ public:
 
 	static void StaticPrint();
 	static void StaticPrint1();
+	static void GetPlayerController();
 
 
 

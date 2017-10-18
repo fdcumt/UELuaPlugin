@@ -7,6 +7,7 @@ public:
 	void InitByUProperty(UProperty *pProperty);
 
 public:
+	int32 ArrayDim;
 	FString OriginalType;
 	FString DeclareType;
 	FString VariableName;
@@ -87,6 +88,9 @@ private:
 	FString GetExtraFuncContent(const FExtraFuncMemberInfo &InDataMemberInfo);
 	FString GetLuaGetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
 	FString GetLuaSetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
+
+	FString GetLuaGetMutilDimDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
+	FString GetLuaSetMutilDimDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
 	
 private:
 	FString m_ClassName;

@@ -136,8 +136,15 @@ namespace NS_LuaGenerator
 		static FString TSubclassOfDecl(TEXT("TSubclassOf<class "));
 
 		FString PropertyType = Property->GetCPPType(NULL, PortFlags);
-		FString PropertyValue = Property->GetName();
-		g_ScriptGeneratorManager->m_LogContent += FString::Printf(TEXT("PropertyType:%s,PropertyValue:%s\r\n"), *PropertyType, *PropertyValue);
+
+		FString PropertyName = Property->GetName();
+		FString NameCPP = Property->GetNameCPP();
+		int32 ArrayDim = Property->ArrayDim;
+		int32 ElementSize = Property->ElementSize;
+		FString RepNotifyFunc = Property->RepNotifyFunc.ToString();
+		g_ScriptGeneratorManager->m_LogContent += 
+			FString::Printf(TEXT("PropertyType:%s,PropertyName:%s,NameCPP:%s,ArrayDim:%d,ElementSize:%d, RepNotifyFunc:%s\r\n"), 
+				*PropertyType, *PropertyName, *NameCPP, ArrayDim, ElementSize, *RepNotifyFunc);
 
 		if (Property->IsA(UArrayProperty::StaticClass()))
 		{ // TArray

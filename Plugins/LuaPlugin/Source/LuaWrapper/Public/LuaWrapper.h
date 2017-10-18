@@ -1,5 +1,6 @@
 #pragma once
 #include "lua_tinker.h"
+#include "LuaWrapperDefine.h"
 
 class LUAWRAPPER_API FLuaWrapper
 {
@@ -12,7 +13,7 @@ public:
 	void Init();
 
 public:
-	lua_State* GetLuaState() { return m_LuaState; }
+	lua_State* GetLuaState() { return g_LuaState; }
 
 private:
 	void InitLuaEnv();
@@ -21,8 +22,4 @@ private:
 	void RegisterLuaLog();
 	void RegisterAllClasses();
 	void DoMainFile();
-
-private:
-	lua_State *m_LuaState;
-
 };

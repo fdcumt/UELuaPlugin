@@ -1,4 +1,10 @@
-function Init(num)
+function Init(pProjectMode, pBaseStruct1)
+
+	pProjectMode.InputPriority = 1111;
+	LuaPrint.print("pProjectMode.InputPriority"..pProjectMode.InputPriority);
+	
+	pBaseStruct1.m_Value1=222;
+	LuaPrint.print("pBaseStruct1.m_Value1"..pBaseStruct1.m_Value1);
 
 --[[
 	--LuaPrint.print(testNum);
@@ -82,7 +88,9 @@ function Init(num)
 	--LuaPrint.print(""..baseStruct1.m_Value3);
 	--LuaPrint.print("baseStruct1.m_Struct.m"..temp.m);
 	--LuaPrint.print("baseStruct1.m_Struct.m"..baseStruct1.m_Struct.m);
+	--local pWidget = UWidget.New(pProjectMode, "UWidget");
+	--pWidget.bIsVariable = false;
+	--LuaPrint.print("pWidget.bIsVariable"..pWidget.bIsVariable);
 	
-	
-	return num+3, 4, true;
+	return 3, 4, true;
 end

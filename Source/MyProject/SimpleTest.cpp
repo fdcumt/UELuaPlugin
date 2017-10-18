@@ -47,6 +47,11 @@ void FMyTest::StaticPrint1()
 	UE_LOG(LogMyProject, Log, TEXT("StaticPrint111"));
 }
 
+void FMyTest::GetPlayerController()
+{
+
+}
+
 FMyTest1* FMyTest1::CreateSelf()
 {
 	return new FMyTest1();

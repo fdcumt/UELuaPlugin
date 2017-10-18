@@ -20,6 +20,11 @@ FUClassGenerator::~FUClassGenerator()
 
 bool FUClassGenerator::CanExport() const
 {
+	if (m_HeaderFileName.IsEmpty())
+	{
+		return false;
+	}
+
 	return !g_LuaConfigManager->NotSuportClasses.Contains(GetClassName());
 }
 
@@ -89,7 +94,7 @@ void FUClassGenerator::ExportFunctionMembersToMemory()
 
 void FUClassGenerator::ExportExtraFuncsToMemory()
 {
-	GenerateNewExportFunction();
+	m_LuaFuncReg.AddExtraFuncMember(GenerateNewExportFunction());
 }
 
 FExtraFuncMemberInfo FUClassGenerator::GenerateNewExportFunction()
@@ -98,7 +103,7 @@ FExtraFuncMemberInfo FUClassGenerator::GenerateNewExportFunction()
 	ExtraFuncNew.funcName = "New";
 	FString &funcBody = ExtraFuncNew.funcBody;
 	funcBody += EndLinePrintf(TEXT("\tUObject* Outer = FLuaUtil::TouserData<UObject*>(InLuaState, 1, \"UObject\");"));
-	funcBody += EndLinePrintf(TEXT("\tFName Name = FName(luaL_checkstring(L, 2));"));
+	funcBody += EndLinePrintf(TEXT("\tFName Name = FName(luaL_checkstring(InLuaState, 2));"));
 	funcBody += EndLinePrintf(TEXT("\t%s* pObj = NewObject<%s>(Outer, Name);"), *GetClassName(), *GetClassName());
 	funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s*>(pObj, \"%s\"));"), *GetClassName(), *GetClassName());
 	funcBody += EndLinePrintf(TEXT("\treturn 1;"));
@@ -117,7 +122,10 @@ FString FUClassGenerator::GetFileHeader()
 FString FUClassGenerator::GetFileInclude()
 {
 	FString StrContent;
-	StrContent += EndLinePrintf(TEXT("#include \"%s\""), *m_HeaderFileName);
+	if (!m_HeaderFileName.IsEmpty())
+	{
+		StrContent += EndLinePrintf(TEXT("#include \"%s\""), *m_HeaderFileName);
+	}
 	return StrContent;
 }
 
