@@ -1,5 +1,4 @@
 #pragma once
-#include "lua_tinker.h"
 #include "LuaWrapperDefine.h"
 
 class LUAWRAPPER_API FLuaWrapper

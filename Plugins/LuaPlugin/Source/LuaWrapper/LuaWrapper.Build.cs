@@ -17,6 +17,7 @@ public class LuaWrapper : ModuleRules
 		PrivateIncludePaths.AddRange(
 			new string[] {
                 "LuaWrapper/Private",
+                "LuaWrapper/LuaSource",
             });
 			
 		PublicDependencyModuleNames.AddRange(

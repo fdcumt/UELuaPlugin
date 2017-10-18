@@ -40,5 +40,8 @@ void AMyProjectGameMode::StartPlay()
 		FLuaClassType<FBaseStruct1*>(pTest, "FBaseStruct1")
 	);
 
+	UE_LOG(LogProject, Log, TEXT("pSelf->InputPriority:%d,pTest->mValue1:%d"), pSelf->InputPriority, pTest->m_Value1);
+
+
 	UE_LOG(LogProject, Log, TEXT("ret1:%d,ret2:%d,ret3:%d, "), Ret1, Ret2, (int32)Ret3);
 }

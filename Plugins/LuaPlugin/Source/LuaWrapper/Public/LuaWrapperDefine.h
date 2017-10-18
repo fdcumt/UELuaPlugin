@@ -1,5 +1,5 @@
 #pragma once
-#include "lua_tinker.h"
+#include "LuaSource/lua_tinker.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogLua, Log, All);
 
