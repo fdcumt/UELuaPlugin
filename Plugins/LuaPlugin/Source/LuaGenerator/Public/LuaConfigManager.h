@@ -10,6 +10,7 @@ struct FCorrectVariable
 
 struct FExportConfig
 {
+	TArray<FString> NotExportFunctions;
 	TArray<FCorrectVariable> correctVariables;
 };
 

@@ -87,6 +87,8 @@ void FLuaConfigManager::InitExportConfig()
 				return;
 			}
 
+			pJsonObj->TryGetStringArrayField("NotExportFunctions", exportConfig.NotExportFunctions);
+
 			const TArray<TSharedPtr<FJsonValue>> *JsonCorrects;
 			if (pJsonObj->TryGetArrayField("CorrectList", JsonCorrects))
 			{

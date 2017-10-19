@@ -87,7 +87,7 @@ void FUClassGenerator::ExportFunctionMembersToMemory()
 		UFunction* Function = *FuncIt;
 		if (NS_LuaGenerator::CanExportFunction(Function) && CanExportFunction(Function) && FExportFuncMemberInfo::CanExportFunction(Function))
 		{
-			m_LuaFuncReg.AddFunctionMember(FExportFuncMemberInfo::CreateFunctionMemberInfo(Function));
+			m_LuaFuncReg.AddFunctionMember(FExportFuncMemberInfo::CreateFunctionMemberInfo(m_pClass, Function));
 		}
 	}
 }
@@ -150,6 +150,12 @@ FString FUClassGenerator::GetFileTailContents()
 bool FUClassGenerator::CanExportFunction(UFunction *InFunction)
 {
 	if (InFunction->FunctionFlags & FUNC_Delegate)
+	{
+		return false;
+	}
+
+	FExportConfig *pConfig = g_LuaConfigManager->ExportConfig.Find(GetClassName());
+	if (pConfig && pConfig->NotExportFunctions.Contains(InFunction->GetName()))
 	{
 		return false;
 	}

@@ -110,9 +110,9 @@ void FUStructGenerator::ExportFunctionsToMemory()
 	for (TFieldIterator<UFunction> FuncIt(m_pScriptStruct /*, EFieldIteratorFlags::ExcludeSuper*/); FuncIt; ++FuncIt)
 	{
 		UFunction* Function = *FuncIt;
-		if (CanExportFunction(Function) && FExportFuncMemberInfo::CanExportFunction(Function))
+		if (NS_LuaGenerator::CanExportFunction(Function) && CanExportFunction(Function) && FExportFuncMemberInfo::CanExportFunction(Function))
 		{
-			m_LuaFuncReg.AddFunctionMember(FExportFuncMemberInfo::CreateFunctionMemberInfo(Function));
+			m_LuaFuncReg.AddFunctionMember(FExportFuncMemberInfo::CreateFunctionMemberInfo(m_pScriptStruct, Function));
 		}
 	}
 }
@@ -125,6 +125,12 @@ void FUStructGenerator::ExportExtraFuncsToMemory()
 
 bool FUStructGenerator::CanExportFunction(UFunction *InFunction)
 {
+	FExportConfig *pConfig = g_LuaConfigManager->ExportConfig.Find(GetClassName());
+	if (pConfig && pConfig->NotExportFunctions.Contains(InFunction->GetName()))
+	{
+		return false;
+	}
+
 	return true;
 }
 

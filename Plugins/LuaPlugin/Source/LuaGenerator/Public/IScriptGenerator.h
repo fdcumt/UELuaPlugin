@@ -20,9 +20,9 @@ public:
 	virtual void GetParentNames(TArray<FString> &OutParentNames) const = 0;
 
 public:
-	NS_LuaGenerator::E_GeneratorType GetType() const { return m_Type; };
+	NS_LuaGenerator::E_GeneratorType GetType() const { return m_eClassType; };
 
 protected:
-	NS_LuaGenerator::E_GeneratorType m_Type;
+	NS_LuaGenerator::E_GeneratorType m_eClassType;
 	FString m_OutDir;
 };

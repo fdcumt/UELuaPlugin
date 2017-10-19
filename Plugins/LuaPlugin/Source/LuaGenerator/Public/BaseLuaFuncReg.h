@@ -18,6 +18,8 @@ public:
 	bool CanGenerateSetFunc;
 	bool CanGenerateGetFunc;
 	bool bSupportNow;
+	bool bNeedReturn;
+	bool bNewReturn; // for return variable
 	NS_LuaGenerator::EVariableType eVariableType;
 
 private:
@@ -31,21 +33,36 @@ public:
 	FString funcBody;
 };
 
+enum EExportFuncType
+{
+	E_Normal,
+	E_CallSuperFunc,
+	E_MinimalAPI,
+};
+
 struct FExportFuncMemberInfo
 {
 public:
-	static FExportFuncMemberInfo CreateFunctionMemberInfo(UFunction* InFunction);
+	static FExportFuncMemberInfo CreateFunctionMemberInfo(UClass *pClass, UFunction* InFunction);
+	static FExportFuncMemberInfo CreateFunctionMemberInfo(UStruct *pStruct, UFunction* InFunction);
 	static bool CanExportFunction(UFunction* InFunction);
 
+public:
+	FExportFuncMemberInfo();
+
 private:
-	void InitByUFunction(UFunction* InFunction);
+	void InitByUFunction(UClass *pClass, UFunction* InFunction);
+	void InitByUFunction(UStruct *pStruct, UFunction* InFunction);
+	void InitByUFunctionInner(UFunction* InFunction);
 
 public:
 	bool bStatic;
 	bool bSupportNow;
+	EExportFuncType eFuncType;
 	FString FunctionName;
-	TArray<FVariableTypeInfo> FunctionParams;
+	FString SuperClassName;
 	FVariableTypeInfo ReturnType;
+	TArray<FVariableTypeInfo> FunctionParams;
 };
 
 struct FExportDataMemberInfo
@@ -85,6 +102,11 @@ private:
 	FString GetDataMemberContents();
 	FString GetFuncMemberContents();
 
+	FString GetFuncMemberContent(const FExportFuncMemberInfo &FunctionItem);
+	FString GetCallSuperFuncBody(const FExportFuncMemberInfo &FunctionItem);
+	FString GetNomalFuncBody(const FExportFuncMemberInfo &FunctionItem);
+	FString GetMinmialAPIFuncBody(const FExportFuncMemberInfo &FunctionItem);
+
 	FString GetExtraFuncContent(const FExtraFuncMemberInfo &InDataMemberInfo);
 	FString GetLuaGetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
 	FString GetLuaSetDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
@@ -93,7 +115,7 @@ private:
 	FString GetLuaSetMutilDimDataMemberFuncContent(const FExportDataMemberInfo &InDataMemberInfo);
 	
 private:
-	FString m_ClassName;
+	FString m_ClassName;	
 	TArray<FExtraFuncMemberInfo> m_ExtraFuncs;
 	TMap<FString, FExportFuncMemberInfo> m_FunctionMembers;
 	TMap<FString, FExportDataMemberInfo> m_DataMembers;

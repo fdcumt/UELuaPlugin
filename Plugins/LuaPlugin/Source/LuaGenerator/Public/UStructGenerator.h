@@ -40,6 +40,5 @@ private:
 private:
 	UScriptStruct *m_pScriptStruct;
 	FBaseFuncReg m_LuaFuncReg;
-
 };
 

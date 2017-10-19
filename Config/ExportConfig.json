@@ -43,6 +43,10 @@
 					"DeclareType":"UAnimBlueprintGeneratedClass*"
 				}
 			]
+		},
+		{
+			"ClassName":"UKismetSystemLibrary",
+			"NotExportFunctions":["StackTrace"]
 		}
 	]
 }
