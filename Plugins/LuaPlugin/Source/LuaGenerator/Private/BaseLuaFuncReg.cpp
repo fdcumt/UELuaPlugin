@@ -5,6 +5,7 @@ using namespace NS_LuaGenerator;
 
 void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 {
+
 	if (!pProperty)
 	{
 		OriginalType = "void";
@@ -15,7 +16,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		return;
 	}
 
-	OriginalType = GetFuncParamPropertyType(pProperty);
+	OriginalType = GetPropertyType(pProperty);
 	eVariableType = ResolvePropertyType(pProperty);
 	ArrayDim = pProperty->ArrayDim;
 	DeclareType = OriginalType;

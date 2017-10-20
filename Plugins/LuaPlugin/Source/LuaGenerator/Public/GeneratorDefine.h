@@ -57,8 +57,8 @@ namespace NS_LuaGenerator
 
 	EVariableType ResolvePropertyType(UProperty *pProperty);
 	int32 CalcStarNum(const FString &InStr);
-	FString GetFuncParamPropertyType(UProperty *Property, uint32 PortFlags = 0);
-	FString GetDataMemberPropertyType(UProperty *Property, uint32 PortFlags = 0);
+	FString GetPropertyType(UProperty *Property);
+	FString OldGetPropertyType(UProperty *Property, uint32 PortFlags = 0);
 	bool StringForwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
 	bool StringBackContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcTailIndex);
 	bool CanExportProperty(UProperty *InProperty);
