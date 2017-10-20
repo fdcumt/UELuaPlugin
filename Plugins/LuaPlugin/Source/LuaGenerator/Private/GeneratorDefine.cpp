@@ -204,7 +204,7 @@ namespace NS_LuaGenerator
 		EVariableType eVariableType = EVariableType::EUnknow;
 		FString PropertyType;
 		bool bRecognize = false;
-		FString OriginalType = OldGetPropertyType(pProperty);
+		FString OriginalType = GetPropertyType(pProperty);
 		PropertyType += FString::Printf(TEXT("UPropertyRealType:%s"), *OriginalType);
 		
 		if (pProperty->IsA(UIntProperty::StaticClass()) ||
