@@ -1,10 +1,11 @@
-function Init(pProjectMode, pBaseStruct1)
+function Init(pBaseLuaWidget)
 
-	pProjectMode.InputPriority = 1111;
-	LuaPrint.print("pProjectMode.InputPriority"..pProjectMode.InputPriority);
-	
-	pBaseStruct1.m_Value1=222;
-	LuaPrint.print("pBaseStruct1.m_Value1"..pBaseStruct1.m_Value1);
+	--local widgetTree = UWidgetTree.New(pBaseLuaWidget, "WidgetTree")
+    --pBaseLuaWidget.WidgetTree = widgetTree;
+    --local button = UButton.New(widgetTree, "Button");
+    --widgetTree.RootWidget = button;
+
+
 
 --[[
 	--LuaPrint.print(testNum);
@@ -54,7 +55,7 @@ function Init(pProjectMode, pBaseStruct1)
 	baseStruct:Destory();
 	baseStruct1:Destory();
 	
-	]]
+
 	
 	
 	local baseStruct1 = FBaseStruct1.New();
@@ -92,5 +93,5 @@ function Init(pProjectMode, pBaseStruct1)
 	--pWidget.bIsVariable = false;
 	--LuaPrint.print("pWidget.bIsVariable"..pWidget.bIsVariable);
 	
-	return 3, 4, true;
+	]]
 end
