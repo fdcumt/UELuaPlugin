@@ -30,6 +30,7 @@ namespace NS_LuaGenerator
 		EUClass = 0,
 		EUStruct = 1,
 		EConfigClass = 2,
+		ETArray = 3,
 	};
 
 	enum EVariableType

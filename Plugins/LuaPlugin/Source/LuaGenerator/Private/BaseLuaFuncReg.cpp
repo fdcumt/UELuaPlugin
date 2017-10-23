@@ -63,7 +63,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	}
 	case EVariableType::EFName:
 	{
-		bSupportNow = false;
+		bSupportNow = true;
 		break;
 	}
 	case EVariableType::EText:
