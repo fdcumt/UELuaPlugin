@@ -15,9 +15,12 @@
 		"FScrollBarStyle", 
 		"FButtonStyle", 
 		"FSlateBrush", 
+		"FLevelCollection", 
 		"FCompositeFont", 
 		"FCheckBoxStyle", 
+		"FStaticMeshComponentLODInfo", 
 		"FPrimitiveComponentPostPhysicsTickFunction",
+		"TArray<FStaticMeshComponentLODInfo>",
 		"FCharacterMovementComponentPostPhysicsTickFunction"
 	],
 	"BaseConfig":
@@ -47,6 +50,14 @@
 		{
 			"ClassName":"UKismetSystemLibrary",
 			"NotExportFunctions":["StackTrace"]
+		},
+		{
+			"ClassName":"TArrayFStaticMeshComponentLODInfo",
+			"NotExportFunctions":["Add", "Copy", "Empty", "New", "Destory", "RemoveAt"]
+		},
+		{
+			"ClassName":"TArrayFLevelCollection",
+			"NotExportFunctions":["Add", "Copy"]
 		}
 	]
 }

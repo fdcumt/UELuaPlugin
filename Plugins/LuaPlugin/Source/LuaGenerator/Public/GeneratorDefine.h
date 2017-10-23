@@ -43,15 +43,15 @@ namespace NS_LuaGenerator
 		EText,
 		EFString,
 		EClass,
-		ETArray,
 		EWeakObject,
 		EStruct,
 		EByte,
 		EEnum,
 		ETSubclassOf,
 		EMulticastDelegate,
-		ETMap,
-		ETSet,
+		EVarTArray,
+		EVarTSet,
+		EVarTMap,
 		EVoid,
 		EUnknow,
 	};
@@ -59,6 +59,7 @@ namespace NS_LuaGenerator
 	EVariableType ResolvePropertyType(UProperty *pProperty);
 	int32 CalcStarNum(const FString &InStr);
 	FString GetPropertyType(UProperty *Property);
+	FString GetPlainType(const FString &InElementType);
 	FString OldGetPropertyType(UProperty *Property, uint32 PortFlags = 0);
 	bool StringForwardContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcIndex);
 	bool StringBackContainSub(const FString &&SrcStr, const FString &&SubStr, int32 SrcTailIndex);

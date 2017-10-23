@@ -2,8 +2,6 @@
 #include "CoreUObject.h"
 #include "ScriptGeneratorManager.h"
 
-#define Def_TEXT(Str) #Str
-
 FScriptGeneratorManager *g_ScriptGeneratorManager = nullptr;
 FLuaConfigManager *g_LuaConfigManager = nullptr;
 
@@ -199,6 +197,59 @@ namespace NS_LuaGenerator
 		return PropertyType;
 	}
 
+	FString GetPlainType(const FString &InElementType)
+	{
+		bool bSwitchToUperChar = true;
+		FString ElementPlainType;
+		for (int32 i = 0; i < InElementType.Len(); ++i)
+		{
+			char curChar = InElementType[i];
+			if (bSwitchToUperChar && InElementType[i] >= 'a' && InElementType[i] <= 'z')
+			{
+				curChar += 'A' - 'a';
+			}
+
+			switch (curChar)
+			{
+			case '\t':
+			{
+			}
+			case ' ':
+			{
+				bSwitchToUperChar = true;
+				break;
+			}
+			case '*':
+			{
+				bSwitchToUperChar = true;
+				ElementPlainType.Append(FString("Point"));
+				break;
+			}
+			case '<':
+			{
+				bSwitchToUperChar = true;
+				break;
+			}
+			case '>':
+			{
+				bSwitchToUperChar = true;
+				break;
+			}
+			case ',':
+			{
+				bSwitchToUperChar = true;
+				break;
+			}
+			default:
+			{
+				ElementPlainType.AppendChar(curChar);
+				bSwitchToUperChar = false;
+			}
+			}
+		}
+		return ElementPlainType;
+	}
+
 	EVariableType ResolvePropertyType(UProperty *pProperty)
 	{
 		EVariableType eVariableType = EVariableType::EUnknow;
@@ -295,7 +346,7 @@ namespace NS_LuaGenerator
 
 		if (pProperty->IsA(UArrayProperty::StaticClass()))
 		{
-			eVariableType = EVariableType::ETArray;
+			eVariableType = EVariableType::EVarTArray;
 			bRecognize = true;
 			PropertyType += FString::Printf(TEXT(",UArrayProperty"));
 		}
@@ -337,14 +388,14 @@ namespace NS_LuaGenerator
 
 		if (pProperty->IsA(UMapProperty::StaticClass()))
 		{
-			eVariableType = EVariableType::ETMap;
+			eVariableType = EVariableType::EVarTMap;
 			bRecognize = true;
 			PropertyType += FString::Printf(TEXT(",UMapProperty"));
 		}
 
 		if (pProperty->IsA(USetProperty::StaticClass()))
 		{
-			eVariableType = EVariableType::ETSet;
+			eVariableType = EVariableType::EVarTSet;
 			bRecognize = true;
 			PropertyType += FString::Printf(TEXT(",USetProperty"));
 		}
@@ -394,7 +445,7 @@ namespace NS_LuaGenerator
 			FinalType = "EClass";
 			break;
 		}
-		case ETArray:
+		case EVarTArray:
 		{
 			FinalType = "ETArray";
 			break;
@@ -429,12 +480,12 @@ namespace NS_LuaGenerator
 			FinalType = "EMulticastDelegate";
 			break;
 		}
-		case ETMap:
+		case EVarTMap:
 		{
 			FinalType = "ETMap";
 			break;
 		}
-		case ETSet:
+		case EVarTSet:
 		{
 			FinalType = "ETSet";
 			break;
@@ -471,13 +522,14 @@ namespace NS_LuaGenerator
 
 	FString GetPropertyType(UProperty *Property)
 	{
+		if (!Property)
+		{
+			return FString("");
+		}
+
 		FString InnerType;
 		FString OuterType;
-		if (Property)
-		{
-			OuterType = Property->GetCPPType(&InnerType);
-		}
-		return FString::Printf(TEXT("%s%s"), *OuterType, *InnerType);;
+		OuterType = Property->GetCPPType(&InnerType);
+		return FString::Printf(TEXT("%s%s"), *OuterType, *InnerType);
 	}
-
 }

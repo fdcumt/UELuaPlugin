@@ -121,7 +121,7 @@ void FClassParentManager::InitParentMatrix(const TArray<IScriptGenerator*> &Clas
 {
 	for (IScriptGenerator *const pGenerator : ClassGenerators)
 	{
-		FString GeneratorClassName = pGenerator->GetClassName();
+		FString GeneratorClassName = pGenerator->GetKey();
 		int32 GeneratorIndex = GetClassIndex(GeneratorClassName);
 		TArray<FString> ParentNames;
 		pGenerator->GetParentNames(ParentNames);

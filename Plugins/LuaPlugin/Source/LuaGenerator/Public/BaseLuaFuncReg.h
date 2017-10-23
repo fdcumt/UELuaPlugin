@@ -94,6 +94,8 @@ public:
 	FString GetRegLibContents();
 
 private:
+	bool CanExportFunc(const FString &FuncName);
+
 	FString GetLuaFuncMemberName(const FString &FuncName);
 	FString GetLuaGetDataMemberName(const FString &VariableName);
 	FString GetLuaSetDataMemberName(const FString &VariableName);

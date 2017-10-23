@@ -5,10 +5,10 @@
 class FTArrayGenerator : public IScriptGenerator
 {
 public:
-	static IScriptGenerator* CreateGenerator(const FString &InArrayElementType, const FString &InOutDir);
+	static IScriptGenerator* CreateGenerator(UProperty *pProperty, const FString &InOutDir);
 
 public:
-	FTArrayGenerator(UProperty *pElementProperty, const FString &InOutDir);
+	FTArrayGenerator(UProperty *pProperty, const FString &InOutDir);
 	virtual ~FTArrayGenerator();
 
 public:
@@ -27,20 +27,20 @@ private:
 	FExtraFuncMemberInfo ExtraDestory();
 	FExtraFuncMemberInfo ExtraNum();
 	FExtraFuncMemberInfo ExtraAdd();
-	FExtraFuncMemberInfo ExtraFind();
 	FExtraFuncMemberInfo ExtraGet();
 	FExtraFuncMemberInfo ExtraSet();
-	FExtraFuncMemberInfo ExtraClear();
-	FExtraFuncMemberInfo ExtraRemove();
+	FExtraFuncMemberInfo ExtraEmpty();
+	FExtraFuncMemberInfo ExtraCopy();
+	FExtraFuncMemberInfo ExtraRemoveAt();
 
 private:
-	void InitElementName(UProperty *pProperty);
-	FString ReplaceStarWithPoint(const FString &InStr);
-
+	void Init(UArrayProperty *pArrayProperty);
+	
 private:
+	FString m_ClassName;
 	bool m_bSupportElement;
-	FString m_ElementName;
-	FVariableTypeInfo m_ElementInfo;
 	FBaseFuncReg m_LuaFuncReg;
+	FVariableTypeInfo m_ElementInfo;
+	FVariableTypeInfo m_TArrayInfo;
 };
 

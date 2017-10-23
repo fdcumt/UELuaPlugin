@@ -65,16 +65,12 @@ void FUStructGenerator::ExportToMemory()
 
 void FUStructGenerator::SaveToFile()
 {
-	DebugProcedure(TEXT("FUStructGenerator::SaveToFile"));
 	FString FileContent;
 	FString FilePathName = m_OutDir / GetFileName();
-	DebugProcedure(TEXT("FUStructGenerator::SaveToFile:%s"), *GetFileName());
+	FileContent += GetFileHeader();
 	FileContent += GetFuncContents();
-	DebugProcedure(TEXT("FUStructGenerator::GetFuncContents"));
-
 	FileContent += GetRegContents();
-	DebugProcedure(TEXT("FUStructGenerator::GetRegContents"));
-
+	FileContent += GetFileTail();
 
 	if (!FFileHelper::SaveStringToFile(FileContent, *FilePathName))
 	{

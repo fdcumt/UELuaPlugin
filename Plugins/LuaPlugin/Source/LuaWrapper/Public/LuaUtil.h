@@ -166,9 +166,12 @@ public: // push args
 	static int32 Push(lua_State *InLuaState, FLuaClassType<float>  &&value);
 	static int32 Push(lua_State *InLuaState, FLuaClassType<double> &&value);
 	static int32 Push(lua_State *InLuaState, FLuaClassType<const char*> &&value);
-	static int32 Push(lua_State *InLuaState, FLuaClassType<const FString&> &&value);
-
-
+	static int32 Push(lua_State *InLuaState, FLuaClassType<FString> &&value);
+	static int32 Push(lua_State *InLuaState, FLuaClassType<const FString> &&value);
+	static int32 Push(lua_State *InLuaState, FLuaClassType<FName> &&value);
+	static int32 Push(lua_State *InLuaState, FLuaClassType<const FName> &&value);
+	static int32 Push(lua_State *InLuaState, FLuaClassType<FText> &&value);
+	static int32 Push(lua_State *InLuaState, FLuaClassType<const FText> &&value);
 
 private: // not export Function
 	static void AddClass(lua_State *InLuaState, const char *ClassName);

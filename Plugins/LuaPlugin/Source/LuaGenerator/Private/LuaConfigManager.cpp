@@ -13,6 +13,7 @@ void FLuaConfigManager::Init()
 
 	ClassScriptHeaderSuffix = ".script.h";
 	ClassConfigFileRelativeFolder = "Config";
+	NoExportExtraFuncName = "NoExport";
 
 	FString ProjectFilePath = FPaths::GetProjectFilePath();
 	ProjectPath = FPaths::GetPath(ProjectFilePath);

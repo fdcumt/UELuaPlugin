@@ -20,6 +20,10 @@ public:
 	virtual void GetParentNames(TArray<FString> &OutParentNames) const = 0;
 
 public:
+	virtual FString GetFileHeader();
+	virtual FString GetFileTail();
+
+public:
 	NS_LuaGenerator::E_GeneratorType GetType() const { return m_eClassType; };
 
 protected:

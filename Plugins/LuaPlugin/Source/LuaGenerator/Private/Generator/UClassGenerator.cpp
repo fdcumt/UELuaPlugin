@@ -43,7 +43,7 @@ void FUClassGenerator::SaveToFile()
 	FileContent += GetFileInclude();
 	FileContent += GetFileFunctionContents();
 	FileContent += GetFileRegContents();
-	FileContent += GetFileTailContents();
+	FileContent += GetFileTail();
 
 	if (!FFileHelper::SaveStringToFile(FileContent, *FilePathName))
 	{
@@ -111,14 +111,6 @@ FExtraFuncMemberInfo FUClassGenerator::GenerateNewExportFunction()
 	return ExtraFuncNew;
 }
 
-FString FUClassGenerator::GetFileHeader()
-{
-	FString StrContent;
-	StrContent += EndLinePrintf(TEXT("#pragma once"));
-	StrContent += EndLinePrintf(TEXT("PRAGMA_DISABLE_DEPRECATION_WARNINGS"));
-	return StrContent;
-}
-
 FString FUClassGenerator::GetFileInclude()
 {
 	FString StrContent;
@@ -137,14 +129,6 @@ FString FUClassGenerator::GetFileFunctionContents()
 FString FUClassGenerator::GetFileRegContents()
 {
 	return m_LuaFuncReg.GetRegLibContents();
-}
-
-FString FUClassGenerator::GetFileTailContents()
-{
-	FString StrContent;
-	StrContent += EndLinePrintf(TEXT(""));
-	StrContent += EndLinePrintf(TEXT("PRAGMA_ENABLE_DEPRECATION_WARNINGS"));
-	return StrContent;
 }
 
 bool FUClassGenerator::CanExportFunction(UFunction *InFunction)

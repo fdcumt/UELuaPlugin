@@ -209,7 +209,7 @@ void FLuaUtil::PushObjInner(lua_State *InLuaState, void *pObj, const char *pName
 {
 	if (!ExistClass(InLuaState, pName))
 	{
-		FString log = FString::Printf(TEXT("push error, not export this class:%s"), pName);
+		FString log = FString::Printf(TEXT("push error, not export this class:%s"), ANSI_TO_TCHAR(pName));
 		TemplateLogError(log);
 		return ;
 	}
@@ -361,7 +361,37 @@ int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<const char*> &&value)
 	return 1;
 }
 
-int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<const FString&> &&value)
+int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<FString> &&value)
+{
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj));
+	return 1;
+}
+
+int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<FName> &&value)
+{
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj.ToString()));
+	return 1;
+}
+
+int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<const FName> &&value)
+{
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj.ToString()));
+	return 1;
+}
+
+int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<FText> &&value)
+{
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj.ToString()));
+	return 1;
+}
+
+int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<const FText> &&value)
+{
+	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj.ToString()));
+	return 1;
+}
+
+int32 FLuaUtil::Push(lua_State *InLuaState, FLuaClassType<const FString> &&value)
 {
 	lua_pushstring(InLuaState, TCHAR_TO_ANSI(*value.m_ClassObj));
 	return 1;

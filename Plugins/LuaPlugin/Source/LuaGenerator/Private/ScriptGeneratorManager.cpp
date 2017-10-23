@@ -10,6 +10,7 @@
 #include "ConfigClassDefine.h"
 #include "UStructGenerator.h"
 #include "LuaConfigManager.h"
+#include "Generator/TArrayGenerator.h"
 
 FScriptGeneratorManager::FScriptGeneratorManager()
 {
@@ -32,6 +33,8 @@ void FScriptGeneratorManager::Initialize(const FString& RootLocalPath, const FSt
 
 void FScriptGeneratorManager::ExportClass(UClass* Class, const FString& SourceHeaderFilename, const FString& GeneratedHeaderFilename, bool bHasChanged)
 {
+	DebugProcedure(TEXT("ExportClass:%s"), *Class->GetName());
+
 	IScriptGenerator *pGenerator = new FUClassGenerator(Class, m_OutDir, SourceHeaderFilename);
 	if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
 	{
@@ -48,15 +51,10 @@ void FScriptGeneratorManager::FinishExport()
 {
 	DebugProcedure(TEXT("FinishExport"));
 	ExportExtrasToMemory();
-	DebugProcedure(TEXT("ExportExtrasToMemory"));
 	AdjustBeforeSaveToFile();
-	DebugProcedure(TEXT("AdjustBeforeSaveToFile"));
 	InitClassParentManager();
-	DebugProcedure(TEXT("InitClassParentManager"));
 	SaveToFiles();
-	DebugProcedure(TEXT("SaveToFiles"));
 	FinishExportPost();
-	DebugProcedure(TEXT("FinishExportPost"));
 }
 
 bool FScriptGeneratorManager::ContainClassName(const FString &ClassName)
@@ -84,6 +82,7 @@ void FScriptGeneratorManager::ExportExtrasToMemory()
 {
 	ExportConfigClasses();
 	ExportUStructs();
+	ExportTArray();
 }
 
 void FScriptGeneratorManager::AdjustBeforeSaveToFile()
@@ -157,6 +156,27 @@ void FScriptGeneratorManager::ExportUStructs()
 	}
 }
 
+void FScriptGeneratorManager::ExportTArray()
+{
+	for (auto &Item :m_GeneratorPropertys)
+	{
+		UProperty *pProperty = Item.Value;
+		if (pProperty->IsA(UArrayProperty::StaticClass()))
+		{
+			IScriptGenerator *pGenerator = FTArrayGenerator::CreateGenerator(pProperty, m_OutDir);
+			if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
+			{
+				pGenerator->ExportToMemory();
+				AddGeneratorToMap(pGenerator);
+			}
+			else
+			{
+				SafeDelete(pGenerator);
+			}
+		}
+	}
+}
+
 void FScriptGeneratorManager::ExportUStruct(UScriptStruct *pScriptStruct)
 {
 	IScriptGenerator *pGenerator = FUStructGenerator::CreateGenerator(pScriptStruct, m_OutDir);
@@ -176,11 +196,19 @@ void FScriptGeneratorManager::AddGeneratorToMap(IScriptGenerator *InGenerator)
 	m_Generators.Add(InGenerator->GetKey(), InGenerator);
 }
 
+void FScriptGeneratorManager::AddGeneratorProperty(const FString &PlainName, UProperty *pProperty)
+{
+	if (!m_GeneratorPropertys.Contains(PlainName))
+	{
+		m_GeneratorPropertys.Add(PlainName, pProperty);
+	}
+}
+
 void FScriptGeneratorManager::SaveToFiles()
 {
+	DebugProcedure(TEXT("SaveToFiles"));
 	for (auto &MapItem : m_Generators)
 	{
-		DebugProcedure(TEXT("saveToFile:%s"), *MapItem.Key);
 		IScriptGenerator *pGenerator = MapItem.Value;
 		pGenerator->SaveToFile();
 	}

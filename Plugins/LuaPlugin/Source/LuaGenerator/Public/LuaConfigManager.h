@@ -23,18 +23,19 @@ private:
 	void InitExportConfig();
 
 public:
+	FString NoExportExtraFuncName;
+	FString ProjectPath;
+	FString GameModuleName;
+	FString ClassScriptHeaderSuffix;
+	FString LuaConfigFileRelativePath;
+	FString ClassConfigFileRelativeFolder;
+
 	TArray<FString> SupportedModules;
 	TArray<FString> NotSuportClasses;
 	TArray<FString> SupportStructs;
 	TArray<FString> BaseTypes;
 	TArray<FString> ClassConfigFileNames;
 	TArray<FString> AdditionalIncludeHeaders;
-
-	FString ProjectPath;
-	FString GameModuleName;
-	FString ClassScriptHeaderSuffix;
-	FString LuaConfigFileRelativePath;
-	FString ClassConfigFileRelativeFolder;
 
 	// config 
 	TArray<FString> InvalidSetTypes;

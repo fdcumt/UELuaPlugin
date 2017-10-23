@@ -4,7 +4,16 @@ function Init(pBaseLuaWidget)
     --pBaseLuaWidget.WidgetTree = widgetTree;
     --local button = UButton.New(widgetTree, "Button");
     --widgetTree.RootWidget = button;
-
+	
+	local BaseStruct1 = FBaseStruct1.New();
+	local BaseStruct  = FBaseStruct.New();
+	BaseStruct1.m_BaseStructs:Add(BaseStruct);
+	
+	local BaseStructTemp = BaseStruct1.m_BaseStructs:Get(0);
+	BaseStructTemp.m = 19;
+	local BaseStructTemp1 = BaseStruct1.m_BaseStructs:Get(0);
+	
+	LuaPrint.print("BaseStructTemp1.m"..BaseStructTemp1.m);
 
 
 --[[

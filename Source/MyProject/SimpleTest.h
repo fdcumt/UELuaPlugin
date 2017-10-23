@@ -93,5 +93,5 @@ struct FBaseStruct1
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
 		int32 m_Value2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
-		int32 m_Value3;
+		TArray<FBaseStruct> m_BaseStructs;
 };

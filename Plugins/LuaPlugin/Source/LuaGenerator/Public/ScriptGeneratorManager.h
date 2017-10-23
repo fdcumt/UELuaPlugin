@@ -22,8 +22,11 @@ public:
 
 public:
 	bool ContainClassName(const FString &ClassName);
+	FString GetOutputDirectory() const { return m_OutDir; }
 	TArray<FString> GetParentNames(const FString &ClassName);
 	IScriptGenerator* GetGenerator(const FString &ClassName);
+	void AddGeneratorToMap(IScriptGenerator *InGenerator);
+	void AddGeneratorProperty(const FString &PlainName, UProperty *pProperty);
 
 private:
 	bool CanExportClass(IScriptGenerator *InGenerator) const ;
@@ -46,10 +49,8 @@ private: // config class
 
 private: // UStruct
 	void ExportUStructs();
+	void ExportTArray();
 	void ExportUStruct(UScriptStruct *pScriptStruct);
-
-private:
-	void AddGeneratorToMap(IScriptGenerator *InGenerator);
 	
 private:
 	FString m_OutDir;
@@ -58,4 +59,5 @@ private:
 	FString m_IncludeBase;
 	TMap<FString, IScriptGenerator*> m_Generators;
 	FClassParentManager m_ClassParentManager;
+	TMap<FString, UProperty*> m_GeneratorPropertys;
 };
