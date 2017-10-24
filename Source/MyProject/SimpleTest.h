@@ -78,6 +78,11 @@ struct FBaseStruct
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct)
 		int32 m;
+
+	bool operator==(const FBaseStruct& Other) const
+	{
+		return m == Other.m;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -96,4 +101,11 @@ struct FBaseStruct1
 		TArray<FBaseStruct> m_BaseStructs;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
 		TMap<int32, FBaseStruct> m_MapBaseStruct;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
+		TSet<FBaseStruct> m_SetBaseStruct;
 };
+
+inline uint32 GetTypeHash(const FBaseStruct& Item)
+{
+	return Item.m;
+}

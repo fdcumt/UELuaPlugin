@@ -1,10 +1,22 @@
 function Init(pBaseLuaWidget)
 
+	local BaseStruct1 = FBaseStruct1.New();
+	local BaseStruct  = FBaseStruct.New();
+	BaseStruct.m = 11;
+	--BaseStruct1.m_SetBaseStruct:Add(BaseStruct);
+	local bContain = BaseStruct1.m_SetBaseStruct:Contains(BaseStruct);
+	LuaPrint.print("bContain"..tostring(bContain));
+	
+
+--[[
 	--local widgetTree = UWidgetTree.New(pBaseLuaWidget, "WidgetTree")
     --pBaseLuaWidget.WidgetTree = widgetTree;
     --local button = UButton.New(widgetTree, "Button");
     --widgetTree.RootWidget = button;
+	]]
 	
+	
+	--[[
 	local BaseStruct1 = FBaseStruct1.New();
 	local BaseStruct  = FBaseStruct.New();
 	BaseStruct.m = 11;
@@ -23,7 +35,7 @@ function Init(pBaseLuaWidget)
 	--BaseStructTemp.m = 19;
 	--local BaseStructTemp1 = BaseStruct1.m_BaseStructs:Get(0);
 	--
-	
+	]]
 
 
 --[[
