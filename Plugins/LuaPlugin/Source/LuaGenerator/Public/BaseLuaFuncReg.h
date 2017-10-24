@@ -8,13 +8,15 @@ public:
 
 public:
 	int32 ArrayDim;
+	FString PureType;
 	FString OriginalType;
 	FString DeclareType;
-	FString VariableName;
-	FString PropertyName;
-	FString PureType;
 	FString UsedSelfVarPrefix; 
 	FString AssignValuePrefix;
+	FString VariableName;
+	FString PropertyName;
+	FString PointTValueDeclare;
+	FString PushPointTValuePrefix;
 	bool CanGenerateSetFunc;
 	bool CanGenerateGetFunc;
 	bool bSupportNow;

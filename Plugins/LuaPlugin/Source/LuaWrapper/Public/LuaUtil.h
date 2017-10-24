@@ -173,6 +173,8 @@ public: // push args
 	static int32 Push(lua_State *InLuaState, FLuaClassType<FText> &&value);
 	static int32 Push(lua_State *InLuaState, FLuaClassType<const FText> &&value);
 
+	static int32 PushNil(lua_State *InLuaState);
+
 private: // not export Function
 	static void AddClass(lua_State *InLuaState, const char *ClassName);
 	static void OpenClass(lua_State *InLuaState, const char *ClassName);

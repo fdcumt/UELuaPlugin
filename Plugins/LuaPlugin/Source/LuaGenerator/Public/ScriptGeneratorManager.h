@@ -49,7 +49,7 @@ private: // config class
 
 private: // UStruct
 	void ExportUStructs();
-	void ExportTArray();
+	void ExportGeneratorPropertys();
 	void ExportUStruct(UScriptStruct *pScriptStruct);
 	
 private:

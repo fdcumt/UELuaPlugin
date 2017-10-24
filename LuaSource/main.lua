@@ -7,13 +7,23 @@ function Init(pBaseLuaWidget)
 	
 	local BaseStruct1 = FBaseStruct1.New();
 	local BaseStruct  = FBaseStruct.New();
-	BaseStruct1.m_BaseStructs:Add(BaseStruct);
+	BaseStruct.m = 11;
+	BaseStruct1.m_MapBaseStruct:Add(6, BaseStruct);
+	local a = BaseStruct1.m_MapBaseStruct:Find(6);
+	a.m = 33;
+	local b = BaseStruct1.m_MapBaseStruct:Find(6);
+	local bContain = BaseStruct1.m_MapBaseStruct:Contains(6);
 	
-	local BaseStructTemp = BaseStruct1.m_BaseStructs:Get(0);
-	BaseStructTemp.m = 19;
-	local BaseStructTemp1 = BaseStruct1.m_BaseStructs:Get(0);
+	LuaPrint.print("b.m"..b.m);
+	LuaPrint.print("bContain"..tostring(bContain));
 	
-	LuaPrint.print("BaseStructTemp1.m"..BaseStructTemp1.m);
+	--BaseStruct1.m_BaseStructs:Add(BaseStruct);
+	--
+	--local BaseStructTemp = BaseStruct1.m_BaseStructs:Get(0);
+	--BaseStructTemp.m = 19;
+	--local BaseStructTemp1 = BaseStruct1.m_BaseStructs:Get(0);
+	--
+	
 
 
 --[[

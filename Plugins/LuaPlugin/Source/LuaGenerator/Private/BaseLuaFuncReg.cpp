@@ -21,14 +21,21 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	ArrayDim = pProperty->ArrayDim;
 	DeclareType = OriginalType;
 	PureType = DeclareType;
+
 	PropertyName = pProperty->GetName();
 	VariableName = PropertyName;
-	UsedSelfVarPrefix = FString("");
-	AssignValuePrefix = FString("");
+
+	UsedSelfVarPrefix = "";
+	AssignValuePrefix = "";
+
+	PointTValueDeclare = OriginalType + "*";
+	PushPointTValuePrefix = "*";
 
 	bNewReturn = false;
+
 	CanGenerateSetFunc = true;
 	CanGenerateGetFunc = true;
+
 	bNeedReturn = OriginalType != "void";
 
 	if (pProperty->PropertyFlags & CPF_DisableEditOnInstance)
@@ -92,6 +99,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		PureType = OriginalType;
 		UsedSelfVarPrefix = "*";
 		AssignValuePrefix = "&";
+		PushPointTValuePrefix = "";
 		bNewReturn = true;
 		bSupportNow = true;
 		break;
@@ -125,6 +133,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		DeclareType = OriginalType + "*";
 		UsedSelfVarPrefix = "*";
 		AssignValuePrefix = "&";
+		PushPointTValuePrefix = "";
 		bNewReturn = true;
 		bSupportNow = true;
 		
@@ -134,12 +143,30 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	}
 	case EVariableType::EVarTSet:
 	{
+		PureType = OriginalType;
+		DeclareType = OriginalType + "*";
+		UsedSelfVarPrefix = "*";
+		AssignValuePrefix = "&";
+		PushPointTValuePrefix = "";
+		bNewReturn = true;
 		bSupportNow = false;
+
+		FString PlainType = GetPlainType(OriginalType);
+		g_ScriptGeneratorManager->AddGeneratorProperty(PlainType, pProperty);
+		break;
 		break;
 	}
 	case EVariableType::EVarTMap:
 	{
-		bSupportNow = false;
+		PureType = OriginalType;
+		DeclareType = OriginalType + "*";
+		UsedSelfVarPrefix = "*";
+		AssignValuePrefix = "&";
+		PushPointTValuePrefix = "";
+		bNewReturn = true;
+		bSupportNow = true;
+		FString PlainType = GetPlainType(OriginalType);
+		g_ScriptGeneratorManager->AddGeneratorProperty(PlainType, pProperty);
 		break;
 	}
 	case EVariableType::EVoid:

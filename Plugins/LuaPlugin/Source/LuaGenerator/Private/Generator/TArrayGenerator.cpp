@@ -200,8 +200,7 @@ void FTArrayGenerator::Init(UArrayProperty *pArrayProperty)
 	m_TArrayInfo.InitByUProperty(pArrayProperty);
 	m_ElementInfo.InitByUProperty(pArrayProperty->Inner);
 
-	EVariableType  eElementType = ResolvePropertyType(pArrayProperty->Inner);
-	switch (eElementType)
+	switch (m_ElementInfo.eVariableType)
 	{
 	case EBaseType:
 	{

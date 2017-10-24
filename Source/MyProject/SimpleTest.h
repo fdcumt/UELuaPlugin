@@ -94,4 +94,6 @@ struct FBaseStruct1
 		int32 m_Value2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
 		TArray<FBaseStruct> m_BaseStructs;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
+		TMap<int32, FBaseStruct> m_MapBaseStruct;
 };

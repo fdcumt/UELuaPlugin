@@ -11,6 +11,7 @@
 #include "UStructGenerator.h"
 #include "LuaConfigManager.h"
 #include "Generator/TArrayGenerator.h"
+#include "Generator/TMapGenerator.h"
 
 FScriptGeneratorManager::FScriptGeneratorManager()
 {
@@ -82,7 +83,7 @@ void FScriptGeneratorManager::ExportExtrasToMemory()
 {
 	ExportConfigClasses();
 	ExportUStructs();
-	ExportTArray();
+	ExportGeneratorPropertys();
 }
 
 void FScriptGeneratorManager::AdjustBeforeSaveToFile()
@@ -156,7 +157,7 @@ void FScriptGeneratorManager::ExportUStructs()
 	}
 }
 
-void FScriptGeneratorManager::ExportTArray()
+void FScriptGeneratorManager::ExportGeneratorPropertys()
 {
 	for (auto &Item :m_GeneratorPropertys)
 	{
@@ -164,6 +165,19 @@ void FScriptGeneratorManager::ExportTArray()
 		if (pProperty->IsA(UArrayProperty::StaticClass()))
 		{
 			IScriptGenerator *pGenerator = FTArrayGenerator::CreateGenerator(pProperty, m_OutDir);
+			if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
+			{
+				pGenerator->ExportToMemory();
+				AddGeneratorToMap(pGenerator);
+			}
+			else
+			{
+				SafeDelete(pGenerator);
+			}
+		}
+		else if (pProperty->IsA(UMapProperty::StaticClass()))
+		{
+			IScriptGenerator *pGenerator = FTMapGenerator::CreateGenerator(pProperty, m_OutDir);
 			if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
 			{
 				pGenerator->ExportToMemory();

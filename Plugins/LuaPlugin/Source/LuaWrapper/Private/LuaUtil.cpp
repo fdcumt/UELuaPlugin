@@ -421,6 +421,12 @@ int32 FLuaUtil::Push(lua_State *InLuaState, FString& value)
 	return 1;
 }
 
+int32 FLuaUtil::PushNil(lua_State *InLuaState)
+{
+	lua_pushnil(InLuaState);
+	return 1;
+}
+
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, uint8 &ReturnValue)
 {
 	ReturnValue = lua_tointeger(InLuaState, LuaStackIndex);
