@@ -15,9 +15,9 @@ public:
 public:
 	virtual FString GetKey() const = 0;
 	virtual FString GetClassName() const = 0;
-	virtual FString GetFileName() const = 0;
-	virtual FString GetRegName() const = 0;
-	virtual void GetParentNames(TArray<FString> &OutParentNames) const = 0;
+	virtual FString GetFileName() const ;
+	virtual FString GetRegName() const ;
+	virtual void GetParentNames(TArray<FString> &OutParentNames) const ;
 
 public:
 	virtual FString GetFileHeader();

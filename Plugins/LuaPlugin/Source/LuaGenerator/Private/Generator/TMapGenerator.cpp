@@ -26,16 +26,6 @@ FString FTMapGenerator::GetKey() const
 	return m_TMapInfo.PureType;
 }
 
-FString FTMapGenerator::GetFileName() const
-{
-	return GetClassName() + g_LuaConfigManager->ClassScriptHeaderSuffix;
-}
-
-FString FTMapGenerator::GetRegName() const
-{
-	return FString::Printf(TEXT("%s_Lib"), *GetClassName());
-}
-
 bool FTMapGenerator::CanExport() const
 {
 	return m_bSupportKey && m_bSupportValue;
@@ -68,12 +58,7 @@ void FTMapGenerator::SaveToFile()
 
 FString FTMapGenerator::GetClassName() const
 {
-	return FString::Printf(TEXT("%s"), *m_ClassName);
-}
-
-void FTMapGenerator::GetParentNames(TArray<FString> &OutParentNames) const
-{
-
+	return m_ClassName;
 }
 
 FExtraFuncMemberInfo FTMapGenerator::ExtraNum()

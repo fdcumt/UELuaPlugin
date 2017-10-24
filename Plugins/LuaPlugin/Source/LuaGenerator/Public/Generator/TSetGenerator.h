@@ -2,14 +2,14 @@
 #include "IScriptGenerator.h"
 #include "BaseLuaFuncReg.h"
 
-class FTMapGenerator : public IScriptGenerator
+class FTSetGenerator : public IScriptGenerator
 {
 public:
 	static IScriptGenerator* CreateGenerator(UProperty *pProperty, const FString &InOutDir);
 
 public:
-	FTMapGenerator(UProperty *pProperty, const FString &InOutDir);
-	virtual ~FTMapGenerator();
+	FTSetGenerator(UProperty *pProperty, const FString &InOutDir);
+	virtual ~FTSetGenerator();
 
 public:
 	/** FBaseGenerator interface */
@@ -22,20 +22,18 @@ public:
 private:
 	FExtraFuncMemberInfo ExtraNum();
 	FExtraFuncMemberInfo ExtraAdd();
-	FExtraFuncMemberInfo ExtraFind();
-	FExtraFuncMemberInfo ExtraContains();
 	FExtraFuncMemberInfo ExtraEmpty();
 	FExtraFuncMemberInfo ExtraRemove();
+	FExtraFuncMemberInfo ExtraContains();
 
 private:
-	void Init(UMapProperty *pMapProperty);
+	void Init(USetProperty *pSetProperty);
 
 private:
 	FString m_ClassName;
-	bool m_bSupportKey;
-	bool m_bSupportValue;
+	bool m_bSupportElement;
 	FBaseFuncReg m_LuaFuncReg;
-	FVariableTypeInfo m_KeyInfo;
-	FVariableTypeInfo m_ValueInfo;
-	FVariableTypeInfo m_TMapInfo;
+	FVariableTypeInfo m_ElementInfo;
+	FVariableTypeInfo m_TSetInfo;
 };
+

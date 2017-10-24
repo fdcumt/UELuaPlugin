@@ -56,16 +56,6 @@ FString FUClassGenerator::GetClassName() const
 	return FString::Printf(TEXT("%s%s"), m_pClass->GetPrefixCPP(), *m_pClass->GetName());
 }
 
-FString FUClassGenerator::GetFileName() const
-{
-	return GetClassName() +g_LuaConfigManager->ClassScriptHeaderSuffix;
-}
-
-FString FUClassGenerator::GetRegName() const
-{
-	return FString::Printf(TEXT("%s_Lib"), *GetClassName());
-}
-
 void FUClassGenerator::ExportDataMembersToMemory()
 {
 	for (TFieldIterator<UProperty> PropertyIt(m_pClass/*, EFieldIteratorFlags::ExcludeSuper*/); PropertyIt; ++PropertyIt)
@@ -146,9 +136,3 @@ bool FUClassGenerator::CanExportFunction(UFunction *InFunction)
 	
 	return true;
 }
-
-void FUClassGenerator::GetParentNames(TArray<FString> &OutParentNames) const
-{
-
-}
-

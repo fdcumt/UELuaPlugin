@@ -28,16 +28,6 @@ FString FConfigClassGenerator::GetClassName() const
 	return m_ConfigClass.GetClassName();
 }
 
-FString FConfigClassGenerator::GetFileName() const
-{
-	return m_ConfigClass.GetClassName() + g_LuaConfigManager->ClassScriptHeaderSuffix;
-}
-
-FString FConfigClassGenerator::GetRegName() const
-{
-	return m_ConfigClass.GetRegLibName();
-}
-
 bool FConfigClassGenerator::CanExport() const
 {
 	return true;

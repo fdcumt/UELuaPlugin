@@ -1,4 +1,6 @@
 #include "IScriptGenerator.h"
+#include "GeneratorDefine.h"
+#include "LuaConfigManager.h"
 
 IScriptGenerator::IScriptGenerator(NS_LuaGenerator::E_GeneratorType InType, const FString &OutDir)
 	: m_eClassType(InType)
@@ -8,6 +10,21 @@ IScriptGenerator::IScriptGenerator(NS_LuaGenerator::E_GeneratorType InType, cons
 }
 
 IScriptGenerator::~IScriptGenerator()
+{
+
+}
+
+FString IScriptGenerator::GetFileName() const
+{
+	return GetClassName() + g_LuaConfigManager->ClassScriptHeaderSuffix;
+}
+
+FString IScriptGenerator::GetRegName() const
+{
+	return FString::Printf(TEXT("%s_Lib"), *GetClassName());
+}
+
+void IScriptGenerator::GetParentNames(TArray<FString> &OutParentNames) const
 {
 
 }

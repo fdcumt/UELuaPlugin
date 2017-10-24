@@ -26,16 +26,6 @@ FString FTArrayGenerator::GetKey() const
 	return m_TArrayInfo.PureType;
 }
 
-FString FTArrayGenerator::GetFileName() const
-{
-	return GetClassName() + g_LuaConfigManager->ClassScriptHeaderSuffix;
-}
-
-FString FTArrayGenerator::GetRegName() const
-{
-	return FString::Printf(TEXT("%s_Lib"), *GetClassName());
-}
-
 bool FTArrayGenerator::CanExport() const
 {
 	return m_bSupportElement;
@@ -43,8 +33,6 @@ bool FTArrayGenerator::CanExport() const
 
 void FTArrayGenerator::ExportToMemory()
 {
-	m_LuaFuncReg.AddExtraFuncMember(ExtraNew());
-	m_LuaFuncReg.AddExtraFuncMember(ExtraDestory());
 	m_LuaFuncReg.AddExtraFuncMember(ExtraNum());
 	m_LuaFuncReg.AddExtraFuncMember(ExtraAdd());
 	m_LuaFuncReg.AddExtraFuncMember(ExtraGet());
@@ -71,33 +59,7 @@ void FTArrayGenerator::SaveToFile()
 
 FString FTArrayGenerator::GetClassName() const
 {
-	return FString::Printf(TEXT("%s"), *m_ClassName);
-}
-
-void FTArrayGenerator::GetParentNames(TArray<FString> &OutParentNames) const
-{
-
-}
-
-FExtraFuncMemberInfo FTArrayGenerator::ExtraNew()
-{
-	FExtraFuncMemberInfo ExtraInfo;
-	ExtraInfo.funcName = "New";
-	FString &funcBody = ExtraInfo.funcBody;
-	funcBody += EndLinePrintf(TEXT("\t%s *pTArray = new %s;"), *m_TArrayInfo.PureType, *m_TArrayInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s*>(pTArray, \"%s\"));"), *m_TArrayInfo.PureType, *m_TArrayInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\treturn 1;"));
-	return ExtraInfo;
-}
-
-FExtraFuncMemberInfo FTArrayGenerator::ExtraDestory()
-{
-	FExtraFuncMemberInfo ExtraInfo;
-	ExtraInfo.funcName = "Destory";
-	FString &funcBody = ExtraInfo.funcBody;
-	funcBody += EndLinePrintf(TEXT("\t%s *pTArray = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TArrayInfo.PureType, *m_TArrayInfo.PureType, *m_TArrayInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
-	return ExtraInfo;
+	return m_ClassName;
 }
 
 FExtraFuncMemberInfo FTArrayGenerator::ExtraNum()
@@ -274,12 +236,12 @@ void FTArrayGenerator::Init(UArrayProperty *pArrayProperty)
 	}
 	case EVarTMap:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EVarTSet:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EUnknow:

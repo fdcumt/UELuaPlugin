@@ -12,6 +12,7 @@
 #include "LuaConfigManager.h"
 #include "Generator/TArrayGenerator.h"
 #include "Generator/TMapGenerator.h"
+#include "Generator/TSetGenerator.h"
 
 FScriptGeneratorManager::FScriptGeneratorManager()
 {
@@ -178,6 +179,19 @@ void FScriptGeneratorManager::ExportGeneratorPropertys()
 		else if (pProperty->IsA(UMapProperty::StaticClass()))
 		{
 			IScriptGenerator *pGenerator = FTMapGenerator::CreateGenerator(pProperty, m_OutDir);
+			if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
+			{
+				pGenerator->ExportToMemory();
+				AddGeneratorToMap(pGenerator);
+			}
+			else
+			{
+				SafeDelete(pGenerator);
+			}
+		}
+		else if (pProperty->IsA(USetProperty::StaticClass()))
+		{
+			IScriptGenerator *pGenerator = FTSetGenerator::CreateGenerator(pProperty, m_OutDir);
 			if (pGenerator && CanExportClass(pGenerator) && pGenerator->CanExport())
 			{
 				pGenerator->ExportToMemory();

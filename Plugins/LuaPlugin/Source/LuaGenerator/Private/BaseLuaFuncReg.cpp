@@ -149,7 +149,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		AssignValuePrefix = "&";
 		PushPointTValuePrefix = "";
 		bNewReturn = true;
-		bSupportNow = false;
+		bSupportNow = true;
 
 		FString PlainType = GetPlainType(OriginalType);
 		g_ScriptGeneratorManager->AddGeneratorProperty(PlainType, pProperty);

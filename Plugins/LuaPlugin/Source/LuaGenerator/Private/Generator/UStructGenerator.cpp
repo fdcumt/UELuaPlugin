@@ -26,16 +26,6 @@ FString FUStructGenerator::GetKey() const
 	return GetClassName();
 }
 
-FString FUStructGenerator::GetFileName() const
-{
-	return GetClassName()+g_LuaConfigManager->ClassScriptHeaderSuffix;
-}
-
-FString FUStructGenerator::GetRegName() const
-{
-	return FString::Printf(TEXT("%s_Lib"), *GetClassName());
-}
-
 bool FUStructGenerator::CanExport() const
 {
 	if (m_pScriptStruct->HasMetaData("DEPRECATED"))
@@ -81,11 +71,6 @@ void FUStructGenerator::SaveToFile()
 FString FUStructGenerator::GetClassName() const
 {
 	return FString::Printf(TEXT("%s%s"), m_pScriptStruct->GetPrefixCPP(), *m_pScriptStruct->GetName());
-}
-
-void FUStructGenerator::GetParentNames(TArray<FString> &OutParentNames) const
-{
-	
 }
 
 void FUStructGenerator::ExportDataMemberToMemory()
