@@ -220,27 +220,27 @@ void FTArrayGenerator::Init(UArrayProperty *pArrayProperty)
 	}
 	case EFName:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EText:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EFString:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EClass:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EVarTArray:
 	{
-		m_bSupportElement = false;
+		m_bSupportElement = true;
 		break;
 	}
 	case EWeakObject:
