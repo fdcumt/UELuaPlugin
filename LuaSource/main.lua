@@ -1,14 +1,28 @@
 function Init(pBaseLuaWidget)
 
+--[[ test export TEnumAsByte
+	local BaseStruct1 = FBaseStruct1.New();
+	BaseStruct1.m_EnumAsByte = 0;
+	LuaPrint.print("BaseStruct1.m_EnumAsByte"..BaseStruct1.m_EnumAsByte);
+	]]
+
+--[[ test export enum
+	local BaseStruct1 = FBaseStruct1.New();
+	BaseStruct1.m_JustEnum = 1;
+	LuaPrint.print("BaseStruct1.m_JustEnum"..BaseStruct1.m_JustEnum);
+	]]
+
+--[[ test tmap 
 	local BaseStruct1 = FBaseStruct1.New();
 	local BaseStruct  = FBaseStruct.New();
 	BaseStruct.m = 11;
 	--BaseStruct1.m_SetBaseStruct:Add(BaseStruct);
 	local bContain = BaseStruct1.m_SetBaseStruct:Contains(BaseStruct);
 	LuaPrint.print("bContain"..tostring(bContain));
+	]]
 	
 
---[[
+--[[ test update widget
 	--local widgetTree = UWidgetTree.New(pBaseLuaWidget, "WidgetTree")
     --pBaseLuaWidget.WidgetTree = widgetTree;
     --local button = UButton.New(widgetTree, "Button");

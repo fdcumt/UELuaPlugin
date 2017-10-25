@@ -79,8 +79,8 @@ FExtraFuncMemberInfo FTMapGenerator::ExtraAdd()
 	ExtraInfo.funcName = "Add";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pMap = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TMapInfo.PureType, *m_TMapInfo.PureType, *m_TMapInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s MapKey = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s MapValue = FLuaUtil::TouserData<%s>(InLuaState, 3, \"%s\");"), *m_ValueInfo.DeclareType, *m_ValueInfo.DeclareType, *m_ValueInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s MapKey = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.TouserPushDeclareType, *m_KeyInfo.TouserPushPureType);
+	funcBody += EndLinePrintf(TEXT("\t%s MapValue = FLuaUtil::TouserData<%s>(InLuaState, 3, \"%s\");"), *m_ValueInfo.DeclareType, *m_ValueInfo.DeclareType, *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tpMap->Add(%sMapKey, %sMapValue);"), *m_KeyInfo.UsedSelfVarPrefix, *m_ValueInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraInfo;
@@ -92,11 +92,19 @@ FExtraFuncMemberInfo FTMapGenerator::ExtraFind()
 	ExtraInfo.funcName = "Find";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pMap = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TMapInfo.PureType, *m_TMapInfo.PureType, *m_TMapInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s MapKey = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s MapKey = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.TouserPushDeclareType, *m_KeyInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\t%s pMapValue = pMap->Find(%sMapKey);"), *m_ValueInfo.PointTValueDeclare, *m_KeyInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\tif (pMapValue)"));
 	funcBody += EndLinePrintf(TEXT("\t{"));
-	funcBody += EndLinePrintf(TEXT("\t\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(%spMapValue, \"%s\"));"), *m_ValueInfo.DeclareType, *m_ValueInfo.PushPointTValuePrefix, *m_ValueInfo.PureType );
+	if (m_ValueInfo.bNeedNewPushValue)
+	{
+		funcBody += EndLinePrintf(TEXT("\t\t%s NewPushValue = %s%spMapValue;"), *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.PushUsedSelfVarPrefix, *m_ValueInfo.PushPointTValuePrefix);
+		funcBody += EndLinePrintf(TEXT("\t\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(NewPushValue, \"%s\"));"), *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.TouserPushPureType);
+	}
+	else
+	{
+		funcBody += EndLinePrintf(TEXT("\t\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(%spMapValue, \"%s\"));"), *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.PushPointTValuePrefix, *m_ValueInfo.TouserPushPureType);
+	}
 	funcBody += EndLinePrintf(TEXT("\t}"));
 	funcBody += EndLinePrintf(TEXT("\telse"));
 	funcBody += EndLinePrintf(TEXT("\t{"));
@@ -112,7 +120,7 @@ FExtraFuncMemberInfo FTMapGenerator::ExtraContains()
 	ExtraInfo.funcName = "Contains";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pMap = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TMapInfo.PureType, *m_TMapInfo.PureType, *m_TMapInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s MapKey = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s MapKey = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.TouserPushDeclareType, *m_KeyInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tbool bContain = pMap->Contains(%sMapKey);"), *m_KeyInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<bool>(bContain, \"bool\"));"));
 	funcBody += EndLinePrintf(TEXT("\treturn 1;"));
@@ -136,7 +144,7 @@ FExtraFuncMemberInfo FTMapGenerator::ExtraRemove()
 	ExtraInfo.funcName = "Remove";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pMap = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TMapInfo.PureType, *m_TMapInfo.PureType, *m_TMapInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s MapKey = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s MapKey = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_KeyInfo.DeclareType, *m_KeyInfo.DeclareType, *m_KeyInfo.TouserPushDeclareType, *m_KeyInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tpMap->Remove(%sMapKey);"), *m_KeyInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraInfo;

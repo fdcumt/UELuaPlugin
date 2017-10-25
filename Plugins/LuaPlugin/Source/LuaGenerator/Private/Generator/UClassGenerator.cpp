@@ -67,6 +67,12 @@ void FUClassGenerator::ExportDataMembersToMemory()
 		{
 			m_LuaFuncReg.AddDataMember(CorrectDataInfo);
 		}
+
+		if (pProperty->IsA(UMulticastDelegateProperty::StaticClass()))
+		{
+			UMulticastDelegateProperty *pMultcastDelegateProperty = Cast<UMulticastDelegateProperty>(pProperty);
+			//DebugLog(TEXT("class:%s%s,Delegate:%s"), m_pClass->GetPrefixCPP(), *m_pClass->GetName(), *pMultcastDelegateProperty->GetName());
+		}
 	}
 }
 
@@ -93,7 +99,8 @@ FExtraFuncMemberInfo FUClassGenerator::GenerateNewExportFunction()
 	ExtraFuncNew.funcName = "New";
 	FString &funcBody = ExtraFuncNew.funcBody;
 	funcBody += EndLinePrintf(TEXT("\tUObject* Outer = FLuaUtil::TouserData<UObject*>(InLuaState, 1, \"UObject\");"));
-	funcBody += EndLinePrintf(TEXT("\tFName Name = FName(luaL_checkstring(InLuaState, 2));"));
+	funcBody += EndLinePrintf(TEXT("\tFName Name = FLuaUtil::TouserData<FName>(InLuaState, 2, \"FName\");"));
+	//funcBody += EndLinePrintf(TEXT("\tFName Name = FName(luaL_checkstring(InLuaState, 2));"));
 	funcBody += EndLinePrintf(TEXT("\t%s* pObj = NewObject<%s>(Outer, Name);"), *GetClassName(), *GetClassName());
 	funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s*>(pObj, \"%s\"));"), *GetClassName(), *GetClassName());
 	funcBody += EndLinePrintf(TEXT("\treturn 1;"));

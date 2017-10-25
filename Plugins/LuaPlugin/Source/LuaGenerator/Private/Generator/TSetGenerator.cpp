@@ -78,7 +78,7 @@ FExtraFuncMemberInfo FTSetGenerator::ExtraAdd()
 	ExtraInfo.funcName = "Add";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pTSet = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TSetInfo.PureType, *m_TSetInfo.PureType, *m_TSetInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s ElementInfo = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s ElementInfo = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tpTSet->Add(%sElementInfo);"), *m_ElementInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraInfo;
@@ -101,7 +101,7 @@ FExtraFuncMemberInfo FTSetGenerator::ExtraRemove()
 	ExtraInfo.funcName = "Remove";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pTSet = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TSetInfo.PureType, *m_TSetInfo.PureType, *m_TSetInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s ElementInfo = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s ElementInfo = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tpTSet->Remove(%sElementInfo);"), *m_ElementInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraInfo;
@@ -113,7 +113,7 @@ FExtraFuncMemberInfo FTSetGenerator::ExtraContains()
 	ExtraInfo.funcName = "Contains";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pTSet = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TSetInfo.PureType, *m_TSetInfo.PureType, *m_TSetInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s ElementInfo = FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.PureType);
+	funcBody += EndLinePrintf(TEXT("\t%s ElementInfo = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tbool bContain = pTSet->Contains(%sElementInfo);"), *m_ElementInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<bool>(bContain, \"bool\"));"));
 	funcBody += EndLinePrintf(TEXT("\treturn 1;"));

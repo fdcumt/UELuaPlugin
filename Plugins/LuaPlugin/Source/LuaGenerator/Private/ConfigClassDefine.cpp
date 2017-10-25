@@ -429,7 +429,8 @@ FString FConfigFunction::GetFunctionBodyChunk(const FConfigClass &ConfigClass) c
 
 	for (int32 i=0; i<FuncParams.Num(); ++i, ++luaStackIndex)
 	{
-		Ret += EndLinePrintf(TEXT("\t%s %s = FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *FuncParams[i].GetDeclareType(), *FuncParams[i].GetVariableName(), *FuncParams[i].GetDeclareType(), luaStackIndex, *FuncParams[i].GetPureType());
+		Ret += EndLinePrintf(TEXT("\t%s %s = (%s)FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), 
+			*FuncParams[i].GetDeclareType(), *FuncParams[i].GetVariableName(), *FuncParams[i].GetDeclareType(), *FuncParams[i].GetDeclareType(), luaStackIndex, *FuncParams[i].GetPureType());
 	}
 
 	CallFuncStr = FString::Printf(TEXT("%s(%s);"), *FunctionName, *GetInParamsStr());

@@ -85,6 +85,22 @@ struct FBaseStruct
 	}
 };
 
+UENUM()
+enum EEnumByteTest
+{
+	EByteTestBlue,
+	EByteTestRed,
+	EByteTestYellow,
+};
+
+UENUM()
+enum class EJsutEnumTest : uint8
+{
+	EEnumTestBlue,
+	EEnumTestRed,
+	EEnumTestYellow,
+};
+
 USTRUCT(BlueprintType)
 struct FBaseStruct1
 {
@@ -103,9 +119,17 @@ struct FBaseStruct1
 		TMap<int32, FBaseStruct> m_MapBaseStruct;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
 		TSet<FBaseStruct> m_SetBaseStruct;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
+		TEnumAsByte<EEnumByteTest> m_EnumAsByte;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BaseStruct1)
+		EJsutEnumTest m_JustEnum;
 };
 
 inline uint32 GetTypeHash(const FBaseStruct& Item)
 {
 	return Item.m;
 }
+
+
