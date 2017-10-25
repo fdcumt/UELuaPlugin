@@ -31,6 +31,7 @@ public class LuaWrapper : ModuleRules
                 "InputCore",
                 "MyProject",
                 "UMG",
+                "ClothingSystemRuntimeInterface",
             });
     }
 }

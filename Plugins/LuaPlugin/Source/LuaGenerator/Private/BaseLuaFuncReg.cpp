@@ -24,6 +24,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	eVariableType = ResolvePropertyType(pProperty);
 	ArrayDim = pProperty->ArrayDim;
 	bNeedNewPushValue = false;
+	CastType = "";
 
 	DeclareType = OriginalType;
 	TouserPushDeclareType = DeclareType;
@@ -105,6 +106,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		TouserPushDeclareType = "int32";
 		TouserPushPureType = "int32";
 		PushUsedSelfVarPrefix = "(int32)";
+		CastType = "("+DeclareType+")";
 		bNeedNewPushValue = true;
 		break;
 	}
@@ -114,6 +116,7 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		TouserPushDeclareType = "int32";
 		TouserPushPureType = "int32";
 		PushUsedSelfVarPrefix = "(int32)";
+		CastType = "(" + DeclareType + ")";
 		bNeedNewPushValue = true;
 		break;
 	}
@@ -161,11 +164,19 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	}
 	case EVariableType::ETSubclassOf:
 	{
-		bSupportNow = false;
-
-		int32 BeginIndex = strlen("TSubclassOf<");
-		DeclareType = OriginalType.Mid(BeginIndex, OriginalType.Len() - BeginIndex - 1);
-		DeclareType += "*";
+		bSupportNow = true;
+		OriginalType = OriginalType.Mid(0, OriginalType.Len()-1);
+		DeclareType = OriginalType;
+		PureType = OriginalType;
+		TouserPushDeclareType = "UClass*";
+		TouserPushPureType = "UClass";
+		CastType = "";
+		UsedSelfVarPrefix = "";
+		PushUsedSelfVarPrefix = "*";
+		AssignValuePrefix = "";
+		PointTValueDeclare = DeclareType + "*";
+		PushPointTValuePrefix ="";
+		bNeedNewPushValue = true;
 		break;
 	}
 	case EVariableType::EWeakObject:
@@ -442,7 +453,7 @@ FString FBaseFuncReg::GetNomalFuncBody(const FExportFuncMemberInfo &FunctionItem
 	for (int32 i = 0; i < FuncArgNum; ++i)
 	{ // touser args
 		const FVariableTypeInfo &VariableInfo = FunctionItem.FunctionParams[i];
-		FuncBody += EndLinePrintf(TEXT("\t%s %s = (%s)FLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.VariableName, *VariableInfo.DeclareType, *VariableInfo.TouserPushDeclareType, luaStackIndex, *VariableInfo.TouserPushPureType);
+		FuncBody += EndLinePrintf(TEXT("\t%s %s = %sFLuaUtil::TouserData<%s>(InLuaState, %d, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.VariableName, *VariableInfo.CastType, *VariableInfo.TouserPushDeclareType, luaStackIndex, *VariableInfo.TouserPushPureType);
 		++luaStackIndex;
 	}
 
@@ -534,7 +545,7 @@ FString FBaseFuncReg::GetMinmialAPIFuncBody(const FExportFuncMemberInfo &Functio
 	
 	for (const FVariableTypeInfo &VarInfo : FunctionItem.FunctionParams)
 	{
-		FuncBody += EndLinePrintf(TEXT("\targs.%s = %s(%s)FLuaUtil::TouserData<%s>(InLuaState, 1, \"%s\");"), *VarInfo.VariableName, *VarInfo.UsedSelfVarPrefix, *VarInfo.DeclareType, *VarInfo.TouserPushDeclareType, *VarInfo.TouserPushPureType );
+		FuncBody += EndLinePrintf(TEXT("\targs.%s = %s%sFLuaUtil::TouserData<%s>(InLuaState, 1, \"%s\");"), *VarInfo.VariableName, *VarInfo.UsedSelfVarPrefix, *VarInfo.CastType, *VarInfo.TouserPushDeclareType, *VarInfo.TouserPushPureType );
 		++LuaStackIndex;
 	}
 
@@ -649,7 +660,7 @@ FString FBaseFuncReg::GetLuaSetDataMemberFuncContent(const FExportDataMemberInfo
 	if (VariableInfo.bSupportNow)
 	{
 		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
-		RetContents += EndLinePrintf(TEXT("\t%s NewValue = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.TouserPushDeclareType, *VariableInfo.TouserPushPureType);
+		RetContents += EndLinePrintf(TEXT("\t%s NewValue = %sFLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.CastType, *VariableInfo.TouserPushDeclareType, *VariableInfo.TouserPushPureType);
 		RetContents += EndLinePrintf(TEXT("\tpObj->%s = %sNewValue;"), *VariableInfo.VariableName, *VariableInfo.UsedSelfVarPrefix);
 	}
 	else
@@ -712,7 +723,7 @@ FString FBaseFuncReg::GetLuaSetMutilDimDataMemberFuncContent(const FExportDataMe
 	{
 		RetContents += EndLinePrintf(TEXT("\t%s *pObj = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_ClassName, *m_ClassName, *m_ClassName);
 		RetContents += EndLinePrintf(TEXT("\tint32 Index = FLuaUtil::TouserData<int32>(InLuaState, 2, \"int32\");"));
-		RetContents += EndLinePrintf(TEXT("\t%s NewValue = (%s)FLuaUtil::TouserData<%s>(InLuaState, 3, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.DeclareType, *VariableInfo.TouserPushDeclareType, *VariableInfo.TouserPushPureType);
+		RetContents += EndLinePrintf(TEXT("\t%s NewValue = %sFLuaUtil::TouserData<%s>(InLuaState, 3, \"%s\");"), *VariableInfo.DeclareType, *VariableInfo.CastType, *VariableInfo.TouserPushDeclareType, *VariableInfo.TouserPushPureType);
 		RetContents += EndLinePrintf(TEXT("\tpObj->%s[Index] = %sNewValue;"), *VariableInfo.VariableName, *VariableInfo.UsedSelfVarPrefix);
 	}
 	else

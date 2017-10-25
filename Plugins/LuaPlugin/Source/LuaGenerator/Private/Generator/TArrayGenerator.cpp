@@ -80,7 +80,7 @@ FExtraFuncMemberInfo FTArrayGenerator::ExtraAdd()
 	ExtraInfo.funcName = "Add";
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pTArray = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TArrayInfo.PureType, *m_TArrayInfo.PureType, *m_TArrayInfo.PureType);
-	funcBody += EndLinePrintf(TEXT("\t%s ArrayItem = (%s)FLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
+	funcBody += EndLinePrintf(TEXT("\t%s ArrayItem = %sFLuaUtil::TouserData<%s>(InLuaState, 2, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.CastType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\tpTArray->Add(%sArrayItem);"), *m_ElementInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraInfo;
@@ -121,7 +121,7 @@ FExtraFuncMemberInfo FTArrayGenerator::ExtraSet()
 	FString &funcBody = ExtraInfo.funcBody;
 	funcBody += EndLinePrintf(TEXT("\t%s *pTArray = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TArrayInfo.PureType, *m_TArrayInfo.PureType, *m_TArrayInfo.PureType);
 	funcBody += EndLinePrintf(TEXT("\tint32 ArrayIndex = FLuaUtil::TouserData<int32>(InLuaState, 2, \"int32\");"));
-	funcBody += EndLinePrintf(TEXT("\t%s ArrayItem = (%s)FLuaUtil::TouserData<%s>(InLuaState, 3, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.DeclareType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
+	funcBody += EndLinePrintf(TEXT("\t%s ArrayItem = %sFLuaUtil::TouserData<%s>(InLuaState, 3, \"%s\");"), *m_ElementInfo.DeclareType, *m_ElementInfo.CastType, *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
 	funcBody += EndLinePrintf(TEXT("\t(*pTArray)[ArrayIndex] = %sArrayItem;"), *m_ElementInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\treturn 0;"));
 	return ExtraInfo;

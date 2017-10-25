@@ -11,6 +11,7 @@ public:
 	FString PureType;
 	FString OriginalType;
 	FString DeclareType;
+	FString CastType;
 	FString TouserPushDeclareType;
 	FString TouserPushPureType;
 	FString UsedSelfVarPrefix;
