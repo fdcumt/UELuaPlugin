@@ -94,7 +94,7 @@ enum EEnumByteTest
 };
 
 UENUM()
-enum class EJsutEnumTest : uint8
+enum class EJsutEnumTest : int32
 {
 	EEnumTestBlue,
 	EEnumTestRed,

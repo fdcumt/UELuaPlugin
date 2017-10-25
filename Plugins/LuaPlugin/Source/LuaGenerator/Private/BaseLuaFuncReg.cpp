@@ -68,16 +68,6 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		TouserPushPureType = PureType;
 		break;
 	}
-	case EVariableType::EMutilPoint:
-	{
-		bSupportNow = false;
-		break;
-	}
-	case EVariableType::EObjectBase:
-	{
-		bSupportNow = false;
-		break;
-	}
 	case EVariableType::EFName:
 	{
 		bSupportNow = true;
@@ -96,11 +86,6 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 	case EVariableType::EClass:
 	{
 		bSupportNow = true;
-		break;
-	}
-	case EVariableType::EWeakObject:
-	{
-		bSupportNow = false;
 		break;
 	}
 	case EVariableType::EStruct:
@@ -130,20 +115,6 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		TouserPushPureType = "int32";
 		PushUsedSelfVarPrefix = "(int32)";
 		bNeedNewPushValue = true;
-		break;
-	}
-	case EVariableType::ETSubclassOf:
-	{
-		bSupportNow = false;
-
-		int32 BeginIndex = strlen("TSubclassOf<");
-		DeclareType = OriginalType.Mid(BeginIndex, OriginalType.Len() - BeginIndex - 1);
-		DeclareType += "*";
-		break;
-	}
-	case EVariableType::EMulticastDelegate:
-	{
-		bSupportNow = false;
 		break;
 	}
 	case EVariableType::EVarTArray:
@@ -186,6 +157,35 @@ void FVariableTypeInfo::InitByUProperty(UProperty *pProperty)
 		bNewReturn = true;
 		FString PlainType = GetPlainType(OriginalType);
 		g_ScriptGeneratorManager->AddGeneratorProperty(PlainType, pProperty);
+		break;
+	}
+	case EVariableType::ETSubclassOf:
+	{
+		bSupportNow = false;
+
+		int32 BeginIndex = strlen("TSubclassOf<");
+		DeclareType = OriginalType.Mid(BeginIndex, OriginalType.Len() - BeginIndex - 1);
+		DeclareType += "*";
+		break;
+	}
+	case EVariableType::EWeakObject:
+	{
+		bSupportNow = false;
+		break;
+	}
+	case EVariableType::EMulticastDelegate:
+	{
+		bSupportNow = false;
+		break;
+	}
+	case EVariableType::EMutilPoint:
+	{
+		bSupportNow = false;
+		break;
+	}
+	case EVariableType::EObjectBase:
+	{
+		bSupportNow = false;
 		break;
 	}
 	case EVariableType::EVoid:

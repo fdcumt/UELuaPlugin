@@ -2,15 +2,15 @@ function Init(pBaseLuaWidget)
 
 --[[ test export TEnumAsByte
 	local BaseStruct1 = FBaseStruct1.New();
-	BaseStruct1.m_EnumAsByte = 0;
+	BaseStruct1.m_EnumAsByte = -1;
 	LuaPrint.print("BaseStruct1.m_EnumAsByte"..BaseStruct1.m_EnumAsByte);
 	]]
 
---[[ test export enum
+----[[ test export enum
 	local BaseStruct1 = FBaseStruct1.New();
-	BaseStruct1.m_JustEnum = 1;
+	BaseStruct1.m_JustEnum = -1;
 	LuaPrint.print("BaseStruct1.m_JustEnum"..BaseStruct1.m_JustEnum);
-	]]
+	--]]
 
 --[[ test tmap 
 	local BaseStruct1 = FBaseStruct1.New();
