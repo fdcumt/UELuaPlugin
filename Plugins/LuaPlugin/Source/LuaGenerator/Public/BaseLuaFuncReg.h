@@ -15,7 +15,8 @@ public:
 	FString TouserPushDeclareType;
 	FString TouserPushPureType;
 	FString UsedSelfVarPrefix;
-	FString PushUsedSelfVarPrefix;
+	FString AssignPushVarPrefix;
+	FString AssignPushVarSuffix;
 	FString AssignValuePrefix;
 	FString VariableName;
 	FString PropertyName;
@@ -25,7 +26,7 @@ public:
 	bool CanGenerateGetFunc;
 	bool bSupportNow;
 	bool bNeedReturn;
-	bool bNeedNewPushValue;
+	bool bNeedExtraDeclarePushValue;
 	bool bNewReturn; // for return variable
 	NS_LuaGenerator::EVariableType eVariableType;
 

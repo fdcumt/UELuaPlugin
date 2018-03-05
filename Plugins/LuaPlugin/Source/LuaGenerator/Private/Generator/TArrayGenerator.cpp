@@ -94,9 +94,9 @@ FExtraFuncMemberInfo FTArrayGenerator::ExtraGet()
 	funcBody += EndLinePrintf(TEXT("\t%s *pTArray = FLuaUtil::TouserData<%s*>(InLuaState, 1, \"%s\");"), *m_TArrayInfo.PureType, *m_TArrayInfo.PureType, *m_TArrayInfo.PureType);
 	funcBody += EndLinePrintf(TEXT("\tint32 ArrayIndex = FLuaUtil::TouserData<int32>(InLuaState, 2, \"int32\");"));
 	funcBody += EndLinePrintf(TEXT("\t%s pItem = %s(*pTArray)[ArrayIndex];"), *m_ElementInfo.DeclareType, *m_ElementInfo.AssignValuePrefix);
-	if (m_ElementInfo.bNeedNewPushValue)
+	if (m_ElementInfo.bNeedExtraDeclarePushValue)
 	{
-		funcBody += EndLinePrintf(TEXT("\t%s NewPushValue = %spItem;"), *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.PushUsedSelfVarPrefix);
+		funcBody += EndLinePrintf(TEXT("\t%s NewPushValue = %spItem%s;"), *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.AssignPushVarPrefix, *m_ElementInfo.AssignPushVarSuffix);
 		funcBody += EndLinePrintf(TEXT("\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(NewPushValue, \"%s\"));"), *m_ElementInfo.TouserPushDeclareType, *m_ElementInfo.TouserPushPureType);
 	}
 	else

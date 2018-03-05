@@ -96,9 +96,9 @@ FExtraFuncMemberInfo FTMapGenerator::ExtraFind()
 	funcBody += EndLinePrintf(TEXT("\t%s pMapValue = pMap->Find(%sMapKey);"), *m_ValueInfo.PointTValueDeclare, *m_KeyInfo.UsedSelfVarPrefix);
 	funcBody += EndLinePrintf(TEXT("\tif (pMapValue)"));
 	funcBody += EndLinePrintf(TEXT("\t{"));
-	if (m_ValueInfo.bNeedNewPushValue)
+	if (m_ValueInfo.bNeedExtraDeclarePushValue)
 	{
-		funcBody += EndLinePrintf(TEXT("\t\t%s NewPushValue = %s%spMapValue;"), *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.PushUsedSelfVarPrefix, *m_ValueInfo.PushPointTValuePrefix);
+		funcBody += EndLinePrintf(TEXT("\t\t%s NewPushValue = %s(%spMapValue)%s;"), *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.AssignPushVarPrefix, *m_ValueInfo.PushPointTValuePrefix, *m_ValueInfo.AssignPushVarSuffix);
 		funcBody += EndLinePrintf(TEXT("\t\tFLuaUtil::Push(InLuaState, FLuaClassType<%s>(NewPushValue, \"%s\"));"), *m_ValueInfo.TouserPushDeclareType, *m_ValueInfo.TouserPushPureType);
 	}
 	else
