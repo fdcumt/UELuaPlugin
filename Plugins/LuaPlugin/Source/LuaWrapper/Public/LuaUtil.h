@@ -82,7 +82,7 @@ private:
 		int32 paramCount = Push(g_LuaState, Forward<T>(args)...);
 		if (LuaPCall(g_LuaState, paramCount, RetTypeNum.m_num, -(paramCount + 2)))
 		{
-			FString log = FString::Printf(TEXT("call r impl found an error: %s!!!"), ANSI_TO_TCHAR(LuaToString(g_LuaState, -1)));
+			FString log = FString::Printf(TEXT("call r impl found an error: %s!!!"), UTF8_TO_TCHAR(LuaToString(g_LuaState, -1)));
 			TemplateLogError(log);
 		}
 	}
@@ -216,7 +216,7 @@ void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLua
 	const char *ClassName = ReturnValue.m_ClassName;
 	if (!ExistClass(InLuaState, ReturnValue.m_ClassName))
 	{
-		TemplateLogError(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), ReturnValue.m_ClassName));
+		TemplateLogError(FString::Printf(TEXT("can not Pop class %s, it not export!!!"), UTF8_TO_TCHAR(ReturnValue.m_ClassName)));
 		return;
 	}
 

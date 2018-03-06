@@ -117,7 +117,7 @@ int32 GCCallBack(lua_State *InLuaState)
 {
 	lua_getmetatable(InLuaState, -1);
 	lua_getfield(InLuaState, -1, "ClassName");
-	FLuaUtil::TemplateLogError(FString::Printf(TEXT("ClassName:%s call gc func"), ANSI_TO_TCHAR(lua_tostring(InLuaState, -1))));
+	FLuaUtil::TemplateLogError(FString::Printf(TEXT("ClassName:%s call gc func"), UTF8_TO_TCHAR(lua_tostring(InLuaState, -1))));
 	lua_pop(InLuaState, 2);
 	return 0;
 }
@@ -514,17 +514,17 @@ void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLua
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FText> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FText::FromString(ANSI_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
+	ReturnValue.m_ClassObj = FText::FromString(UTF8_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
 }
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FName> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FName(ANSI_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
+	ReturnValue.m_ClassObj = FName(UTF8_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
 }
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FLuaClassType<FString> &&ReturnValue)
 {
-	ReturnValue.m_ClassObj = FString(ANSI_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
+	ReturnValue.m_ClassObj = FString(UTF8_TO_TCHAR(lua_tostring(InLuaState, LuaStackIndex)));
 }
 
 int32 LuaErrHandleFunc(lua_State*LuaState)

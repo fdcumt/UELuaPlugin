@@ -108,6 +108,6 @@ void FLuaWrapper::DoMainFile()
 	FString LuaMainFile = luaDir / TEXT("main.lua");
 	if (luaL_dofile(g_LuaState, TCHAR_TO_ANSI(*LuaMainFile)))
 	{
-		LuaWrapperLog(Fatal, TEXT("DoMainFile error %s!"),ANSI_TO_TCHAR(lua_tostring(g_LuaState, -1)));
+		LuaWrapperLog(Fatal, TEXT("DoMainFile error %s!"), UTF8_TO_TCHAR(lua_tostring(g_LuaState, -1)));
 	}
 }
