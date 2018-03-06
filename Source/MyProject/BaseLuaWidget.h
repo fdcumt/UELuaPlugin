@@ -9,6 +9,12 @@ class MYPROJECT_API UBaseLuaWidget : public UUserWidget
 public:
 	UBaseLuaWidget(const FObjectInitializer& ObjectInitializer);
 
+public:
 	virtual bool Initialize();
+
+public:
+	UFUNCTION(BlueprintCallable)
+	UWidget* GetWidget(const FName& Name) const;
+
 
 };

@@ -68,12 +68,6 @@ int32 MetaTableNewIndexFunc(lua_State* L)
 	// stack 3: value
 	if (lua_isuserdata(L, 1)==1)
 	{
-		lua_pushvalue(L, 1);
-		lua_pushvalue(L, 1);
-		int32 r1 = lua_ref(L, LUA_REGISTRYINDEX);
-		int32 r2 = lua_ref(L, LUA_REGISTRYINDEX);
-		FLuaUtil::TemplateLogError(FString::Printf(TEXT("r1:%d"), r1));
-		FLuaUtil::TemplateLogError(FString::Printf(TEXT("r2:%d"), r2));
 		lua_getmetatable(L, 1);
 		FString PropertyName = FString(lua_tostring(L, 2));
 		FString SetPropertyFuncName = FString::Printf(TEXT("Set_%s"), *PropertyName);
@@ -470,12 +464,12 @@ void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FTex
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FName &ReturnValue)
 {
-	ReturnValue = FName(luaL_checkstring(InLuaState, LuaStackIndex));
+	ReturnValue = FName(UTF8_TO_TCHAR(luaL_checkstring(InLuaState, LuaStackIndex)));
 }
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FString &ReturnValue)
 {
-	ReturnValue = FString(ANSI_TO_TCHAR(luaL_checkstring(InLuaState, LuaStackIndex)));
+	ReturnValue = FString(UTF8_TO_TCHAR(luaL_checkstring(InLuaState, LuaStackIndex)));
 }
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, int32 &ReturnValue)

@@ -520,7 +520,7 @@ FString FBaseFuncReg::GetNomalFuncBody(const FExportFuncMemberInfo &FunctionItem
 		}
 	}
 
-	if (RetVarInfo.bNewReturn)
+	if (RetVarInfo.bNeedReturn)
 	{
 		FuncBody += EndLinePrintf(TEXT("\treturn 1;"));
 	}

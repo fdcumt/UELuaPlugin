@@ -62,7 +62,7 @@ static int32 LuaUnrealLog(lua_State* LuaState)
 	{
 		if (lua_isstring(LuaState, ArgIndex))
 		{
-			Message += ANSI_TO_TCHAR(lua_tostring(LuaState, ArgIndex));
+			Message += UTF8_TO_TCHAR(lua_tostring(LuaState, ArgIndex));
 		}
 	}
 
@@ -71,15 +71,30 @@ static int32 LuaUnrealLog(lua_State* LuaState)
 	return 0;
 }
 
-const luaL_Reg LuaPrint[] =
+static int32 LuaCast(lua_State* LuaState)
+{
+	if (lua_isnil(LuaState, 1))
+	{
+		LuaWrapperLog(Error, TEXT("%s"), "cast error, nil");
+		return 1;
+	}
+
+	luaL_getmetatable(LuaState, lua_tostring(LuaState, 2));
+	lua_setmetatable(LuaState, 1);
+	lua_pushvalue(LuaState, 1);
+	return 1;
+}
+
+const luaL_Reg UELibrary[] =
 {
 	{ "print", LuaUnrealLog },
+	{ "Cast", LuaCast },
 	{ NULL, NULL }
 };
 
 void FLuaWrapper::RegisterLuaLog()
 {
-	FLuaUtil::RegisterClass(g_LuaState, LuaPrint, "LuaPrint");
+	FLuaUtil::RegisterClass(g_LuaState, UELibrary, "UELibrary");
 }
 
 void FLuaWrapper::RegisterAllClasses()
@@ -89,7 +104,7 @@ void FLuaWrapper::RegisterAllClasses()
 
 void FLuaWrapper::DoMainFile()
 {
-	FString luaDir = FPaths::ConvertRelativePathToFull(FPaths::GameDir() / TEXT("LuaSource"));
+	FString luaDir = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("LuaSource"));
 	FString LuaMainFile = luaDir / TEXT("main.lua");
 	if (luaL_dofile(g_LuaState, TCHAR_TO_ANSI(*LuaMainFile)))
 	{

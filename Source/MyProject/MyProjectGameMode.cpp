@@ -22,6 +22,7 @@ AMyProjectGameMode::AMyProjectGameMode()
 
 void AMyProjectGameMode::StartPlay()
 {
+	AGameModeBase::StartPlay();
 	FLuaWrapperModule& ModuleUI = FModuleManager::Get().LoadModuleChecked<FLuaWrapperModule>(FName("LuaWrapper"));
 	ModuleUI.Init();
 
@@ -29,8 +30,8 @@ void AMyProjectGameMode::StartPlay()
 	int32 Ret2 = 0;
 	bool Ret3 = false;
 
-	UBaseLuaWidget *pBaseLuaWidget = NewObject<UBaseLuaWidget>(this, UBaseLuaWidget::StaticClass());
-	pBaseLuaWidget->AddToViewport();
+	//UBaseLuaWidget *pBaseLuaWidget = NewObject<UBaseLuaWidget>(this, UBaseLuaWidget::StaticClass());
+	//pBaseLuaWidget->AddToViewport();
 
 // 	AMyProjectGameMode*pSelf = this;
 // 	//FLuaClassType<AMyProjectGameMode*>(pSelf, "AMyProjectGameMode")

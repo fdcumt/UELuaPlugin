@@ -6,11 +6,11 @@ function Init(pBaseLuaWidget)
 	LuaPrint.print("BaseStruct1.m_EnumAsByte"..BaseStruct1.m_EnumAsByte);
 	]]
 
-----[[ test export enum
+--[[ test export enum
 	local BaseStruct1 = FBaseStruct1.New();
 	BaseStruct1.m_JustEnum = -1;
-	LuaPrint.print("BaseStruct1.m_JustEnum"..BaseStruct1.m_JustEnum);
-	--]]
+	LuaPrint.print("BaseStruct1.m_JustEnum:"..BaseStruct1.m_JustEnum);
+	]]
 
 --[[ test tmap 
 	local BaseStruct1 = FBaseStruct1.New();
@@ -22,12 +22,17 @@ function Init(pBaseLuaWidget)
 	]]
 	
 
---[[ test update widget
+-- test update widget
+--LuaPrint.print("999999")
+	UELibrary.print("你好");
+	local pWidget = pBaseLuaWidget:GetWidget("b");
+	local pTextBlock = UELibrary.Cast(pWidget, "UTextBlock");
+	pTextBlock:SetText("你好");
 	--local widgetTree = UWidgetTree.New(pBaseLuaWidget, "WidgetTree")
     --pBaseLuaWidget.WidgetTree = widgetTree;
     --local button = UButton.New(widgetTree, "Button");
     --widgetTree.RootWidget = button;
-	]]
+	--]]
 	
 	
 	--[[
