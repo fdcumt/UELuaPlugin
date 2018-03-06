@@ -459,7 +459,7 @@ void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, bool
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FText &ReturnValue)
 {
-	ReturnValue = FText::FromString(luaL_checkstring(InLuaState, LuaStackIndex));
+	ReturnValue = FText::FromString(UTF8_TO_TCHAR(luaL_checkstring(InLuaState, LuaStackIndex)));
 }
 
 void FLuaUtil::TouserData(lua_State *InLuaState, const int32 LuaStackIndex, FName &ReturnValue)
